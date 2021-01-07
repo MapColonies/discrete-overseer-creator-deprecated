@@ -11,14 +11,16 @@ import { ILogger, OpenApiConfig } from '../interfaces';
 @injectable()
 export class OpenapiController {
   public uiMiddleware: RequestHandler[];
-  
+
   private uiHandler?: RequestHandler;
   private openapiDoc?: openapiUi.JsonObject;
 
   public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, @inject(Services.CONFIG) private readonly config: IConfig) {
     const openapiConfig = config.get<OpenApiConfig>('openapiConfig');
     this.uiMiddleware = openapiUi.serve;
-    this.init(openapiConfig).catch(err=>{throw err});
+    this.init(openapiConfig).catch((err) => {
+      throw err;
+    });
   }
 
   public serveUi(req: Request, res: Response, next: NextFunction): void {
@@ -36,9 +38,7 @@ export class OpenapiController {
   private async init(openapiConfig: OpenApiConfig): Promise<void> {
     const openapiDefinition = readFileSync(openapiConfig.filePath, 'utf8');
     const parsedDefinition = safeLoad(openapiDefinition) as openapiUi.JsonObject;
-    this.openapiDoc = (await this.multiFileSwagger(
-      parsedDefinition
-    ).catch((err) => {
+    this.openapiDoc = (await this.multiFileSwagger(parsedDefinition).catch((err) => {
       throw err;
     })) as openapiUi.JsonObject;
     this.uiHandler = openapiUi.setup(this.openapiDoc, {
@@ -46,17 +46,12 @@ export class OpenapiController {
     });
   }
 
-  private async multiFileSwagger(
-    root: Record<string, unknown>
-  ): Promise<void | Record<string, unknown>> {
+  private async multiFileSwagger(root: Record<string, unknown>): Promise<void | Record<string, unknown>> {
     const options = {
       filter: ['relative', 'remote'],
       location: './docs/openapi3.yaml',
       loaderOptions: {
-        processContent: function (
-          res: { text: string },
-          callback: unknown
-        ): void {
+        processContent: function (res: { text: string }, callback: unknown): void {
           const cb = callback as (a: null, b: unknown) => void;
           cb(null, JSON.parse(res.text));
         },
@@ -69,7 +64,7 @@ export class OpenapiController {
         return results.resolved as Record<string, unknown>;
       },
       function (err: Error) {
-        logger.log('warn',`failed to load swagger reference: ${err.message}.`);
+        logger.log('warn', `failed to load swagger reference: ${err.message}.`);
       }
     );
   }

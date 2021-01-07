@@ -8,6 +8,8 @@ import * as requestSender from './helpers/requestSender';
 describe('resourceName', function () {
   beforeAll(async function () {
     registerTestValues();
+    //this lint error isn't fixed here because this file will be removed soon
+    // eslint-disable-next-line @typescript-eslint/await-thenable
     await requestSender.init();
   });
   afterEach(function () {
