@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
-import { initAsync as validatorInit } from 'openapi-validator-middleware'
+import { initAsync as validatorInit } from 'openapi-validator-middleware';
 import { container, inject, injectable } from 'tsyringe';
 import { RequestLogger } from './common/middlewares/RequestLogger';
 import { Services } from './common/constants';
@@ -30,7 +30,7 @@ export class ServerBuilder {
     return this.serverInstance;
   }
 
-  private async initValidation():Promise<void>{
+  private async initValidation(): Promise<void> {
     const apiSpecPath = this.config.get<string>('openapiConfig.filePath');
     await validatorInit(apiSpecPath);
   }
