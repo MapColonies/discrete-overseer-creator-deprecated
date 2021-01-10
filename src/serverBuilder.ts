@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
-import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
+import { initAsync as validatorInit, validate } from 'openapi-validator-middleware'
 import { container, inject, injectable } from 'tsyringe';
 import { RequestLogger } from './common/middlewares/RequestLogger';
 import { Services } from './common/constants';
@@ -21,8 +21,8 @@ export class ServerBuilder {
     this.serverInstance = express();
   }
 
-  public build(): express.Application {
-    this.registerPreRoutesMiddleware();
+  public async build(): Promise<express.Application> {
+    await this.registerPreRoutesMiddleware();
     this.buildRoutes();
     this.registerPostRoutesMiddleware();
 
@@ -34,12 +34,11 @@ export class ServerBuilder {
     this.serverInstance.use('/', openapiRouterFactory(container));
   }
 
-  private registerPreRoutesMiddleware(): void {
+  private async registerPreRoutesMiddleware(): Promise<void> {
     this.serverInstance.use(bodyParser.json());
-
-    const ignorePathRegex = new RegExp(`^${this.config.get<string>('openapiConfig.basePath')}/.*`, 'i');
     const apiSpecPath = this.config.get<string>('openapiConfig.filePath');
-    this.serverInstance.use(OpenApiMiddleware({ apiSpec: apiSpecPath, validateRequests: true, ignorePaths: ignorePathRegex }));
+    await validatorInit(apiSpecPath);
+    this.serverInstance.use(validate);
 
     this.serverInstance.use(this.requestLogger.getLoggerMiddleware());
   }
