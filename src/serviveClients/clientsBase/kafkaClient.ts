@@ -1,8 +1,8 @@
-import { MCLogger } from '@map-colonies/mc-logger';
 import { Kafka, Producer, Partitioners, KafkaConfig } from 'kafkajs';
 import { KafkaConnectionError } from '../../common/exceptions/kafka/kafkaConnectionError';
 import { KafkaDisconnectError } from '../../common/exceptions/kafka/KafkaDisconnectError';
 import { KafkaSendError } from '../../common/exceptions/kafka/kafkaSendError';
+import { ILogger } from '../../common/interfaces';
 
 export interface IKafkaConfig {
   clientId: string;
@@ -13,12 +13,13 @@ export interface IKafkaConfig {
 export abstract class KafkaClient {
   protected producer: Producer;
 
-  public constructor(protected readonly logger: MCLogger, protected readonly kafkaConfig: IKafkaConfig) {
+  public constructor(protected readonly logger: ILogger, protected readonly kafkaConfig: IKafkaConfig) {
     if (typeof this.kafkaConfig.brokers === 'string') {
       this.kafkaConfig.brokers = this.kafkaConfig.brokers.split(' ');
     }
 
-    logger.info(
+    logger.log(
+      'info',
       `Kafka manager created clientId=${this.kafkaConfig.clientId}, topic=${this.kafkaConfig.topic} brokers=${JSON.stringify(
         this.kafkaConfig.brokers
       )}`
@@ -34,11 +35,11 @@ export abstract class KafkaClient {
   }
 
   protected async sendMessage(message: string): Promise<void> {
-    this.logger.debug(`sendMessage to kafka: message=${message}`);
+    this.logger.log('debug', `sendMessage to kafka: message=${message}`);
     try {
       await this.internalSendMessage(message);
     } catch (error) {
-      this.logger.error(`Failed sending message to kafka, message=${message}`);
+      this.logger.log('error', `Failed sending message to kafka, message=${message}`);
       throw error;
     }
   }
