@@ -17,7 +17,7 @@ const openapiRouterFactory: FactoryFunction<Router> = (dependencyContainer) => {
   }
 
   const openapiUiPath = openapiConfig.basePath + openapiConfig.uiPath;
-  openapiRouter.use(openapiUiPath, controller.uiMiddleware, controller.serveUi);
+  openapiRouter.use(openapiUiPath, controller.uiMiddleware, controller.serveUi.bind(controller));
 
   return openapiRouter;
 };
