@@ -15,5 +15,7 @@
     "clientId": "discrete-overseer-creator",
     "brokers": "192.168.0.14:9092",
     "topic": "tile-creator"
-  }
+  },
+  "storageServiceURL": "http://localhost:8081",
+  "publishingServiceURL": "http://localhost:8082"
 }

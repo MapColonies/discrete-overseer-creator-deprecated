@@ -12,5 +12,7 @@
     "clientId": "TILER_KAFKA_CLIENT_ID",
     "brokers": "TILER_KAFKA_BROKERS",
     "topic": "TILER_KAFKA_TOPIC"
-  }
+  },
+  "storageServiceURL": "STORAGE_SERVICE_URL",
+  "publishingServiceURL": "PUBLISHING_SERVICE_URL"
 }
