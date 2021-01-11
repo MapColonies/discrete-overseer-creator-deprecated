@@ -14,8 +14,8 @@ export abstract class KafkaClient {
   protected producer: Producer;
 
   public constructor(protected readonly logger: ILogger, protected readonly kafkaConfig: IKafkaConfig) {
-    if (typeof this.kafkaConfig.brokers === 'string') {
-      this.kafkaConfig.brokers = this.kafkaConfig.brokers.split(' ');
+    if (typeof this.kafkaConfig.brokers === 'string' || this.kafkaConfig.brokers instanceof String) {
+      this.kafkaConfig.brokers = this.kafkaConfig.brokers.split(',');
     }
 
     logger.log(
@@ -24,6 +24,7 @@ export abstract class KafkaClient {
         this.kafkaConfig.brokers
       )}`
     );
+    //TODO: add ssl support. see: https://github.com/MapColonies/exporter-trigger/issues/113
     const internalKafkaConfig: KafkaConfig = {
       clientId: this.kafkaConfig.clientId,
       brokers: this.kafkaConfig.brokers,
