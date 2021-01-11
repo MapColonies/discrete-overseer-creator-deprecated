@@ -15,9 +15,10 @@
     "release": "standard-version",
     "test": "npm run test:unit && npm run test:integration",
     "prebuild": "npm run clean",
-    "build": "tsc --project tsconfig.build.json  && npm run assets:copy",
+    "build": "tsc --project tsconfig.build.json  && npm run assets:copy && npm run copySchema",
     "start": "npm run build && cd dist && node ./index.js",
     "assets:copy": "copyfiles -f ./config/* ./dist/config && copyfiles -f ./openapi3.yaml ./dist/ && copyfiles ./package.json dist",
+    "copySchema": "copyfiles -u 3 ./node_modules/@map-colonies/mc-model-types/Schema/**/* dist",
     "clean": "rimraf dist"
   },
   "directories": {
@@ -37,8 +38,8 @@
   },
   "dependencies": {
     "@map-colonies/error-express-handler": "^1.0.2",
-    "@map-colonies/mc-logger": "^1.2.1",
-    "@map-colonies/mc-model-types": "^1.0.1",
+    "@map-colonies/mc-logger": "^2.0.2",
+    "@map-colonies/mc-model-types": "^2.0.0",
     "@map-colonies/mc-probe": "^1.0.0",
     "axios": "^0.21.1",
     "config": "^3.3.3",

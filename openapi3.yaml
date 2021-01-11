@@ -9,57 +9,17 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  /resourceName:
-    get:
-      operationId: getResourceName
+  /layers:
+    post:
+      operationId: createLayer
       tags:
-        - resourceName
-      summary: gets the resource
+        - layers
+      summary: start a process of creating new layer from raw data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: ./Schema/ImageMetadata/ImageMetadata-Create.json
       responses:
         200:
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/resource'
-    post:
-      operationId: createResource
-      tags:
-        - resourceName
-      summary: creates a new record of type resource
-      responses:
-        201:
-          description: created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/resource'
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-components:
-  schemas:
-    error:
-      type: object
-      required:
-        - message
-      properties:
-        message:
-          type: string
-    resource:
-      type: object
-      required:
-        - id
-        - name
-        - description
-      properties:
-        id:
-          type: number
-          format: int64
-        name:
-          type: string
-        description:
-          type: string
