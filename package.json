@@ -19,7 +19,10 @@
     "start": "npm run build && cd dist && node ./index.js",
     "assets:copy": "copyfiles -f ./config/* ./dist/config && copyfiles -f ./openapi3.yaml ./dist/ && copyfiles ./package.json dist",
     "copySchema": "copyfiles -u 3 ./node_modules/@map-colonies/mc-model-types/Schema/**/* dist",
-    "clean": "rimraf dist"
+    "copySchema:dev": "copyfiles -u 3 ./node_modules/@map-colonies/mc-model-types/Schema/**/* .",
+    "clean": "rimraf dist",
+    "pretest": "npm run copySchema:dev",
+    "prelint:openapi": "rimraf Schema"
   },
   "directories": {
     "test": "tests"
