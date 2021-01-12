@@ -9,11 +9,11 @@ export class TillerClient extends KafkaClient {
     super(logger, config.get<IKafkaConfig>('tilerKafka'));
   }
 
-  public async addTilingRequest(id: string, files: string[], zoom: number): Promise<void> {
+  public async addTilingRequest(id: string, version: string, zoomLevels: number[]): Promise<void> {
     const data = {
       id: id,
-      files: files,
-      zoom: zoom,
+      version: version,
+      zoomLevels: zoomLevels,
     };
     const message = JSON.stringify(data);
     await this.sendMessage(message);
