@@ -38,18 +38,18 @@ export class OpenapiController {
   private async init(openapiConfig: OpenApiConfig): Promise<void> {
     const openapiDefinition = readFileSync(openapiConfig.filePath, 'utf8');
     const parsedDefinition = safeLoad(openapiDefinition) as openapiUi.JsonObject;
-    this.openapiDoc = (await this.multiFileSwagger(parsedDefinition).catch((err) => {
+    this.openapiDoc = (await this.multiFileSwagger(parsedDefinition, openapiConfig.filePath).catch((err) => {
       throw err;
     })) as openapiUi.JsonObject;
     this.uiHandler = openapiUi.setup(this.openapiDoc, {
-      swaggerOptions: { basePath: './Schema' },
+      swaggerOptions: { basePath: '.' },
     });
   }
 
-  private async multiFileSwagger(root: Record<string, unknown>): Promise<void | Record<string, unknown>> {
+  private async multiFileSwagger(root: Record<string, unknown>, fileLocation: string): Promise<void | Record<string, unknown>> {
     const options = {
       filter: ['relative', 'remote'],
-      location: './docs/openapi3.yaml',
+      location: fileLocation,
       loaderOptions: {
         processContent: function (res: { text: string }, callback: unknown): void {
           const cb = callback as (a: null, b: unknown) => void;
