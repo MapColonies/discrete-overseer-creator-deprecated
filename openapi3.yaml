@@ -23,3 +23,25 @@ paths:
       responses:
         200:
           description: OK
+  /progress/completetask/{id}/{version}:
+    post:
+      operationId: completeTask
+      tags:
+        - progress
+      summary: update overseer on completion of tiling task
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: layer id
+        - in: path
+          name: version
+          schema:
+            type: string
+          required: true
+          description: layer version
+      responses:
+        200:
+          description: OK
