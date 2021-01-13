@@ -19,13 +19,13 @@ export class LayersManager {
   }
 
   public async createLayer(metadata: ImageMetadata): Promise<void> {
-    this.logger.log('info',`saving metadata for layer ${metadata.id as string}`)
+    this.logger.log('info', `saving metadata for layer ${metadata.id as string}`);
     await this.db.saveMetadata(metadata);
 
     //add tiling tasks to queue
     const tillerTasks: Promise<void>[] = [];
     this.zoomBatches.forEach((batch) => {
-      this.logger.log('info',`queuing zoom levels: ${batch.join(',')} for layer ${metadata.id as string}`)
+      this.logger.log('info', `queuing zoom levels: ${batch.join(',')} for layer ${metadata.id as string}`);
       //TODO: replace const version with model when updated.
       tillerTasks.push(this.tiller.addTilingRequest(metadata.id as string, '1', batch));
     });
