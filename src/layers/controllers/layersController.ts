@@ -13,9 +13,9 @@ type CreateLayerHandler = RequestHandler<undefined, undefined, ImageMetadata>;
 export class LayersController {
   public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, @inject(LayersManager) private readonly manager: LayersManager) {}
 
-  public createLayer: CreateLayerHandler = (req, res, next) => {
+  public createLayer: CreateLayerHandler = async (req, res, next) => {
     try {
-      this.manager.createLayer(req.body);
+      await this.manager.createLayer(req.body);
       return res.sendStatus(httpStatus.OK);
     } catch (err) {
       next(err);
