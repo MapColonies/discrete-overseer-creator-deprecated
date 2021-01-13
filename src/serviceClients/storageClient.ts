@@ -1,24 +1,21 @@
 import { IConfig } from 'config';
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
+import { ImageMetadata } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
+import { Services } from '../common/constants';
 import { HttpClient } from './clientsBase/httpClient';
 
 @injectable()
 export class StorageClient extends HttpClient {
-  public constructor(protected readonly logger: ILogger, config: IConfig) {
+  public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, @inject(Services.CONFIG) config: IConfig) {
     super(logger);
     this.targetService = 'CatalogDb'; //name of target for logs
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  //TODO: replace metadata type with type from models
-  public async saveMetadata(taskId: string, metadata: unknown): Promise<void> {
+  public async saveMetadata(metadata: ImageMetadata): Promise<void> {
     const saveMetadataUrl = '/metadata';
-    const data = {
-      taskId: taskId,
-      metadata: metadata,
-    };
-    await this.post(saveMetadataUrl, data);
+    await this.post(saveMetadataUrl, metadata);
   }
 
   //TODO: replace return type with model

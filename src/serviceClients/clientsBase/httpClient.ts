@@ -1,5 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import HttpStatus from 'http-status-codes';
+import { inject } from 'tsyringe';
+import { Services } from '../../common/constants';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { HttpError } from '../../common/exceptions/http/httpError';
 import { InternalServerError } from '../../common/exceptions/http/internalServerError';
@@ -10,7 +12,7 @@ export abstract class HttpClient {
   protected targetService = '';
   protected axiosOptions: AxiosRequestConfig = {};
 
-  public constructor(protected readonly logger: ILogger) {}
+  public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger) {}
 
   protected async get<T>(url: string): Promise<T> {
     try {
