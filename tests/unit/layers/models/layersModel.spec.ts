@@ -1,19 +1,92 @@
+import { ImageMetadata } from '@map-colonies/mc-model-types';
+import { IConfig, ILogger } from '../../../../src/common/interfaces';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
+import { StorageClient } from '../../../../src/serviceClients/storageClient';
+import { TillerClient } from '../../../../src/serviceClients/tillerClient';
 
 let layersManager: LayersManager;
 
+//storage client mock
+const saveMetadataMock = jest.fn();
+const dbMock = ({
+  saveMetadata: saveMetadataMock,
+} as unknown) as StorageClient;
+
+//tiller client mock
+const addTilingRequestMock = jest.fn();
+const tillerMock = ({
+  addTilingRequest: addTilingRequestMock,
+} as unknown) as TillerClient;
+
+//config mock
+const configGetMock = jest.fn();
+const configMock = ({
+  get: configGetMock,
+} as unknown) as IConfig;
+
+//logger mock
+const logMock = jest.fn();
+const loggerMock = {
+  log: logMock,
+} as ILogger;
+
+//TODO: update when model updates
+const testImageMetadata: ImageMetadata = {
+  id: 'test',
+};
 describe('LayersManager', () => {
   beforeEach(function () {
-    layersManager = new LayersManager({ log: jest.fn() });
+    saveMetadataMock.mockReset();
+    addTilingRequestMock.mockReset();
+    configGetMock.mockReset();
+    logMock.mockReset();
   });
+
   describe('createLayer', () => {
-    it('throws error', function () {
-      // action
-      const action = () => {
-        layersManager.createLayer({});
-      };
-      // expectation
-      expect(action).toThrow();
+    it('saves metadata before queueing tasks', async function () {
+      configGetMock.mockImplementation((key: string) => {
+        switch (key) {
+          case 'tiling.zoomGroups':
+            return '[[1],[2]]';
+        }
+      });
+      let saved = false;
+      let tiledBeforeSave = false;
+      saveMetadataMock.mockImplementation(async () => {
+        saved = true;
+        return Promise.resolve();
+      });
+      addTilingRequestMock.mockImplementation(async () => {
+        if (!saved) {
+          tiledBeforeSave = true;
+        }
+        return Promise.resolve();
+      });
+      layersManager = new LayersManager(loggerMock, configMock, tillerMock, dbMock);
+
+      await layersManager.createLayer(testImageMetadata);
+
+      expect(saveMetadataMock).toHaveBeenCalledTimes(1);
+      expect(saveMetadataMock).toHaveBeenCalledWith(testImageMetadata);
+      expect(addTilingRequestMock).toHaveBeenCalledTimes(2);
+      expect(tiledBeforeSave).toBe(false);
+    });
+
+    it('split the tasks based on configuration', async function () {
+      configGetMock.mockImplementation((key: string) => {
+        switch (key) {
+          case 'tiling.zoomGroups':
+            return '[[1],[8,5],[2]]';
+        }
+      });
+      layersManager = new LayersManager(loggerMock, configMock, tillerMock, dbMock);
+
+      await layersManager.createLayer(testImageMetadata);
+
+      expect(addTilingRequestMock).toHaveBeenCalledTimes(3);
+      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.id, '1', [1]);
+      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.id, '1', [8, 5]);
+      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.id, '1', [2]);
     });
   });
 });
