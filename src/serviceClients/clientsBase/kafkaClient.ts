@@ -1,4 +1,6 @@
 import { Kafka, Producer, Partitioners, KafkaConfig } from 'kafkajs';
+import { inject } from 'tsyringe';
+import { Services } from '../../common/constants';
 import { KafkaConnectionError } from '../../common/exceptions/kafka/kafkaConnectionError';
 import { KafkaDisconnectError } from '../../common/exceptions/kafka/KafkaDisconnectError';
 import { KafkaSendError } from '../../common/exceptions/kafka/kafkaSendError';
@@ -13,21 +15,21 @@ export interface IKafkaConfig {
 export abstract class KafkaClient {
   protected producer: Producer;
 
-  public constructor(protected readonly logger: ILogger, protected readonly kafkaConfig: IKafkaConfig) {
-    if (typeof this.kafkaConfig.brokers === 'string' || this.kafkaConfig.brokers instanceof String) {
-      this.kafkaConfig.brokers = this.kafkaConfig.brokers.split(',');
-    }
-
+  public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, protected readonly kafkaConfig: IKafkaConfig) {
     logger.log(
       'info',
       `Kafka manager created clientId=${this.kafkaConfig.clientId}, topic=${this.kafkaConfig.topic} brokers=${JSON.stringify(
         this.kafkaConfig.brokers
       )}`
     );
+    let brokers = this.kafkaConfig.brokers;
+    if (typeof brokers === 'string' || brokers instanceof String) {
+      brokers = brokers.split(',');
+    }
     //TODO: add ssl support. see: https://github.com/MapColonies/exporter-trigger/issues/113
     const internalKafkaConfig: KafkaConfig = {
       clientId: this.kafkaConfig.clientId,
-      brokers: this.kafkaConfig.brokers,
+      brokers: brokers,
     };
     const kafka = new Kafka(internalKafkaConfig);
     this.producer = kafka.producer({

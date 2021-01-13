@@ -1,11 +1,12 @@
 import { MCLogger } from '@map-colonies/mc-logger';
 import { IConfig } from 'config';
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
+import { Services } from '../common/constants';
 import { KafkaClient, IKafkaConfig } from './clientsBase/kafkaClient';
 
 @injectable()
 export class TillerClient extends KafkaClient {
-  public constructor(protected readonly logger: MCLogger, protected readonly config: IConfig) {
+  public constructor(@inject(Services.LOGGER) protected readonly logger: MCLogger, @inject(Services.CONFIG) protected readonly config: IConfig) {
     super(logger, config.get<IKafkaConfig>('tilerKafka'));
   }
 
