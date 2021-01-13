@@ -11,7 +11,7 @@ export class ErrorHandler {
   public constructor(@inject(Services.LOGGER) private readonly logger: ILogger) {}
 
   public getErrorHandlerMiddleware(): ErrorRequestHandler {
-    return (
+    const handler = (
       err: Error,
       req: Request,
       res: Response,
@@ -47,5 +47,6 @@ export class ErrorHandler {
       }
       res.status(status).json(body);
     };
+    return handler.bind(this);
   }
 }

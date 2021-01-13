@@ -40,7 +40,6 @@
     }
   },
   "dependencies": {
-    "@map-colonies/error-express-handler": "^1.0.2",
     "@map-colonies/mc-logger": "^2.0.2",
     "@map-colonies/mc-model-types": "^2.0.0",
     "@map-colonies/mc-probe": "^1.0.0",
