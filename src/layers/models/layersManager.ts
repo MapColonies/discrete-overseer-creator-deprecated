@@ -24,6 +24,7 @@ export class LayersManager {
 
     //add tiling tasks to queue
     const tillerTasks: Promise<void>[] = [];
+    //TODO: handle case of kafka errors after metadata save
     this.zoomBatches.forEach((batch) => {
       this.logger.log('info', `queuing zoom levels: ${batch.join(',')} for layer ${metadata.id as string}`);
       //TODO: replace const version with model when updated.
