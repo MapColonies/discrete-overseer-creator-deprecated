@@ -53,7 +53,7 @@ describe('ProgressManager', () => {
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
     });
 
-    it('no nothing if some tasks are not done', async function () {
+    it('do nothing if some tasks are not done', async function () {
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: false,
       });
