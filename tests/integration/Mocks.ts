@@ -1,3 +1,5 @@
+import { ILogger } from '../../src/common/interfaces';
+import { PublisherClient } from '../../src/serviceClients/publisherClient';
 import { StorageClient } from '../../src/serviceClients/storageClient';
 import { TillerClient } from '../../src/serviceClients/tillerClient';
 
@@ -27,4 +29,33 @@ const tiller = {
   clientMock: tillerMock,
 };
 
-export { tiller, storage };
+//publisher client mock
+const publishLayerMock = jest.fn();
+const publisherMock = ({
+  publishLayer: publishLayerMock,
+} as unknown) as PublisherClient;
+const publisher = {
+  publishLayerMock: publishLayerMock,
+  clientMock: publisherMock,
+};
+
+//logger mock
+const logMock = jest.fn();
+const loggerMocker = {
+  log: logMock,
+} as ILogger;
+const logger = {
+  logMock: logMock,
+  logger: loggerMocker,
+};
+
+const resetMocks = (): void => {
+  saveMetadataMock.mockReset();
+  getCompletedZoomLevelsMock.mockReset();
+  publishToCatalogMock.mockReset();
+  addTilingRequestMock.mockReset();
+  publishLayerMock.mockReset();
+  logMock.mockReset();
+};
+
+export { tiller, storage, publisher, logger, resetMocks };

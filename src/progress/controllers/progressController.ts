@@ -13,9 +13,9 @@ type CompleteWorkerTaskHandler = RequestHandler<ITaskId>;
 export class ProgressController {
   public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, @inject(ProgressManager) private readonly manager: ProgressManager) {}
 
-  public completeWorkerTask: CompleteWorkerTaskHandler = (req, res, next) => {
+  public completeWorkerTask: CompleteWorkerTaskHandler = async (req, res, next) => {
     try {
-      this.manager.taskComplete(req.params);
+      await this.manager.taskComplete(req.params);
       return res.sendStatus(httpStatus.OK);
     } catch (err) {
       next(err);
