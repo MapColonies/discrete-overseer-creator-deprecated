@@ -1,12 +1,26 @@
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
+import { PublisherClient } from '../../serviceClients/publisherClient';
+import { StorageClient } from '../../serviceClients/storageClient';
 import { ITaskId } from '../interfaces';
 
 @injectable()
 export class ProgressManager {
-  public constructor(@inject(Services.LOGGER) private readonly logger: ILogger) {}
-  public taskComplete(taskId: ITaskId): void {
-    throw new Error('not implemented');
+  public constructor(
+    @inject(Services.LOGGER) private readonly logger: ILogger,
+    private readonly db: StorageClient,
+    private readonly publisher: PublisherClient
+  ) {}
+
+  public async taskComplete(taskId: ITaskId): Promise<void> {
+    this.logger.log('info', `checking tiling status of layer ${taskId.id} version  ${taskId.version}`);
+    const res = await this.db.getCompletedZoomLevels(taskId);
+    if (res.allCompleted) {
+      this.logger.log('info', `publishing layer ${taskId.id} version  ${taskId.version}`);
+      await this.publisher.publishLayer(taskId);
+      //TODO: add error handling logic in case publishing to catalog failed after publishing to map proxy
+      await this.db.publishToCatalog(taskId);
+    }
   }
 }
