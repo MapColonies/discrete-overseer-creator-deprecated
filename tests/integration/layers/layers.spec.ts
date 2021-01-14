@@ -1,7 +1,7 @@
 import { ImageMetadata } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
-import { storage, tiller } from '../Mocks'
+import { storage, tiller } from '../Mocks';
 import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
 
@@ -68,18 +68,18 @@ describe('layers', function () {
   describe('Sad Path', function () {
     // All requests with status code 4XX-5XX
     it('should return 500 status code on db error', async function () {
-      storage.saveMetadataMock.mockImplementation(()=>{
+      storage.saveMetadataMock.mockImplementation(() => {
         throw new Error('test error');
-      })
-      const response = await requestSender.createLayer(invalidTestImageMetadata);
+      });
+      const response = await requestSender.createLayer(validTestImageMetadata);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
 
     it('should return 500 status code on kafka error', async function () {
-      tiller.addTilingRequestMock.mockImplementation(()=>{
+      tiller.addTilingRequestMock.mockImplementation(() => {
         throw new Error('test error');
-      })
-      const response = await requestSender.createLayer(invalidTestImageMetadata);
+      });
+      const response = await requestSender.createLayer(validTestImageMetadata);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
   });
