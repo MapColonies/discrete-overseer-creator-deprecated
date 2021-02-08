@@ -48,7 +48,6 @@ describe('layers', function () {
   describe('Happy Path', function () {
     it('should return 200 status code', async function () {
       const response = await requestSender.createLayer(validTestImageMetadata);
-      console.log(JSON.stringify(response.body));
       expect(response.status).toBe(httpStatusCodes.OK);
     });
   });

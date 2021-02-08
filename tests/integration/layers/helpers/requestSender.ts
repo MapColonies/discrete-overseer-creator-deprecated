@@ -23,7 +23,6 @@ export async function createLayer(body: LayerMetadata): Promise<supertest.Respon
   const req = { ...body };
   if (req.updateDate) {
     const strDate = parseDate(req.updateDate);
-    console.log(strDate);
     ((req as unknown) as { updateDate: string }).updateDate = strDate;
   }
   return supertest.agent(app).post('/layers').set('Content-Type', 'application/json').send(req);

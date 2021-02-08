@@ -26,8 +26,10 @@ export class LayersManager {
     const tillerTasks: Promise<void>[] = [];
     //TODO: handle case of kafka errors after metadata save
     this.zoomBatches.forEach((batch) => {
-      this.logger.log('info', `queuing zoom levels: ${batch.join(',')} for layer ${metadata.source as string}-${metadata.version as string}`);
-      tillerTasks.push(this.tiller.addTilingRequest(metadata.source as string, metadata.version as string, batch));
+      const source = metadata.source as string;
+      const version = metadata.version as string;
+      this.logger.log('info', `queuing zoom levels: ${batch.join(',')} for layer ${source}-${version}`);
+      tillerTasks.push(this.tiller.addTilingRequest(source, version, batch));
     });
     await Promise.all(tillerTasks);
   }
