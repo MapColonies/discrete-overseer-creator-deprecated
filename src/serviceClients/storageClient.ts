@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
-import { ImageMetadata } from '@map-colonies/mc-model-types';
+import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { ICompletedTasks, ITaskId } from '../progress/interfaces';
@@ -14,7 +14,7 @@ export class StorageClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async saveMetadata(metadata: ImageMetadata): Promise<void> {
+  public async saveMetadata(metadata: LayerMetadata): Promise<void> {
     const saveMetadataUrl = '/metadata';
     await this.post(saveMetadataUrl, metadata);
   }

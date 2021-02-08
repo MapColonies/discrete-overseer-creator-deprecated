@@ -1,4 +1,4 @@
-import { ImageMetadata } from '@map-colonies/mc-model-types';
+import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { IConfig, ILogger } from '../../common/interfaces';
@@ -18,17 +18,18 @@ export class LayersManager {
     this.zoomBatches = JSON.parse(batches) as number[][];
   }
 
-  public async createLayer(metadata: ImageMetadata): Promise<void> {
-    this.logger.log('info', `saving metadata for layer ${metadata.id as string}`);
+  public async createLayer(metadata: LayerMetadata): Promise<void> {
+    this.logger.log('info', `saving metadata for layer ${metadata.source as string}`);
     await this.db.saveMetadata(metadata);
 
     //add tiling tasks to queue
     const tillerTasks: Promise<void>[] = [];
     //TODO: handle case of kafka errors after metadata save
     this.zoomBatches.forEach((batch) => {
-      this.logger.log('info', `queuing zoom levels: ${batch.join(',')} for layer ${metadata.id as string}`);
-      //TODO: replace const version with model when updated.
-      tillerTasks.push(this.tiller.addTilingRequest(metadata.id as string, '1', batch));
+      const source = metadata.source as string;
+      const version = metadata.version as string;
+      this.logger.log('info', `queuing zoom levels: ${batch.join(',')} for layer ${source}-${version}`);
+      tillerTasks.push(this.tiller.addTilingRequest(source, version, batch));
     });
     await Promise.all(tillerTasks);
   }

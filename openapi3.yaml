@@ -19,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: ./Schema/ImageMetadata/ImageMetadata-Create.json
+              $ref: ./Schema/layerMetadata.yaml#/definitions/LayerMetadata
       responses:
         200:
           description: OK

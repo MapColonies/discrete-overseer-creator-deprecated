@@ -18,8 +18,8 @@
     "build": "tsc --project tsconfig.build.json  && npm run assets:copy && npm run copySchema",
     "start": "npm run build && cd dist && node ./index.js",
     "assets:copy": "copyfiles -f ./config/* ./dist/config && copyfiles -f ./openapi3.yaml ./dist/ && copyfiles ./package.json dist",
-    "copySchema": "copyfiles -u 3 ./node_modules/@map-colonies/mc-model-types/Schema/**/* dist",
-    "copySchema:dev": "copyfiles -u 3 ./node_modules/@map-colonies/mc-model-types/Schema/**/* .",
+    "copySchema": "copyfiles -u 5 ./node_modules/@map-colonies/mc-model-types/Schema/yaml/**/* dist/Schema",
+    "copySchema:dev": "copyfiles -u 5 ./node_modules/@map-colonies/mc-model-types/Schema/yaml/**/* ./Schema",
     "clean": "rimraf dist",
     "pretest": "npm run copySchema:dev",
     "prelint:openapi": "rimraf Schema"
@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@map-colonies/mc-logger": "^2.0.2",
-    "@map-colonies/mc-model-types": "^2.0.0",
+    "@map-colonies/mc-model-types": "^2.1.4",
     "@map-colonies/mc-probe": "^1.0.0",
     "axios": "^0.21.1",
     "config": "^3.3.3",
@@ -58,7 +58,7 @@
   "devDependencies": {
     "@commitlint/cli": "^9.1.1",
     "@commitlint/config-conventional": "^10.0.0",
-    "@map-colonies/eslint-config": "^1.1.0",
+    "@map-colonies/eslint-config": "^2.2.0",
     "@redocly/openapi-cli": "^1.0.0-beta.25",
     "@types/config": "0.0.36",
     "@types/express": "^4.17.8",
