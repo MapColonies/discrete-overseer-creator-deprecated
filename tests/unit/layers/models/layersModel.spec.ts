@@ -1,4 +1,4 @@
-import { ImageMetadata } from '@map-colonies/mc-model-types';
+import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
 import { IConfig, ILogger } from '../../../../src/common/interfaces';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
 import { StorageClient } from '../../../../src/serviceClients/storageClient';
@@ -30,9 +30,30 @@ const loggerMock = {
   log: logMock,
 } as ILogger;
 
-//TODO: update when model updates
-const testImageMetadata: ImageMetadata = {
-  id: 'test',
+const testImageMetadata: LayerMetadata = {
+  source: 'test',
+  version: '1.22',
+  sourceName: 'test name',
+  dsc: 'test desc',
+  ep90: 3,
+  resolution: 0.3,
+  rms: 0.5,
+  scale: '3',
+  sensorType: SensorType.OTHER,
+  updateDate: new Date('01/01/2020'),
+  fileUris: [],
+  geometry: {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [0, 0],
+        [0, 1],
+        [1, 1],
+        [1, 0],
+        [0, 0],
+      ],
+    ],
+  },
 };
 describe('LayersManager', () => {
   beforeEach(function () {
@@ -84,9 +105,9 @@ describe('LayersManager', () => {
       await layersManager.createLayer(testImageMetadata);
 
       expect(addTilingRequestMock).toHaveBeenCalledTimes(3);
-      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.id, '1', [1]);
-      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.id, '1', [8, 5]);
-      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.id, '1', [2]);
+      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.source, testImageMetadata.version, [1]);
+      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.source, testImageMetadata.version, [8, 5]);
+      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.source, testImageMetadata.version, [2]);
     });
   });
 });

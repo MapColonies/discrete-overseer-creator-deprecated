@@ -1,13 +1,13 @@
 import { RequestHandler } from 'express';
 import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
-import { ImageMetadata } from '@map-colonies/mc-model-types';
+import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
 
 import { LayersManager } from '../models/layersManager';
 
-type CreateLayerHandler = RequestHandler<undefined, undefined, ImageMetadata>;
+type CreateLayerHandler = RequestHandler<undefined, undefined, LayerMetadata>;
 
 @injectable()
 export class LayersController {
