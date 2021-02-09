@@ -68,7 +68,7 @@ describe('LayersManager', () => {
       configGetMock.mockImplementation((key: string) => {
         switch (key) {
           case 'tiling.zoomGroups':
-            return '[[1],[2]]';
+            return '1,2-3';
         }
       });
       let saved = false;
@@ -97,7 +97,7 @@ describe('LayersManager', () => {
       configGetMock.mockImplementation((key: string) => {
         switch (key) {
           case 'tiling.zoomGroups':
-            return '[[1],[8,5],[2]]';
+            return '1,8-5,2';
         }
       });
       layersManager = new LayersManager(loggerMock, configMock, tillerMock, dbMock);
@@ -105,9 +105,42 @@ describe('LayersManager', () => {
       await layersManager.createLayer(testImageMetadata);
 
       expect(addTilingRequestMock).toHaveBeenCalledTimes(3);
-      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.source, testImageMetadata.version, [1]);
-      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.source, testImageMetadata.version, [8, 5]);
-      expect(addTilingRequestMock).toHaveBeenCalledWith(testImageMetadata.source, testImageMetadata.version, [2]);
+      expect(addTilingRequestMock).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        discrete_id: testImageMetadata.source,
+        version: testImageMetadata.version,
+        //TODO: replace with mocked value when integrated with db
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        task_id: '',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        min_zoom_level: 1,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_zoom_level: 1,
+      });
+      expect(addTilingRequestMock).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        discrete_id: testImageMetadata.source,
+        version: testImageMetadata.version,
+        //TODO: replace with mocked value when integrated with db
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        task_id: '',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        min_zoom_level: 5,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_zoom_level: 8,
+      });
+      expect(addTilingRequestMock).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        discrete_id: testImageMetadata.source,
+        version: testImageMetadata.version,
+        //TODO: replace with mocked value when integrated with db
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        task_id: '',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        min_zoom_level: 2,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_zoom_level: 2,
+      });
     });
   });
 });

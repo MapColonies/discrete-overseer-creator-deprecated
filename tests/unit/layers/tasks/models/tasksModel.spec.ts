@@ -1,10 +1,10 @@
-import { ILogger } from '../../../../src/common/interfaces';
-import { ITaskId } from '../../../../src/progress/interfaces';
-import { ProgressManager } from '../../../../src/progress/models/progressManager';
-import { PublisherClient } from '../../../../src/serviceClients/publisherClient';
-import { StorageClient } from '../../../../src/serviceClients/storageClient';
+import { ILogger } from '../../../../../src/common/interfaces';
+import { ITaskId } from '../../../../../src/tasks/interfaces';
+import { TasksManager } from '../../../../../src/tasks/models/tasksManager';
+import { PublisherClient } from '../../../../../src/serviceClients/publisherClient';
+import { StorageClient } from '../../../../../src/serviceClients/storageClient';
 
-let progressManager: ProgressManager;
+let tasksManager: TasksManager;
 
 //storage client mock
 const getCompletedZoomLevelsMock = jest.fn();
@@ -31,7 +31,7 @@ const testData: ITaskId = {
   id: 'test',
   version: '1',
 };
-describe('ProgressManager', () => {
+describe('TasksManager', () => {
   beforeEach(function () {
     getCompletedZoomLevelsMock.mockReset();
     publishToCatalogMock.mockReset();
@@ -44,9 +44,9 @@ describe('ProgressManager', () => {
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: true,
       });
-      progressManager = new ProgressManager(loggerMock, dbMock, publisherMock);
+      tasksManager = new TasksManager(loggerMock, dbMock, publisherMock);
 
-      await progressManager.taskComplete(testData);
+      await tasksManager.taskComplete(testData);
 
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
@@ -57,9 +57,9 @@ describe('ProgressManager', () => {
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: false,
       });
-      progressManager = new ProgressManager(loggerMock, dbMock, publisherMock);
+      tasksManager = new TasksManager(loggerMock, dbMock, publisherMock);
 
-      await progressManager.taskComplete(testData);
+      await tasksManager.taskComplete(testData);
 
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(0);

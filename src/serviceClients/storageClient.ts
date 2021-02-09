@@ -3,7 +3,7 @@ import { inject, injectable } from 'tsyringe';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
-import { ICompletedTasks, ITaskId } from '../progress/interfaces';
+import { ICompletedTasks, ITaskId } from '../tasks/interfaces';
 import { HttpClient } from './clientsBase/httpClient';
 
 @injectable()

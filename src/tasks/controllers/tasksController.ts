@@ -4,14 +4,14 @@ import { injectable, inject } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
 
-import { ProgressManager } from '../models/progressManager';
+import { TasksManager } from '../models/tasksManager';
 import { ITaskId } from '../interfaces';
 
 type CompleteWorkerTaskHandler = RequestHandler<ITaskId>;
 
 @injectable()
-export class ProgressController {
-  public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, @inject(ProgressManager) private readonly manager: ProgressManager) {}
+export class TasksController {
+  public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, @inject(TasksManager) private readonly manager: TasksManager) {}
 
   public completeWorkerTask: CompleteWorkerTaskHandler = async (req, res, next) => {
     try {
