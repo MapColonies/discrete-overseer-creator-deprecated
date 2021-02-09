@@ -23,11 +23,11 @@ paths:
       responses:
         200:
           description: OK
-  /progress/completetask/{id}/{version}:
+  /tasks/{id}/{version}/completed:
     post:
       operationId: completeTask
       tags:
-        - progress
+        - tasks
       summary: update overseer on completion of tiling task
       parameters:
         - in: path

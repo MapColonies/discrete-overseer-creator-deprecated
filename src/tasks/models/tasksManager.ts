@@ -6,7 +6,7 @@ import { StorageClient } from '../../serviceClients/storageClient';
 import { ITaskId } from '../interfaces';
 
 @injectable()
-export class ProgressManager {
+export class TasksManager {
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
     private readonly db: StorageClient,

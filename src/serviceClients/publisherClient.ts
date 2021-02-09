@@ -2,7 +2,7 @@ import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../common/constants';
 import { ILogger } from '../common/interfaces';
-import { ITaskId } from '../progress/interfaces';
+import { ITaskId } from '../tasks/interfaces';
 import { HttpClient } from './clientsBase/httpClient';
 
 @injectable()

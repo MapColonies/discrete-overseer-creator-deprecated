@@ -11,5 +11,5 @@ export async function init(): Promise<void> {
 }
 
 export async function completeTask(id: string, version: string): Promise<supertest.Response> {
-  return supertest.agent(app).post(`/progress/completetask/${id}/${version}`).set('Content-Type', 'application/json');
+  return supertest.agent(app).post(`/tasks/${id}/${version}/completed`).set('Content-Type', 'application/json');
 }

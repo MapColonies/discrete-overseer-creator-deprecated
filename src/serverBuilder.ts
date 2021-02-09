@@ -6,7 +6,7 @@ import { RequestLogger } from './common/middlewares/RequestLogger';
 import { Services } from './common/constants';
 import { IConfig, ILogger } from './common/interfaces';
 import { layersRouterFactory } from './layers/routes/layersRouter';
-import { progressRouterFactory } from './progress/routes/progressRouter';
+import { tasksRouterFactory } from './tasks/routes/tasksRouter';
 import { openapiRouterFactory } from './common/routes/openapi';
 import { ErrorHandler } from './common/middlewares/ErrorHandler';
 
@@ -39,7 +39,7 @@ export class ServerBuilder {
 
   private buildRoutes(): void {
     this.serverInstance.use('/layers', layersRouterFactory(container));
-    this.serverInstance.use('/progress', progressRouterFactory(container));
+    this.serverInstance.use('/tasks', tasksRouterFactory(container));
     this.serverInstance.use('/', openapiRouterFactory(container));
   }
 

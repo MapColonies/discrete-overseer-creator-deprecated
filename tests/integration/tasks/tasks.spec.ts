@@ -1,6 +1,6 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
-import { ITaskId } from '../../../src/progress/interfaces';
+import { ITaskId } from '../../../src/tasks/interfaces';
 import { storage, publisher } from '../Mocks';
 
 import { registerTestValues } from '../testContainerConfig';
