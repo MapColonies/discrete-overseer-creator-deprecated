@@ -7,9 +7,11 @@ import { TillerClient } from '../../../../src/serviceClients/tillerClient';
 let layersManager: LayersManager;
 
 //storage client mock
-const saveMetadataMock = jest.fn();
+const createLayerTasksMock = jest.fn();
+const updateTaskStatusMock = jest.fn();
 const dbMock = ({
-  saveMetadata: saveMetadataMock,
+  createLayerTasks: createLayerTasksMock,
+  updateTaskStatus: updateTaskStatusMock,
 } as unknown) as StorageClient;
 
 //tiller client mock
@@ -57,10 +59,7 @@ const testImageMetadata: LayerMetadata = {
 };
 describe('LayersManager', () => {
   beforeEach(function () {
-    saveMetadataMock.mockReset();
-    addTilingRequestMock.mockReset();
-    configGetMock.mockReset();
-    logMock.mockReset();
+    jest.resetAllMocks();
   });
 
   describe('createLayer', () => {
@@ -71,11 +70,35 @@ describe('LayersManager', () => {
             return '1,2-3';
         }
       });
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 2,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 3,
+        },
+      ];
       let saved = false;
       let tiledBeforeSave = false;
-      saveMetadataMock.mockImplementation(async () => {
+      createLayerTasksMock.mockImplementation(async () => {
         saved = true;
-        return Promise.resolve();
+        return Promise.resolve(tillingReqs);
       });
       addTilingRequestMock.mockImplementation(async () => {
         if (!saved) {
@@ -87,13 +110,52 @@ describe('LayersManager', () => {
 
       await layersManager.createLayer(testImageMetadata);
 
-      expect(saveMetadataMock).toHaveBeenCalledTimes(1);
-      expect(saveMetadataMock).toHaveBeenCalledWith(testImageMetadata);
+      expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
+      expect(createLayerTasksMock).toHaveBeenCalledWith(testImageMetadata, [
+        { minZoom: 1, maxZoom: 1 },
+        { minZoom: 2, maxZoom: 3 },
+      ]);
       expect(addTilingRequestMock).toHaveBeenCalledTimes(2);
       expect(tiledBeforeSave).toBe(false);
     });
 
     it('split the tasks based on configuration', async function () {
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '2',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 5,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 8,
+        },
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '3',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 2,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 2,
+        },
+      ];
+      createLayerTasksMock.mockResolvedValue(tillingReqs);
       configGetMock.mockImplementation((key: string) => {
         switch (key) {
           case 'tiling.zoomGroups':
@@ -104,14 +166,18 @@ describe('LayersManager', () => {
 
       await layersManager.createLayer(testImageMetadata);
 
+      expect(createLayerTasksMock).toHaveBeenCalledWith(testImageMetadata, [
+        { minZoom: 1, maxZoom: 1 },
+        { minZoom: 5, maxZoom: 8 },
+        { minZoom: 2, maxZoom: 2 },
+      ]);
       expect(addTilingRequestMock).toHaveBeenCalledTimes(3);
       expect(addTilingRequestMock).toHaveBeenCalledWith({
         // eslint-disable-next-line @typescript-eslint/naming-convention
         discrete_id: testImageMetadata.source,
         version: testImageMetadata.version,
-        //TODO: replace with mocked value when integrated with db
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        task_id: '',
+        task_id: '1',
         // eslint-disable-next-line @typescript-eslint/naming-convention
         min_zoom_level: 1,
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -121,9 +187,8 @@ describe('LayersManager', () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         discrete_id: testImageMetadata.source,
         version: testImageMetadata.version,
-        //TODO: replace with mocked value when integrated with db
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        task_id: '',
+        task_id: '2',
         // eslint-disable-next-line @typescript-eslint/naming-convention
         min_zoom_level: 5,
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -133,9 +198,8 @@ describe('LayersManager', () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         discrete_id: testImageMetadata.source,
         version: testImageMetadata.version,
-        //TODO: replace with mocked value when integrated with db
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        task_id: '',
+        task_id: '3',
         // eslint-disable-next-line @typescript-eslint/naming-convention
         min_zoom_level: 2,
         // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -1,17 +1,17 @@
-import { ILogger } from '../../../../../src/common/interfaces';
-import { ITaskId } from '../../../../../src/tasks/interfaces';
-import { TasksManager } from '../../../../../src/tasks/models/tasksManager';
-import { PublisherClient } from '../../../../../src/serviceClients/publisherClient';
-import { StorageClient } from '../../../../../src/serviceClients/storageClient';
+import { ILogger } from '../../../../src/common/interfaces';
+import { ITaskId } from '../../../../src/tasks/interfaces';
+import { TasksManager } from '../../../../src/tasks/models/tasksManager';
+import { PublisherClient } from '../../../../src/serviceClients/publisherClient';
+import { StorageClient } from '../../../../src/serviceClients/storageClient';
 
 let tasksManager: TasksManager;
 
 //storage client mock
 const getCompletedZoomLevelsMock = jest.fn();
-const publishToCatalogMock = jest.fn();
+const updateTaskStatusMock = jest.fn();
 const dbMock = ({
   getCompletedZoomLevels: getCompletedZoomLevelsMock,
-  publishToCatalog: publishToCatalogMock,
+  updateTaskStatus: updateTaskStatusMock,
 } as unknown) as StorageClient;
 
 //publisher client mock
@@ -19,6 +19,9 @@ const publishLayerMock = jest.fn();
 const publisherMock = ({
   publishLayer: publishLayerMock,
 } as unknown) as PublisherClient;
+
+//catalog mock
+//const publishToCatalogMock = jest.fn();
 
 //logger mock
 const logMock = jest.fn();
@@ -33,23 +36,24 @@ const testData: ITaskId = {
 };
 describe('TasksManager', () => {
   beforeEach(function () {
-    getCompletedZoomLevelsMock.mockReset();
-    publishToCatalogMock.mockReset();
-    publishLayerMock.mockReset();
-    logMock.mockReset();
+    jest.resetAllMocks();
   });
 
   describe('completeWorkerTask', () => {
     it('publish layer if all tasks are done', async function () {
       getCompletedZoomLevelsMock.mockReturnValue({
-        allCompleted: true,
+        completed: true,
+        successful: true,
+        metaData: {
+          test: 'metadata',
+        },
       });
       tasksManager = new TasksManager(loggerMock, dbMock, publisherMock);
 
       await tasksManager.taskComplete(testData);
 
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
-      expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
+      //expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
     });
 
@@ -62,7 +66,7 @@ describe('TasksManager', () => {
       await tasksManager.taskComplete(testData);
 
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
-      expect(publishToCatalogMock).toHaveBeenCalledTimes(0);
+      //expect(publishToCatalogMock).toHaveBeenCalledTimes(0);
       expect(publishLayerMock).toHaveBeenCalledTimes(0);
     });
   });
