@@ -60,10 +60,11 @@ describe('layers', function () {
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
 
-    it('should return 500 if failed to publish to catalog', async function () {
-      storage.publishToCatalogMock.mockImplementation(() => {
-        throw new Error('test error');
-      });
+    //TODO: readd test after catalog integration
+    it.skip('should return 500 if failed to publish to catalog', async function () {
+      // storage.publishToCatalogMock.mockImplementation(() => {
+      //   throw new Error('test error');
+      // });
       const response = await requestSender.completeTask(testData.id, testData.version);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });

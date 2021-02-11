@@ -5,7 +5,7 @@ import { storage, tiller } from '../Mocks';
 import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
 
-const validTestImageMetadata: LayerMetadata & { tileUris: string[] } = {
+const validTestImageMetadata: LayerMetadata = {
   source: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   version: '1.234.5',
   sourceName: 'test layer',
@@ -29,7 +29,6 @@ const validTestImageMetadata: LayerMetadata & { tileUris: string[] } = {
   resolution: 0.7,
   sensorType: SensorType.RGB,
   fileUris: [],
-  tileUris: [],
 };
 const invalidTestImageMetadata = {
   source: 'testId',
@@ -63,7 +62,16 @@ describe('layers', function () {
   describe('Sad Path', function () {
     // All requests with status code 4XX-5XX
     it('should return 500 status code on db error', async function () {
-      storage.saveMetadataMock.mockImplementation(() => {
+      storage.createLayerTasksMock.mockImplementation(() => {
+        throw new Error('test error');
+      });
+      const response = await requestSender.createLayer(validTestImageMetadata);
+      expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+    });
+
+    //TODO: change when errors are handled
+    it('should return 500 status code on db error when doing status update', async function () {
+      storage.createLayerTasksMock.mockImplementation(() => {
         throw new Error('test error');
       });
       const response = await requestSender.createLayer(validTestImageMetadata);
