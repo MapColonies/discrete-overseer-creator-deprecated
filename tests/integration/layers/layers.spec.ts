@@ -71,7 +71,7 @@ describe('layers', function () {
 
     //TODO: change when errors are handled
     it('should return 500 status code on db error when doing status update', async function () {
-      storage.createLayerTasksMock.mockImplementation(() => {
+      storage.updateTaskStatusMock.mockImplementation(() => {
         throw new Error('test error');
       });
       const response = await requestSender.createLayer(validTestImageMetadata);

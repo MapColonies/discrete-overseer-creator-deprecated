@@ -1,7 +1,7 @@
 import { ILogger } from '../../../../src/common/interfaces';
 import { ITaskId } from '../../../../src/tasks/interfaces';
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
-import { PublisherClient } from '../../../../src/serviceClients/publisherClient';
+import { MapPublisherClient } from '../../../../src/serviceClients/publisherClient';
 import { StorageClient } from '../../../../src/serviceClients/storageClient';
 
 let tasksManager: TasksManager;
@@ -18,9 +18,10 @@ const dbMock = ({
 const publishLayerMock = jest.fn();
 const publisherMock = ({
   publishLayer: publishLayerMock,
-} as unknown) as PublisherClient;
+} as unknown) as MapPublisherClient;
 
 //catalog mock
+//TODO: add catalog
 //const publishToCatalogMock = jest.fn();
 
 //logger mock

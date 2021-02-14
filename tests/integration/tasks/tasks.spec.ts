@@ -1,7 +1,7 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { ITaskId } from '../../../src/tasks/interfaces';
-import { storage, publisher } from '../Mocks';
+import { storage, mapPublisher } from '../Mocks';
 
 import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
@@ -53,7 +53,7 @@ describe('layers', function () {
     });
 
     it('should return 500 if failed to publish layer', async function () {
-      publisher.publishLayerMock.mockImplementation(() => {
+      mapPublisher.publishLayerMock.mockImplementation(() => {
         throw new Error('test error');
       });
       const response = await requestSender.completeTask(testData.id, testData.version);

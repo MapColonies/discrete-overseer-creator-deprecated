@@ -1,6 +1,6 @@
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { ILogger } from '../../src/common/interfaces';
-import { PublisherClient } from '../../src/serviceClients/publisherClient';
+import { MapPublisherClient } from '../../src/serviceClients/publisherClient';
 import { StorageClient } from '../../src/serviceClients/storageClient';
 import { TillerClient } from '../../src/serviceClients/tillerClient';
 import { ITaskZoomRange } from '../../src/tasks/interfaces';
@@ -34,12 +34,12 @@ const tiller = {
 
 //publisher client mock
 const publishLayerMock = jest.fn();
-const publisherMock = ({
+const mapPublisherMock = ({
   publishLayer: publishLayerMock,
-} as unknown) as PublisherClient;
-const publisher = {
+} as unknown) as MapPublisherClient;
+const mapPublisher = {
   publishLayerMock: publishLayerMock,
-  clientMock: publisherMock,
+  clientMock: mapPublisherMock,
 };
 
 //logger mock
@@ -85,4 +85,4 @@ function mockCreateLayerTasks(): void {
   });
 }
 mockCreateLayerTasks();
-export { tiller, storage, publisher, logger, resetMocks };
+export { tiller, storage, mapPublisher, logger, resetMocks };

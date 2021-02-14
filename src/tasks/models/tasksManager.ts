@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
-import { PublisherClient } from '../../serviceClients/publisherClient';
+import { MapPublisherClient } from '../../serviceClients/publisherClient';
 import { StorageClient, TaskState } from '../../serviceClients/storageClient';
 import { ITaskId } from '../interfaces';
 
@@ -10,7 +10,7 @@ export class TasksManager {
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
     private readonly db: StorageClient,
-    private readonly publisher: PublisherClient
+    private readonly mapPublisher: MapPublisherClient
   ) {}
 
   public async taskComplete(taskId: ITaskId): Promise<void> {
@@ -19,7 +19,7 @@ export class TasksManager {
     if (res.completed) {
       if (res.successful) {
         //TODO: add retries
-        await this.publishToServer(taskId);
+        await this.publishToMappingServer(taskId);
         await this.publishToCatalog(taskId);
         await this.db.updateTaskStatus(taskId, TaskState.COMPLETED);
       } else {
@@ -44,10 +44,10 @@ export class TasksManager {
     }
   }
 
-  private async publishToServer(taskId: ITaskId): Promise<void> {
+  private async publishToMappingServer(taskId: ITaskId): Promise<void> {
     try {
       this.logger.log('info', `publishing layer ${taskId.id} version  ${taskId.version} to server`);
-      await this.publisher.publishLayer(taskId);
+      await this.mapPublisher.publishLayer(taskId);
     } catch (err) {
       await this.db.updateTaskStatus(taskId, TaskState.FAILED, 'Failed to publish layer');
       //TODO: add error handling logic in case publishing to catalog failed after publishing to map proxy
