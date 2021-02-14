@@ -34,6 +34,16 @@ export abstract class HttpClient {
     }
   }
 
+  protected async put<T>(url: string, body?: unknown): Promise<T> {
+    try {
+      const res = await axios.put<T>(url, body, this.axiosOptions);
+      return res.data;
+    } catch (err) {
+      const error = this.wrapError(url, err, body);
+      throw error;
+    }
+  }
+
   private wrapError(url: string, err: AxiosError, body?: unknown): HttpError {
     switch (err.response?.status) {
       case HttpStatus.BAD_REQUEST:

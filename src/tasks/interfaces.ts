@@ -1,10 +1,14 @@
+import { LayerMetadata } from '@map-colonies/mc-model-types';
+
 export interface ITaskId {
   id: string;
   version: string;
 }
 
 export interface ICompletedTasks {
-  allCompleted: boolean;
+  completed: boolean;
+  successful: boolean;
+  metaData: LayerMetadata;
 }
 
 export interface ITillerRequest {
@@ -17,4 +21,9 @@ export interface ITillerRequest {
   min_zoom_level: number;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   max_zoom_level: number;
+}
+
+export interface ITaskZoomRange {
+  minZoom: number;
+  maxZoom: number;
 }

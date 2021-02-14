@@ -3,31 +3,107 @@ import { inject, injectable } from 'tsyringe';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
-import { ICompletedTasks, ITaskId } from '../tasks/interfaces';
+import { ICompletedTasks, ITaskId, ITaskZoomRange, ITillerRequest } from '../tasks/interfaces';
 import { HttpClient } from './clientsBase/httpClient';
 
+//TODO: replace with model
+enum TaskState {
+  PENDING = 'Pending',
+  IN_PROGRESS = 'In-Progress',
+  COMPLETED = 'Completed',
+  FAILED = 'Failed',
+}
+
+interface ITaskStatus {
+  taskId: string;
+  updateDate: string;
+  status: TaskState;
+  reason: string;
+  attempts: number;
+  minZoom: number;
+  maxZoom: number;
+}
+
+interface IDiscreteData {
+  id: string;
+  version: string;
+  updateDate: string;
+  tasks: ITaskStatus[];
+  metadata: LayerMetadata;
+  status: TaskState;
+  reason: string;
+}
 @injectable()
 export class StorageClient extends HttpClient {
   public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, @inject(Services.CONFIG) config: IConfig) {
     super(logger);
-    this.targetService = 'CatalogDb'; //name of target for logs
+    this.targetService = 'DiscreteIngestionDB'; //name of target for logs
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async saveMetadata(metadata: LayerMetadata): Promise<void> {
-    const saveMetadataUrl = '/metadata';
-    await this.post(saveMetadataUrl, metadata);
+  public async createLayerTasks(metadata: LayerMetadata, zoomRanges: ITaskZoomRange[]): Promise<ITillerRequest[]> {
+    const id = metadata.source as string;
+    const version = metadata.version as string;
+    const createLayerTasksUrl = `/discrete/${id}/${version}`;
+    const body = {
+      metadata: metadata,
+      tasks: zoomRanges,
+    };
+    try {
+      const res = await this.post<string[]>(createLayerTasksUrl, body);
+      const tasks = res.map((taskId, idx) => {
+        const tillerReq: ITillerRequest = {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: id,
+          version: version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: taskId,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: zoomRanges[idx].minZoom,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: zoomRanges[idx].maxZoom,
+        };
+        return tillerReq;
+      });
+      return tasks;
+    } catch (err) {
+      //TODO: add error handling
+      const error = err as Error;
+      this.logger.log('error', error.message);
+      throw err;
+    }
   }
 
-  //TODO: replace return type with model
   public async getCompletedZoomLevels(taskId: ITaskId): Promise<ICompletedTasks> {
-    const getCompletedZoomLevelsUrl = '/completedZoom';
-    const data = await this.get<ICompletedTasks>(`${getCompletedZoomLevelsUrl}/${taskId.id}/${taskId.version}`);
-    return data;
+    const getCompletedZoomLevelsUrl = `/discrete/${taskId.id}/${taskId.version}`;
+    const res = await this.get<IDiscreteData>(getCompletedZoomLevelsUrl);
+    let completedCounter = 0;
+    let failedCounter = 0;
+    res.tasks.forEach((task) => {
+      switch (task.status) {
+        case TaskState.COMPLETED:
+          completedCounter++;
+          break;
+        case TaskState.FAILED:
+          failedCounter++;
+          break;
+        default:
+      }
+    });
+    return {
+      completed: completedCounter + failedCounter == res.tasks.length,
+      successful: failedCounter < res.tasks.length,
+      metaData: res.metadata,
+    };
   }
 
-  public async publishToCatalog(taskId: ITaskId): Promise<void> {
-    const publishToCatalogUrl = '/publish';
-    await this.post(`${publishToCatalogUrl}/${taskId.id}/${taskId.version}`);
+  public async updateTaskStatus(taskId: ITaskId, status: TaskState, reason?: string): Promise<void> {
+    const updateTaskUrl = `/discrete/${taskId.id}/${taskId.version}`;
+    await this.put(updateTaskUrl, {
+      status: status,
+      reason: reason,
+    });
   }
 }
+
+export { TaskState };
