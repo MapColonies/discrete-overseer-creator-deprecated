@@ -1,7 +1,7 @@
-import { ILogger } from '../../../../src/common/interfaces';
+import { IConfig, ILogger } from '../../../../src/common/interfaces';
 import { ITaskId } from '../../../../src/tasks/interfaces';
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
-import { MapPublisherClient } from '../../../../src/serviceClients/publisherClient';
+import { MapPublisherClient } from '../../../../src/serviceClients/mapPublisherClient';
 import { StorageClient } from '../../../../src/serviceClients/storageClient';
 
 let tasksManager: TasksManager;
@@ -30,6 +30,12 @@ const loggerMock = {
   log: logMock,
 } as ILogger;
 
+//config mock
+const configGetMock = jest.fn();
+const configMock = ({
+  get: configGetMock,
+} as unknown) as IConfig;
+
 //TODO: update when model updates
 const testData: ITaskId = {
   id: 'test',
@@ -42,27 +48,38 @@ describe('TasksManager', () => {
 
   describe('completeWorkerTask', () => {
     it('publish layer if all tasks are done', async function () {
+      configGetMock.mockReturnValue('0-10,11,12,13,14,15,16,17,18');
       getCompletedZoomLevelsMock.mockReturnValue({
         completed: true,
         successful: true,
         metaData: {
-          test: 'metadata',
+          dsc: 'test desc',
+          source: 'test',
+          version: '1',
         },
       });
-      tasksManager = new TasksManager(loggerMock, dbMock, publisherMock);
+      tasksManager = new TasksManager(loggerMock, configMock, dbMock, publisherMock);
 
       await tasksManager.taskComplete(testData);
 
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
       //expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
+      const expectedPublishReq = {
+        description: 'test desc',
+        maxZoom: 18,
+        name: 'test-1',
+        tilesPath: 'test/1',
+      };
+      expect(publishLayerMock).toHaveBeenCalledWith(expectedPublishReq);
     });
 
     it('do nothing if some tasks are not done', async function () {
+      configGetMock.mockReturnValue('');
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: false,
       });
-      tasksManager = new TasksManager(loggerMock, dbMock, publisherMock);
+      tasksManager = new TasksManager(loggerMock, configMock, dbMock, publisherMock);
 
       await tasksManager.taskComplete(testData);
 

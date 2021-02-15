@@ -3,7 +3,7 @@ import config from 'config';
 import { Services } from '../../src/common/constants';
 import { TillerClient } from '../../src/serviceClients/tillerClient';
 import { StorageClient } from '../../src/serviceClients/storageClient';
-import { MapPublisherClient } from '../../src/serviceClients/publisherClient';
+import { MapPublisherClient } from '../../src/serviceClients/mapPublisherClient';
 import { resetMocks, storage, tiller, mapPublisher, logger } from './Mocks';
 
 function registerTestValues(): void {

@@ -2,7 +2,7 @@ import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../common/constants';
 import { ILogger } from '../common/interfaces';
-import { ITaskId } from '../tasks/interfaces';
+import { IPublishMapLayerRequest } from '../layers/interfaces';
 import { HttpClient } from './clientsBase/httpClient';
 
 @injectable()
@@ -13,9 +13,8 @@ export class MapPublisherClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('publishingServiceURL');
   }
 
-  //TODO: modify to match model
-  public async publishLayer(taskId: ITaskId): Promise<void> {
+  public async publishLayer(publishReq: IPublishMapLayerRequest): Promise<IPublishMapLayerRequest> {
     const saveMetadataUrl = '/publish';
-    await this.post(saveMetadataUrl, taskId);
+    return this.post(saveMetadataUrl, publishReq);
   }
 }

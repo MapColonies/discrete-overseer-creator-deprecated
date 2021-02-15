@@ -1,6 +1,6 @@
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { ILogger } from '../../src/common/interfaces';
-import { MapPublisherClient } from '../../src/serviceClients/publisherClient';
+import { MapPublisherClient } from '../../src/serviceClients/mapPublisherClient';
 import { StorageClient } from '../../src/serviceClients/storageClient';
 import { TillerClient } from '../../src/serviceClients/tillerClient';
 import { ITaskZoomRange } from '../../src/tasks/interfaces';
