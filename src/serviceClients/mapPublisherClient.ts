@@ -10,7 +10,7 @@ export class MapPublisherClient extends HttpClient {
   public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, @inject(Services.CONFIG) config: IConfig) {
     super(logger);
     this.targetService = 'LayerPublisher'; //name of target for logs
-    this.axiosOptions.baseURL = config.get<string>('publishingServiceURL');
+    this.axiosOptions.baseURL = config.get<string>('mapPublishingServiceURL');
   }
 
   public async publishLayer(publishReq: IPublishMapLayerRequest): Promise<IPublishMapLayerRequest> {

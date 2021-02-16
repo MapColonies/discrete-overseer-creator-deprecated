@@ -17,7 +17,8 @@
     "topic": "tile-creator"
   },
   "storageServiceURL": "http://localhost:8081",
-  "publishingServiceURL": "http://localhost:8082",
+  "mapPublishingServiceURL": "http://localhost:8082",
+  "catalogPublishingServiceURL": "",
   "tiling": {
     "zoomGroups": "0-10,11,12,13,14,15,16,17,18"
   }

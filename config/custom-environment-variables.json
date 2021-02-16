@@ -14,7 +14,8 @@
     "topic": "TILER_KAFKA_TOPIC"
   },
   "storageServiceURL": "STORAGE_SERVICE_URL",
-  "publishingServiceURL": "PUBLISHING_SERVICE_URL",
+  "mapPublishingServiceURL": "MAP_PUBLISHING_SERVICE_URL",
+  "catalogPublishingServiceURL": "CATALOG_PUBLISHING_SERVICE_URL",
   "tiling": {
     "zoomGroups": "TILING_ZOOM_GROUPS"
   }
