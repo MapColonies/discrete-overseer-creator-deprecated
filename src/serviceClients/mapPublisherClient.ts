@@ -14,7 +14,7 @@ export class MapPublisherClient extends HttpClient {
   }
 
   public async publishLayer(publishReq: IPublishMapLayerRequest): Promise<IPublishMapLayerRequest> {
-    const saveMetadataUrl = '/publish';
+    const saveMetadataUrl = '/layer';
     return this.post(saveMetadataUrl, publishReq);
   }
 }

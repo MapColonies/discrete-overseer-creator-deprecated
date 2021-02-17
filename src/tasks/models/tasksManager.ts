@@ -61,7 +61,7 @@ export class TasksManager {
         name: `${id}-${version}`,
         description: metadata.dsc as string,
         //TODO: replace with zoom base on both config and source resolution
-        maxZoom: this.maxZoom,
+        maxZoomLevel: this.maxZoom,
         tilesPath: `${id}/${version}`,
       };
       await this.mapPublisher.publishLayer(publishReq);
