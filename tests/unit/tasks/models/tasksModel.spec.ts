@@ -67,7 +67,7 @@ describe('TasksManager', () => {
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
       const expectedPublishReq = {
         description: 'test desc',
-        maxZoom: 18,
+        maxZoomLevel: 18,
         name: 'test-1',
         tilesPath: 'test/1',
       };
