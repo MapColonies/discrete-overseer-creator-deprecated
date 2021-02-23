@@ -1,42 +1,14 @@
-import { IConfig, ILogger } from '../../../../src/common/interfaces';
 import { ITaskId } from '../../../../src/tasks/interfaces';
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
-import { MapPublisherClient } from '../../../../src/serviceClients/mapPublisherClient';
-import { StorageClient } from '../../../../src/serviceClients/storageClient';
+import { getCompletedZoomLevelsMock, dbClientMock } from '../../../mocks/clients/storageClient';
+import { publishLayerMock, mapPublisherClientMock } from '../../../mocks/clients/mapPublisherClient';
+import { getMock as configGetMock, configMock } from '../../../mocks/config';
+import { logger } from '../../../mocks/logger';
 
 let tasksManager: TasksManager;
 
-//storage client mock
-const getCompletedZoomLevelsMock = jest.fn();
-const updateTaskStatusMock = jest.fn();
-const dbMock = ({
-  getCompletedZoomLevels: getCompletedZoomLevelsMock,
-  updateTaskStatus: updateTaskStatusMock,
-} as unknown) as StorageClient;
+//TODO: add catalog mock when catalog is added
 
-//publisher client mock
-const publishLayerMock = jest.fn();
-const publisherMock = ({
-  publishLayer: publishLayerMock,
-} as unknown) as MapPublisherClient;
-
-//catalog mock
-//TODO: add catalog
-//const publishToCatalogMock = jest.fn();
-
-//logger mock
-const logMock = jest.fn();
-const loggerMock = {
-  log: logMock,
-} as ILogger;
-
-//config mock
-const configGetMock = jest.fn();
-const configMock = ({
-  get: configGetMock,
-} as unknown) as IConfig;
-
-//TODO: update when model updates
 const testData: ITaskId = {
   id: 'test',
   version: '1',
@@ -58,7 +30,7 @@ describe('TasksManager', () => {
           version: '1',
         },
       });
-      tasksManager = new TasksManager(loggerMock, configMock, dbMock, publisherMock);
+      tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock);
 
       await tasksManager.taskComplete(testData);
 
@@ -79,7 +51,7 @@ describe('TasksManager', () => {
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: false,
       });
-      tasksManager = new TasksManager(loggerMock, configMock, dbMock, publisherMock);
+      tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock);
 
       await tasksManager.taskComplete(testData);
 

@@ -1,8 +1,9 @@
 import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
-import { storage, tiller } from '../Mocks';
 import { registerTestValues } from '../testContainerConfig';
+import { createLayerTasksMock, mockCreateLayerTasks } from '../../mocks/clients/storageClient';
+import { addTilingRequestMock } from '../../mocks/clients/tillerClient';
 import * as requestSender from './helpers/requestSender';
 
 const validTestImageMetadata: LayerMetadata = {
@@ -40,7 +41,11 @@ describe('layers', function () {
     registerTestValues();
     await requestSender.init();
   });
+  beforeEach(function () {
+    mockCreateLayerTasks();
+  });
   afterEach(function () {
+    jest.resetAllMocks();
     container.clearInstances();
   });
 
@@ -62,16 +67,7 @@ describe('layers', function () {
   describe('Sad Path', function () {
     // All requests with status code 4XX-5XX
     it('should return 500 status code on db error', async function () {
-      storage.createLayerTasksMock.mockImplementation(() => {
-        throw new Error('test error');
-      });
-      const response = await requestSender.createLayer(validTestImageMetadata);
-      expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
-    });
-
-    //TODO: change when errors are handled
-    it('should return 500 status code on db error when doing status update', async function () {
-      storage.updateTaskStatusMock.mockImplementation(() => {
+      createLayerTasksMock.mockImplementation(() => {
         throw new Error('test error');
       });
       const response = await requestSender.createLayer(validTestImageMetadata);
@@ -79,7 +75,7 @@ describe('layers', function () {
     });
 
     it('should return 500 status code on kafka error', async function () {
-      tiller.addTilingRequestMock.mockImplementation(() => {
+      addTilingRequestMock.mockImplementation(() => {
         throw new Error('test error');
       });
       const response = await requestSender.createLayer(validTestImageMetadata);
