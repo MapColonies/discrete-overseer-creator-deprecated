@@ -4,6 +4,7 @@ import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { ICompletedTasks, ITaskId, ITaskZoomRange, ITillerRequest } from '../tasks/interfaces';
+import { NotFoundError } from '../common/exceptions/http/notFoundError';
 import { HttpClient } from './clientsBase/httpClient';
 
 //TODO: replace with model
@@ -103,6 +104,20 @@ export class StorageClient extends HttpClient {
       status: status,
       reason: reason,
     });
+  }
+
+  public async getLayerStatus(taskId: ITaskId): Promise<TaskState | undefined> {
+    const getLayerUrl = `/discrete/${taskId.id}/${taskId.version}`;
+    try {
+      const res = await this.get<IDiscreteData>(getLayerUrl);
+      return res.status;
+    } catch (err) {
+      if (err instanceof NotFoundError) {
+        return undefined;
+      } else {
+        throw err;
+      }
+    }
   }
 }
 

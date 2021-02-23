@@ -1,6 +1,7 @@
 import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../common/constants';
+import { NotFoundError } from '../common/exceptions/http/notFoundError';
 import { ILogger } from '../common/interfaces';
 import { IPublishMapLayerRequest } from '../layers/interfaces';
 import { HttpClient } from './clientsBase/httpClient';
@@ -16,5 +17,19 @@ export class MapPublisherClient extends HttpClient {
   public async publishLayer(publishReq: IPublishMapLayerRequest): Promise<IPublishMapLayerRequest> {
     const saveMetadataUrl = '/layer';
     return this.post(saveMetadataUrl, publishReq);
+  }
+
+  public async exists(name: string): Promise<boolean> {
+    const saveMetadataUrl = `/layer/${name}`;
+    try {
+      await this.get(saveMetadataUrl);
+      return true;
+    } catch (err) {
+      if (err instanceof NotFoundError) {
+        return false;
+      } else {
+        throw err;
+      }
+    }
   }
 }

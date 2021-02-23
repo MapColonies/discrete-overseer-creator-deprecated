@@ -1,8 +1,8 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { ITaskId } from '../../../src/tasks/interfaces';
-import { storage, mapPublisher } from '../Mocks';
-
+import { getCompletedZoomLevelsMock } from '../../mocks/clients/storageClient';
+import { publishLayerMock } from '../../mocks/clients/mapPublisherClient';
 import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
 
@@ -17,12 +17,13 @@ describe('layers', function () {
     await requestSender.init();
   });
   afterEach(function () {
+    jest.resetAllMocks();
     container.clearInstances();
   });
 
   describe('Happy Path', function () {
     it('should return 200 status code when all completed', async function () {
-      storage.getCompletedZoomLevelsMock.mockReturnValue({
+      getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: true,
       });
       const response = await requestSender.completeTask(testData.id, testData.version);
@@ -30,7 +31,7 @@ describe('layers', function () {
     });
 
     it('should return 200 status code when not all completed', async function () {
-      storage.getCompletedZoomLevelsMock.mockReturnValue({
+      getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: false,
       });
       const response = await requestSender.completeTask(testData.id, testData.version);
@@ -45,7 +46,7 @@ describe('layers', function () {
   describe('Sad Path', function () {
     // All requests with status code 4XX-5XX
     it('should return 500 if failed to get completed zoom levels', async function () {
-      storage.getCompletedZoomLevelsMock.mockImplementation(() => {
+      getCompletedZoomLevelsMock.mockImplementation(() => {
         throw new Error('test error');
       });
       const response = await requestSender.completeTask(testData.id, testData.version);
@@ -53,7 +54,7 @@ describe('layers', function () {
     });
 
     it('should return 500 if failed to publish layer', async function () {
-      mapPublisher.publishLayerMock.mockImplementation(() => {
+      publishLayerMock.mockImplementation(() => {
         throw new Error('test error');
       });
       const response = await requestSender.completeTask(testData.id, testData.version);

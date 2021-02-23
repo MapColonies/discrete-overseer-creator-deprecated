@@ -1,36 +1,17 @@
 import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
-import { IConfig, ILogger } from '../../../../src/common/interfaces';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
-import { StorageClient } from '../../../../src/serviceClients/storageClient';
-import { TillerClient } from '../../../../src/serviceClients/tillerClient';
+import { createLayerTasksMock, getLayerStatusMock, dbClientMock } from '../../../mocks/clients/storageClient';
+import { addTilingRequestMock, tillerClientMock } from '../../../mocks/clients/tillerClient';
+import { catalogExistsMock, catalogClientMock } from '../../../mocks/clients/catalogClient';
+import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
+import { getMock as configGetMock, configMock } from '../../../mocks/config';
+import { logger } from '../../../mocks/logger';
+import { fileValidatorValidateExistsMock, fileValidatorMock } from '../../../mocks/fileValidator';
+import { TaskState } from '../../../../src/serviceClients/storageClient';
+import { ConflictError } from '../../../../src/common/exceptions/http/conflictError';
+import { BadRequestError } from '../../../../src/common/exceptions/http/badRequestError';
 
 let layersManager: LayersManager;
-
-//storage client mock
-const createLayerTasksMock = jest.fn();
-const updateTaskStatusMock = jest.fn();
-const dbMock = ({
-  createLayerTasks: createLayerTasksMock,
-  updateTaskStatus: updateTaskStatusMock,
-} as unknown) as StorageClient;
-
-//tiller client mock
-const addTilingRequestMock = jest.fn();
-const tillerMock = ({
-  addTilingRequest: addTilingRequestMock,
-} as unknown) as TillerClient;
-
-//config mock
-const configGetMock = jest.fn();
-const configMock = ({
-  get: configGetMock,
-} as unknown) as IConfig;
-
-//logger mock
-const logMock = jest.fn();
-const loggerMock = {
-  log: logMock,
-} as ILogger;
 
 const testImageMetadata: LayerMetadata = {
   source: 'test',
@@ -106,7 +87,20 @@ describe('LayersManager', () => {
         }
         return Promise.resolve();
       });
-      layersManager = new LayersManager(loggerMock, configMock, tillerMock, dbMock);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      getLayerStatusMock.mockResolvedValue(undefined);
+
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        tillerClientMock,
+        dbClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock
+      );
 
       await layersManager.createLayer(testImageMetadata);
 
@@ -162,7 +156,20 @@ describe('LayersManager', () => {
             return '1,8-5,2';
         }
       });
-      layersManager = new LayersManager(loggerMock, configMock, tillerMock, dbMock);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      getLayerStatusMock.mockResolvedValue(undefined);
+
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        tillerClientMock,
+        dbClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock
+      );
 
       await layersManager.createLayer(testImageMetadata);
 
@@ -205,6 +212,307 @@ describe('LayersManager', () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         max_zoom_level: 2,
       });
+    });
+
+    it('fail if layer status is pending', async function () {
+      configGetMock.mockImplementation((key: string) => {
+        switch (key) {
+          case 'tiling.zoomGroups':
+            return '1';
+        }
+      });
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+      ];
+      createLayerTasksMock.mockResolvedValue(tillingReqs);
+      addTilingRequestMock.mockResolvedValue(undefined);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      getLayerStatusMock.mockResolvedValue(TaskState.PENDING);
+
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        tillerClientMock,
+        dbClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock
+      );
+
+      const action = async () => {
+        await layersManager.createLayer(testImageMetadata);
+      };
+      await expect(action).rejects.toThrow(ConflictError);
+    });
+
+    it('fail if layer status is inProgress', async function () {
+      configGetMock.mockImplementation((key: string) => {
+        switch (key) {
+          case 'tiling.zoomGroups':
+            return '1';
+        }
+      });
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+      ];
+      createLayerTasksMock.mockResolvedValue(tillingReqs);
+      addTilingRequestMock.mockResolvedValue(undefined);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      getLayerStatusMock.mockResolvedValue(TaskState.IN_PROGRESS);
+
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        tillerClientMock,
+        dbClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock
+      );
+
+      const action = async () => {
+        await layersManager.createLayer(testImageMetadata);
+      };
+      await expect(action).rejects.toThrow(ConflictError);
+    });
+
+    it('pass if layer status is completed', async function () {
+      configGetMock.mockImplementation((key: string) => {
+        switch (key) {
+          case 'tiling.zoomGroups':
+            return '1';
+        }
+      });
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+      ];
+      createLayerTasksMock.mockResolvedValue(tillingReqs);
+      addTilingRequestMock.mockResolvedValue(undefined);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      getLayerStatusMock.mockResolvedValue(TaskState.COMPLETED);
+
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        tillerClientMock,
+        dbClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock
+      );
+
+      const action = async () => {
+        await layersManager.createLayer(testImageMetadata);
+      };
+      await expect(action()).resolves.not.toThrow();
+    });
+
+    it('pass if layer status is failed', async function () {
+      configGetMock.mockImplementation((key: string) => {
+        switch (key) {
+          case 'tiling.zoomGroups':
+            return '1';
+        }
+      });
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+      ];
+      createLayerTasksMock.mockResolvedValue(tillingReqs);
+      addTilingRequestMock.mockResolvedValue(undefined);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      getLayerStatusMock.mockResolvedValue(TaskState.FAILED);
+
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        tillerClientMock,
+        dbClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock
+      );
+
+      const action = async () => {
+        await layersManager.createLayer(testImageMetadata);
+      };
+      await expect(action()).resolves.not.toThrow();
+    });
+
+    it('fail if layer exists in mapping server', async function () {
+      configGetMock.mockImplementation((key: string) => {
+        switch (key) {
+          case 'tiling.zoomGroups':
+            return '1';
+        }
+      });
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+      ];
+      createLayerTasksMock.mockResolvedValue(tillingReqs);
+      addTilingRequestMock.mockResolvedValue(undefined);
+      mapExistsMock.mockResolvedValue(true);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      getLayerStatusMock.mockResolvedValue(undefined);
+
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        tillerClientMock,
+        dbClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock
+      );
+
+      const action = async () => {
+        await layersManager.createLayer(testImageMetadata);
+      };
+      await expect(action).rejects.toThrow(ConflictError);
+    });
+
+    it('fail if layer exists in catalog', async function () {
+      configGetMock.mockImplementation((key: string) => {
+        switch (key) {
+          case 'tiling.zoomGroups':
+            return '1';
+        }
+      });
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+      ];
+      createLayerTasksMock.mockResolvedValue(tillingReqs);
+      addTilingRequestMock.mockResolvedValue(undefined);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(true);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      getLayerStatusMock.mockResolvedValue(undefined);
+
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        tillerClientMock,
+        dbClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock
+      );
+
+      const action = async () => {
+        await layersManager.createLayer(testImageMetadata);
+      };
+      await expect(action).rejects.toThrow(ConflictError);
+    });
+
+    it('fail if files are missing', async function () {
+      configGetMock.mockImplementation((key: string) => {
+        switch (key) {
+          case 'tiling.zoomGroups':
+            return '1';
+        }
+      });
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.source,
+          version: testImageMetadata.version,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+      ];
+      createLayerTasksMock.mockResolvedValue(tillingReqs);
+      addTilingRequestMock.mockResolvedValue(undefined);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(false);
+      getLayerStatusMock.mockResolvedValue(undefined);
+
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        tillerClientMock,
+        dbClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock
+      );
+
+      const action = async () => {
+        await layersManager.createLayer(testImageMetadata);
+      };
+      await expect(action).rejects.toThrow(BadRequestError);
     });
   });
 });
