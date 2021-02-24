@@ -4,11 +4,15 @@ import { Services } from '../common/constants';
 import { NotFoundError } from '../common/exceptions/http/notFoundError';
 import { ILogger } from '../common/interfaces';
 import { IPublishMapLayerRequest } from '../layers/interfaces';
-import { HttpClient } from './clientsBase/httpClient';
+import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
 @injectable()
 export class MapPublisherClient extends HttpClient {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, @inject(Services.CONFIG) config: IConfig) {
+    const retryConfig = parseConfig(config.get<IHttpRetryConfig>('httpRetry'));
+    super(logger, retryConfig);
     super(logger);
     this.targetService = 'LayerPublisher'; //name of target for logs
     this.axiosOptions.baseURL = config.get<string>('mapPublishingServiceURL');

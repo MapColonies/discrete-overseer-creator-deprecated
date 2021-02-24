@@ -5,7 +5,7 @@ import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { ICompletedTasks, ITaskId, ITaskZoomRange, ITillerRequest } from '../tasks/interfaces';
 import { NotFoundError } from '../common/exceptions/http/notFoundError';
-import { HttpClient } from './clientsBase/httpClient';
+import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
 //TODO: replace with model
 enum TaskState {
@@ -36,7 +36,11 @@ interface IDiscreteData {
 }
 @injectable()
 export class StorageClient extends HttpClient {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, @inject(Services.CONFIG) config: IConfig) {
+    const retryConfig = parseConfig(config.get<IHttpRetryConfig>('httpRetry'));
+    super(logger, retryConfig);
     super(logger);
     this.targetService = 'DiscreteIngestionDB'; //name of target for logs
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
