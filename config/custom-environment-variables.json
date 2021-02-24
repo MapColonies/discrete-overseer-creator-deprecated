@@ -11,7 +11,14 @@
   "tilerKafka": {
     "clientId": "TILER_KAFKA_CLIENT_ID",
     "brokers": "TILER_KAFKA_BROKERS",
-    "topic": "TILER_KAFKA_TOPIC"
+    "topic": "TILER_KAFKA_TOPIC",
+    "retry": {
+      "maxRetryTime": "TILER_KAFKA_MAX_RETRY_TIME",
+      "initialRetryTime": "TILER_KAFKA_INITIAL_RETRY_TIME",
+      "factor": "TILER_KAFKA_RETRY_FACTOR",
+      "multiplier": "TILER_KAFKA_RETRY_MULTIPLIER",
+      "retries": "TILER_KAFKA_RETRIES"
+    }
   },
   "storageServiceURL": "STORAGE_SERVICE_URL",
   "mapPublishingServiceURL": "MAP_PUBLISHING_SERVICE_URL",
