@@ -1,6 +1,7 @@
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import HttpStatus from 'http-status-codes';
 import { inject } from 'tsyringe';
+import axiosRetry, { exponentialDelay, IAxiosRetryConfig } from 'axios-retry';
 import { Services } from '../../common/constants';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { HttpError } from '../../common/exceptions/http/httpError';
@@ -11,12 +12,22 @@ import { ILogger } from '../../common/interfaces';
 export abstract class HttpClient {
   protected targetService = '';
   protected axiosOptions: AxiosRequestConfig = {};
+  protected axiosClient: AxiosInstance;
 
-  public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger) {}
+  public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, retryConfig?: IAxiosRetryConfig) {
+    this.axiosClient = axios.create();
+    if (!retryConfig) {
+      retryConfig = {
+        retries: 0,
+      };
+    }
+    axiosRetry(this.axiosClient, retryConfig);
+  }
 
-  protected async get<T>(url: string): Promise<T> {
+  protected async get<T>(url: string, retryConfig?: IAxiosRetryConfig): Promise<T> {
     try {
-      const res = await axios.get<T>(url, this.axiosOptions);
+      const reqConfig = retryConfig ? { ...this.axiosOptions, 'axios-retry': retryConfig } : this.axiosOptions;
+      const res = await this.axiosClient.get<T>(url, reqConfig);
       return res.data;
     } catch (err) {
       const error = this.wrapError(url, err);
@@ -24,9 +35,10 @@ export abstract class HttpClient {
     }
   }
 
-  protected async post<T>(url: string, body?: unknown): Promise<T> {
+  protected async post<T>(url: string, body?: unknown, retryConfig?: IAxiosRetryConfig): Promise<T> {
     try {
-      const res = await axios.post<T>(url, body, this.axiosOptions);
+      const reqConfig = retryConfig ? { ...this.axiosOptions, 'axios-retry': retryConfig } : this.axiosOptions;
+      const res = await this.axiosClient.post<T>(url, body, reqConfig);
       return res.data;
     } catch (err) {
       const error = this.wrapError(url, err, body);
@@ -34,9 +46,10 @@ export abstract class HttpClient {
     }
   }
 
-  protected async put<T>(url: string, body?: unknown): Promise<T> {
+  protected async put<T>(url: string, body?: unknown, retryConfig?: IAxiosRetryConfig): Promise<T> {
     try {
-      const res = await axios.put<T>(url, body, this.axiosOptions);
+      const reqConfig = retryConfig ? { ...this.axiosOptions, 'axios-retry': retryConfig } : this.axiosOptions;
+      const res = await this.axiosClient.put<T>(url, body, reqConfig);
       return res.data;
     } catch (err) {
       const error = this.wrapError(url, err, body);
@@ -67,4 +80,32 @@ export abstract class HttpClient {
         return new InternalServerError(err);
     }
   }
+}
+
+export interface IHttpRetryConfig {
+  attempts: number;
+  delay: number | 'exponential';
+  shouldResetTimeout: boolean;
+}
+
+export function parseConfig(config: IHttpRetryConfig): IAxiosRetryConfig {
+  const retries = config.attempts - 1;
+  if (retries <= 0) {
+    throw new Error('invalid retry configuration: attempts must be positive');
+  }
+  let delay: (attempt: number) => number;
+  if (config.delay === 'exponential') {
+    delay = exponentialDelay;
+  } else if (typeof config.delay === 'number') {
+    delay = (): number => {
+      return config.delay as number;
+    };
+  } else {
+    throw new Error('invalid retry configuration: delay must be "exponential" or number');
+  }
+  return {
+    retries: retries,
+    retryDelay: delay,
+    shouldResetTimeout: config.shouldResetTimeout,
+  };
 }
