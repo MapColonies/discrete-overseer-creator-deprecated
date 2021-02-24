@@ -1,4 +1,4 @@
-import { Kafka, Producer, Partitioners, KafkaConfig } from 'kafkajs';
+import { Kafka, Producer, Partitioners, KafkaConfig, RetryOptions } from 'kafkajs';
 import { inject } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { KafkaConnectionError } from '../../common/exceptions/kafka/kafkaConnectionError';
@@ -10,6 +10,7 @@ export interface IKafkaConfig {
   clientId: string;
   brokers: string | string[];
   topic: string;
+  retry: RetryOptions;
 }
 
 export abstract class KafkaClient {
@@ -30,6 +31,7 @@ export abstract class KafkaClient {
     const internalKafkaConfig: KafkaConfig = {
       clientId: this.kafkaConfig.clientId,
       brokers: brokers,
+      retry: kafkaConfig.retry,
     };
     const kafka = new Kafka(internalKafkaConfig);
     this.producer = kafka.producer({

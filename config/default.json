@@ -14,7 +14,14 @@
   "tilerKafka": {
     "clientId": "discrete-overseer-creator",
     "brokers": "192.168.0.14:9092",
-    "topic": "tile-creator"
+    "topic": "tile-creator",
+    "retry": {
+      "maxRetryTime": 10000,
+      "initialRetryTime": 100,
+      "factor": 0.2,
+      "multiplier": 2,
+      "retries": 3
+    }
   },
   "storageServiceURL": "http://localhost:8081",
   "mapPublishingServiceURL": "http://localhost:8082",
@@ -23,7 +30,7 @@
     "zoomGroups": "0-10,11,12,13,14,15,16,17,18"
   },
   "httpRetry": {
-    "attempts": 3,
+    "attempts": 5,
     "delay": "exponential",
     "shouldResetTimeout": true
   }
