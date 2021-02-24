@@ -21,6 +21,11 @@ export abstract class HttpClient {
         retries: 0,
       };
     }
+    const delayFunc = retryConfig.retryDelay ?? ((): number => 0);
+    retryConfig.retryDelay = (retryCount: number, error: AxiosError): number => {
+      this.logger.log('error', `error from ${this.targetService}. retries: ${retryCount}. error: ${error.message}`);
+      return delayFunc(retryCount, error);
+    };
     axiosRetry(this.axiosClient, retryConfig);
   }
 
