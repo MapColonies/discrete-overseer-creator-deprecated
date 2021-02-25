@@ -53,7 +53,7 @@ export class OpenapiController {
       loaderOptions: {
         processContent: function (res: { text: string }, callback: unknown): void {
           const cb = callback as (a: null, b: unknown) => void;
-          cb(null, JSON.parse(res.text));
+          cb(null, safeLoad(res.text));
         },
       },
     };

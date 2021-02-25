@@ -2,8 +2,9 @@ import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { registerTestValues } from '../testContainerConfig';
-import { createLayerTasksMock, mockCreateLayerTasks } from '../../mocks/clients/storageClient';
+import { createLayerTasksMock, mockCreateLayerTasks, getLayerStatusMock } from '../../mocks/clients/storageClient';
 import { addTilingRequestMock } from '../../mocks/clients/tillerClient';
+import { TaskState } from '../../../src/serviceClients/storageClient';
 import * as requestSender from './helpers/requestSender';
 
 const validTestImageMetadata: LayerMetadata = {
@@ -37,9 +38,9 @@ const invalidTestImageMetadata = {
 };
 
 describe('layers', function () {
-  beforeAll(async function () {
+  beforeAll(function () {
     registerTestValues();
-    await requestSender.init();
+    requestSender.init();
   });
   beforeEach(function () {
     mockCreateLayerTasks();
@@ -66,6 +67,12 @@ describe('layers', function () {
 
   describe('Sad Path', function () {
     // All requests with status code 4XX-5XX
+    it('should return 409 if rested layer is already being generated', async function () {
+      getLayerStatusMock.mockResolvedValue(TaskState.IN_PROGRESS);
+
+      const response = await requestSender.createLayer(validTestImageMetadata);
+      expect(response.status).toBe(httpStatusCodes.CONFLICT);
+    });
     it('should return 500 status code on db error', async function () {
       createLayerTasksMock.mockImplementation(() => {
         throw new Error('test error');

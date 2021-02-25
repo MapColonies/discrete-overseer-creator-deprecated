@@ -13,7 +13,7 @@ interface IServerConfig {
 async function main(): Promise<void> {
   const serverConfig = get<IServerConfig>('server');
   const port: number = parseInt(serverConfig.port) || DEFAULT_SERVER_PORT;
-  const app = await getApp();
+  const app = getApp();
   const probe = container.resolve<Probe>(Probe);
   await probe.start(app, port);
   probe.readyFlag = true;

@@ -12,9 +12,9 @@ const testData: ITaskId = {
 };
 
 describe('layers', function () {
-  beforeAll(async function () {
+  beforeAll(function () {
     registerTestValues();
-    await requestSender.init();
+    requestSender.init();
   });
   afterEach(function () {
     jest.resetAllMocks();

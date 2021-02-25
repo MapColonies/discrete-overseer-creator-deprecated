@@ -41,7 +41,6 @@ export class StorageClient extends HttpClient {
   public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, @inject(Services.CONFIG) config: IConfig) {
     const retryConfig = parseConfig(config.get<IHttpRetryConfig>('httpRetry'));
     super(logger, retryConfig);
-    super(logger);
     this.targetService = 'DiscreteIngestionDB'; //name of target for logs
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
