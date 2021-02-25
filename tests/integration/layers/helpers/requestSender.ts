@@ -14,9 +14,9 @@ const parseDate = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
-export async function init(): Promise<void> {
+export function init(): void {
   const builder = container.resolve<ServerBuilder>(ServerBuilder);
-  app = await builder.build();
+  app = builder.build();
 }
 
 export async function createLayer(body: LayerMetadata): Promise<supertest.Response> {
