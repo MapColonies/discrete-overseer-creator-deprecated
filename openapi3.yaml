@@ -19,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: ./Schema/layerMetadata.yaml#/definitions/LayerMetadata
+              $ref: ./Schema/layerMetadata.yaml#/components/schemas/LayerMetadata
       responses:
         200:
           description: OK

@@ -16,6 +16,9 @@ describe('layers', function () {
     registerTestValues();
     requestSender.init();
   });
+  beforeEach(() => {
+    console.warn = jest.fn();
+  });
   afterEach(function () {
     jest.resetAllMocks();
     container.clearInstances();

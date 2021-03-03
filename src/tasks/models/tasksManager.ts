@@ -53,7 +53,7 @@ export class TasksManager {
   }
 
   private async publishToMappingServer(metadata: LayerMetadata): Promise<void> {
-    const id = metadata.source as string;
+    const id = metadata.id as string;
     const version = metadata.version as string;
     try {
       this.logger.log('info', `publishing layer ${id} version  ${version} to server`);
