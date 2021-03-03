@@ -46,7 +46,7 @@ export class StorageClient extends HttpClient {
   }
 
   public async createLayerTasks(metadata: LayerMetadata, zoomRanges: ITaskZoomRange[]): Promise<ITillerRequest[]> {
-    const id = metadata.source as string;
+    const id = metadata.id as string;
     const version = metadata.version as string;
     const createLayerTasksUrl = `/discrete/${id}/${version}`;
     const body = {

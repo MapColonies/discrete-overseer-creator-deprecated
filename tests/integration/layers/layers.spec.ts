@@ -8,8 +8,9 @@ import { TaskState } from '../../../src/serviceClients/storageClient';
 import * as requestSender from './helpers/requestSender';
 
 const validTestImageMetadata: LayerMetadata = {
-  source: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+  id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   version: '1.234.5',
+  source: '3fa85f64-5717-4562-b3fc-2c963f66afa6-1.234.5',
   sourceName: 'test layer',
   dsc: 'test layer desc',
   ep90: 0.7,
@@ -43,6 +44,7 @@ describe('layers', function () {
     requestSender.init();
   });
   beforeEach(function () {
+    console.warn = jest.fn();
     mockCreateLayerTasks();
   });
   afterEach(function () {

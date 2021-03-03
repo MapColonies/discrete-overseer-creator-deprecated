@@ -56,7 +56,7 @@ export class LayersManager {
 
   private async validateRunConditions(metadata: LayerMetadata): Promise<void> {
     const id: ITaskId = {
-      id: metadata.source as string,
+      id: metadata.id as string,
       version: metadata.version as string,
     };
     await this.validateNotRunning(id);

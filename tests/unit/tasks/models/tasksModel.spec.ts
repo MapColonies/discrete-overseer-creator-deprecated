@@ -26,8 +26,9 @@ describe('TasksManager', () => {
         successful: true,
         metaData: {
           dsc: 'test desc',
-          source: 'test',
+          source: 'test-1',
           version: '1',
+          id: 'test',
         },
       });
       tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock);
