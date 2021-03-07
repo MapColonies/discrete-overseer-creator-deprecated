@@ -21,6 +21,12 @@
       "factor": 0.2,
       "multiplier": 2,
       "retries": 3
+    },
+    "ssl": {
+      "rejectUnauthorized": false,
+      "ca": null,
+      "key": null,
+      "cert": null
     }
   },
   "storageServiceURL": "http://localhost:8081",

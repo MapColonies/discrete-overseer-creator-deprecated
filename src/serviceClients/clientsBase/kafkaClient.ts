@@ -1,3 +1,5 @@
+import { ConnectionOptions } from 'tls';
+import { readFileSync } from 'fs';
 import { Kafka, Producer, Partitioners, KafkaConfig, RetryOptions } from 'kafkajs';
 import { inject } from 'tsyringe';
 import { Services } from '../../common/constants';
@@ -6,11 +8,19 @@ import { KafkaDisconnectError } from '../../common/exceptions/kafka/KafkaDisconn
 import { KafkaSendError } from '../../common/exceptions/kafka/kafkaSendError';
 import { ILogger } from '../../common/interfaces';
 
+export interface IKafkaSSLOptions {
+  rejectUnauthorized: boolean;
+  ca: string;
+  key: string;
+  cert: string;
+}
+
 export interface IKafkaConfig {
   clientId: string;
   brokers: string | string[];
   topic: string;
   retry: RetryOptions;
+  ssl: IKafkaSSLOptions;
 }
 
 export abstract class KafkaClient {
@@ -27,11 +37,12 @@ export abstract class KafkaClient {
     if (typeof brokers === 'string' || brokers instanceof String) {
       brokers = brokers.split(',');
     }
-    //TODO: add ssl support. see: https://github.com/MapColonies/exporter-trigger/issues/113
+    const sslOptions = this.parseSSLOptions();
     const internalKafkaConfig: KafkaConfig = {
       clientId: this.kafkaConfig.clientId,
       brokers: brokers,
       retry: kafkaConfig.retry,
+      ssl: sslOptions,
     };
     const kafka = new Kafka(internalKafkaConfig);
     this.producer = kafka.producer({
@@ -77,5 +88,17 @@ export abstract class KafkaClient {
       const err = error as Error;
       throw new KafkaDisconnectError(err.message, err.stack);
     }
+  }
+
+  private parseSSLOptions(): ConnectionOptions | undefined {
+    if (this.kafkaConfig.ssl.ca && this.kafkaConfig.ssl.cert && this.kafkaConfig.ssl.key) {
+      return {
+        rejectUnauthorized: this.kafkaConfig.ssl.rejectUnauthorized,
+        ca: readFileSync(this.kafkaConfig.ssl.ca, 'utf-8'),
+        cert: readFileSync(this.kafkaConfig.ssl.cert, 'utf-8'),
+        key: readFileSync(this.kafkaConfig.ssl.key, 'utf-8'),
+      };
+    }
+    return undefined;
   }
 }
