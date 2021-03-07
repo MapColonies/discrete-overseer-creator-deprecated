@@ -18,6 +18,12 @@
       "factor": "TILER_KAFKA_RETRY_FACTOR",
       "multiplier": "TILER_KAFKA_RETRY_MULTIPLIER",
       "retries": "TILER_KAFKA_RETRIES"
+    },
+    "ssl": {
+      "rejectUnauthorized": "TILER_KAFKA_SSL_REJECT_UNAUTHORIZED",
+      "ca": "TILER_KAFKA_SSL_CA",
+      "key": "TILER_KAFKA_SSL_KEY",
+      "cert": "TILER_KAFKA_SSL_CERT"
     }
   },
   "storageServiceURL": "STORAGE_SERVICE_URL",
