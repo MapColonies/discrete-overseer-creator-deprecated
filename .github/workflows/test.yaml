@@ -21,14 +21,6 @@ jobs:
 
       - name: Run tests
         run: npm run test
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: Test Reporters
-          path: reports/**
-
-      - name: Azure Pipelines Action
-        uses: Azure/pipelines@v1
         with:
           azure-devops-project-url: https://dev.azure.com/Libot-Mipui-Org/discrete-overseer-creator
           azure-pipeline-name: 'build-and-push-to-ACR'
