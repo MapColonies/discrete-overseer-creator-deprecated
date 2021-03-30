@@ -10,6 +10,6 @@ export function init(): void {
   app = builder.build();
 }
 
-export async function completeTask(id: string, version: string): Promise<supertest.Response> {
-  return supertest.agent(app).post(`/tasks/${id}/${version}/completed`).set('Content-Type', 'application/json');
+export async function completeTask(jobId: string, taskId: string): Promise<supertest.Response> {
+  return supertest.agent(app).post(`/tasks/${jobId}/${taskId}/completed`).set('Content-Type', 'application/json');
 }

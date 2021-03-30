@@ -1,11 +1,11 @@
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
+import { OperationStatus } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
 import { IPublishMapLayerRequest } from '../../layers/interfaces';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
-import { StorageClient, TaskState } from '../../serviceClients/storageClient';
-import { ITaskId } from '../interfaces';
+import { StorageClient } from '../../serviceClients/storageClient';
 
 @injectable()
 export class TasksManager {
@@ -21,38 +21,34 @@ export class TasksManager {
     this.maxZoom = this.getMaxZoom(zoomConfig);
   }
 
-  public async taskComplete(taskId: ITaskId): Promise<void> {
-    this.logger.log('info', `checking tiling status of layer ${taskId.id} version  ${taskId.version}`);
+  public async taskComplete(jobId: string, taskId: string): Promise<void> {
+    this.logger.log('info', `checking tiling status of job ${jobId} task  ${taskId}`);
     const res = await this.db.getCompletedZoomLevels(taskId);
     if (res.completed) {
       if (res.successful) {
-        //TODO: add retries
-        await this.publishToMappingServer(res.metaData);
-        await this.publishToCatalog(taskId);
-        await this.db.updateTaskStatus(taskId, TaskState.COMPLETED);
+        await this.publishToMappingServer(taskId, res.metaData);
+        await this.publishToCatalog(taskId, res.metaData);
+        await this.db.updateJobStatus(taskId, OperationStatus.COMPLETED);
       } else {
-        this.logger.log(
-          'error',
-          `failed generating tiles for layer ${taskId.id} version  ${taskId.version}. please check discrete worker logs from more info`
-        );
-        await this.db.updateTaskStatus(taskId, TaskState.FAILED, 'Failed to generate tiles');
+        this.logger.log('error', `failed generating tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`);
+        await this.db.updateJobStatus(taskId, OperationStatus.FAILED, 'Failed to generate tiles');
       }
     }
   }
 
-  private async publishToCatalog(taskId: ITaskId): Promise<void> {
+  private async publishToCatalog(jobId: string, metadata: LayerMetadata): Promise<void> {
     try {
-      this.logger.log('info', `publishing layer ${taskId.id} version  ${taskId.version} to catalog`);
+      this.logger.log('info', `publishing layer ${metadata.id as string} version  ${metadata.version as string} to catalog`);
       //TODO: add publish to catalog step
       //await this.db.publishToCatalog(taskId);
     } catch (err) {
-      await this.db.updateTaskStatus(taskId, TaskState.FAILED, 'Failed to publish layer to catalog');
+      await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer to catalog');
       //TODO: add error handling logic in case publishing to catalog failed after publishing to map proxy
       throw err;
     }
   }
 
-  private async publishToMappingServer(metadata: LayerMetadata): Promise<void> {
+  private async publishToMappingServer(jobId: string, metadata: LayerMetadata): Promise<void> {
     const id = metadata.id as string;
     const version = metadata.version as string;
     try {
@@ -66,11 +62,7 @@ export class TasksManager {
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
-      const taskId: ITaskId = {
-        id: id,
-        version: version,
-      };
-      await this.db.updateTaskStatus(taskId, TaskState.FAILED, 'Failed to publish layer');
+      await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer');
       //TODO: add error handling logic in case publishing to catalog failed after publishing to map proxy
       throw err;
     }

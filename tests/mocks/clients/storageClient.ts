@@ -4,14 +4,14 @@ import { ITaskZoomRange } from '../../../src/tasks/interfaces';
 
 const createLayerTasksMock = jest.fn();
 const getCompletedZoomLevelsMock = jest.fn();
-const updateTaskStatusMock = jest.fn();
-const getLayerStatusMock = jest.fn();
+const updateJobStatusMock = jest.fn();
+const findJobsMock = jest.fn();
 
 const dbClientMock = ({
   createLayerTasks: createLayerTasksMock,
   getCompletedZoomLevels: getCompletedZoomLevelsMock,
-  updateTaskStatus: updateTaskStatusMock,
-  getLayerStatus: getLayerStatusMock,
+  updateJobStatus: updateJobStatusMock,
+  findJobs: findJobsMock,
 } as unknown) as StorageClient;
 
 function mockCreateLayerTasks(): void {
@@ -37,4 +37,4 @@ function mockCreateLayerTasks(): void {
   });
 }
 
-export { updateTaskStatusMock, getCompletedZoomLevelsMock, createLayerTasksMock, getLayerStatusMock, dbClientMock, mockCreateLayerTasks };
+export { updateJobStatusMock, getCompletedZoomLevelsMock, createLayerTasksMock, findJobsMock, dbClientMock, mockCreateLayerTasks };

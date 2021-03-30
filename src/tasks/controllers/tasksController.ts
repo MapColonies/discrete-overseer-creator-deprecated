@@ -3,9 +3,12 @@ import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
-
 import { TasksManager } from '../models/tasksManager';
-import { ITaskId } from '../interfaces';
+
+interface ITaskId {
+  jobId: string;
+  taskId: string;
+}
 
 type CompleteWorkerTaskHandler = RequestHandler<ITaskId>;
 
@@ -15,7 +18,7 @@ export class TasksController {
 
   public completeWorkerTask: CompleteWorkerTaskHandler = async (req, res, next) => {
     try {
-      await this.manager.taskComplete(req.params);
+      await this.manager.taskComplete(req.params.jobId, req.params.taskId);
       return res.sendStatus(httpStatus.OK);
     } catch (err) {
       next(err);

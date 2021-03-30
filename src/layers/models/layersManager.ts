@@ -1,14 +1,15 @@
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
+import { OperationStatus } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { IConfig, ILogger } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
-import { StorageClient, TaskState } from '../../serviceClients/storageClient';
+import { StorageClient } from '../../serviceClients/storageClient';
 import { TillerClient } from '../../serviceClients/tillerClient';
-import { ITaskId, ITaskZoomRange } from '../../tasks/interfaces';
+import { ITaskZoomRange } from '../../tasks/interfaces';
 import { FileValidator } from './fileValidator';
 
 @injectable()
@@ -55,13 +56,12 @@ export class LayersManager {
   }
 
   private async validateRunConditions(metadata: LayerMetadata): Promise<void> {
-    const id: ITaskId = {
-      id: metadata.id as string,
-      version: metadata.version as string,
-    };
-    await this.validateNotRunning(id);
-    await this.validateNotExistsInCatalog(id);
-    await this.validateNotExistsInMapServer(id);
+    const resourceId = metadata.id as string;
+    const version = metadata.version as string;
+    await this.validateNotRunning(resourceId, version);
+
+    await this.validateNotExistsInCatalog(resourceId, version);
+    await this.validateNotExistsInMapServer(resourceId, version);
     await this.validateFiles(metadata);
   }
 
@@ -72,22 +72,24 @@ export class LayersManager {
     }
   }
 
-  private async validateNotExistsInMapServer(id: ITaskId): Promise<void> {
-    const existsInMapServer = await this.mapPublisher.exists(`${id.id}-${id.version}`);
+  private async validateNotExistsInMapServer(resourceId: string, version: string): Promise<void> {
+    const existsInMapServer = await this.mapPublisher.exists(`${resourceId}-${version}`);
     if (existsInMapServer) {
       throw new ConflictError('layer already exists');
     }
   }
 
-  private async validateNotRunning(id: ITaskId): Promise<void> {
-    const status = await this.db.getLayerStatus(id);
-    if (status != undefined && (status == TaskState.IN_PROGRESS || status == TaskState.PENDING)) {
-      throw new ConflictError('layer generation is already running');
-    }
+  private async validateNotRunning(resourceId: string, version: string): Promise<void> {
+    const jobs = await this.db.findJobs(resourceId, version);
+    jobs.forEach((job) => {
+      if (job.status == OperationStatus.IN_PROGRESS || job.status == OperationStatus.PENDING) {
+        throw new ConflictError('layer generation is already running');
+      }
+    });
   }
 
-  private async validateNotExistsInCatalog(id: ITaskId): Promise<void> {
-    const existsInCatalog = await this.catalog.exists(id);
+  private async validateNotExistsInCatalog(resourceId: string, version: string): Promise<void> {
+    const existsInCatalog = await this.catalog.exists(resourceId, version);
     if (existsInCatalog) {
       throw new ConflictError('layer already exists in catalog');
     }

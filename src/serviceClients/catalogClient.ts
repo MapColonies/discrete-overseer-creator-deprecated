@@ -1,7 +1,6 @@
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../common/constants';
 import { IConfig, ILogger } from '../common/interfaces';
-import { ITaskId } from '../tasks/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
 @injectable()
@@ -15,7 +14,7 @@ export class CatalogClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async exists(id: ITaskId): Promise<boolean> {
+  public async exists(resourceId: string, version: string): Promise<boolean> {
     //TODO: integrate with catalog
     return Promise.resolve(false);
   }

@@ -29,9 +29,10 @@ export abstract class HttpClient {
     axiosRetry(this.axiosClient, retryConfig);
   }
 
-  protected async get<T>(url: string, retryConfig?: IAxiosRetryConfig): Promise<T> {
+  protected async get<T>(url: string, queryParams?: Record<string, unknown>, retryConfig?: IAxiosRetryConfig): Promise<T> {
     try {
       const reqConfig = retryConfig ? { ...this.axiosOptions, 'axios-retry': retryConfig } : this.axiosOptions;
+      reqConfig.params = queryParams;
       const res = await this.axiosClient.get<T>(url, reqConfig);
       return res.data;
     } catch (err) {

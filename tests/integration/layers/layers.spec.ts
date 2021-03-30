@@ -2,9 +2,9 @@ import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { registerTestValues } from '../testContainerConfig';
-import { createLayerTasksMock, mockCreateLayerTasks, getLayerStatusMock } from '../../mocks/clients/storageClient';
+import { createLayerTasksMock, mockCreateLayerTasks, findJobsMock } from '../../mocks/clients/storageClient';
 import { addTilingRequestMock } from '../../mocks/clients/tillerClient';
-import { TaskState } from '../../../src/serviceClients/storageClient';
+import { OperationStatus } from '../../../src/common/enums';
 import * as requestSender from './helpers/requestSender';
 
 const validTestImageMetadata: LayerMetadata = {
@@ -54,7 +54,10 @@ describe('layers', function () {
 
   describe('Happy Path', function () {
     it('should return 200 status code', async function () {
+      findJobsMock.mockResolvedValue([]);
+
       const response = await requestSender.createLayer(validTestImageMetadata);
+
       expect(response.status).toBe(httpStatusCodes.OK);
     });
   });
@@ -70,7 +73,8 @@ describe('layers', function () {
   describe('Sad Path', function () {
     // All requests with status code 4XX-5XX
     it('should return 409 if rested layer is already being generated', async function () {
-      getLayerStatusMock.mockResolvedValue(TaskState.IN_PROGRESS);
+      const jobs = [{ status: OperationStatus.FAILED }, { status: OperationStatus.IN_PROGRESS }];
+      findJobsMock.mockResolvedValue(jobs);
 
       const response = await requestSender.createLayer(validTestImageMetadata);
       expect(response.status).toBe(httpStatusCodes.CONFLICT);

@@ -3,37 +3,64 @@ import { inject, injectable } from 'tsyringe';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
-import { ICompletedTasks, ITaskId, ITaskZoomRange, ITillerRequest } from '../tasks/interfaces';
-import { NotFoundError } from '../common/exceptions/http/notFoundError';
+import { OperationStatus } from '../common/enums';
+import { ICompletedTasks, ITaskZoomRange, ITillerRequest } from '../tasks/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
-//TODO: replace with model
-enum TaskState {
-  PENDING = 'Pending',
-  IN_PROGRESS = 'In-Progress',
-  COMPLETED = 'Completed',
-  FAILED = 'Failed',
+interface ICreateTaskBody {
+  description?: string;
+  parameters: Record<string, unknown>;
+  reason?: string;
+  type?: string;
+  status?: OperationStatus;
+  attempts?: number;
 }
 
-interface ITaskStatus {
-  taskId: string;
-  updateDate: string;
-  status: TaskState;
-  reason: string;
-  attempts: number;
-  minZoom: number;
-  maxZoom: number;
-}
-
-interface IDiscreteData {
-  id: string;
+interface ICreateJobBody {
+  resourceId: string;
   version: string;
-  updateDate: string;
-  tasks: ITaskStatus[];
-  metadata: LayerMetadata;
-  status: TaskState;
-  reason: string;
+  parameters: Record<string, unknown>;
+  type: string;
+  description?: string;
+  status?: OperationStatus;
+  reason?: string;
+  tasks?: ICreateTaskBody[];
 }
+
+interface ICreateJobResponse {
+  id: string;
+  taskIds: string[];
+}
+
+interface IGetTaskResponse {
+  id: string;
+  jobId: string;
+  description?: string;
+  parameters?: Record<string, unknown>;
+  created: Date;
+  updated: Date;
+  status: OperationStatus;
+  percentage?: number;
+  reason?: string;
+  attempts: number;
+}
+
+interface IGetJobResponse {
+  id: string;
+  resourceId?: string;
+  version?: string;
+  description?: string;
+  parameters?: Record<string, unknown>;
+  reason?: string;
+  tasks?: IGetTaskResponse[];
+  created: Date;
+  updated: Date;
+  status?: OperationStatus;
+  percentage?: number;
+  isCleaned: boolean;
+}
+
+const jobType = 'Discrete-Tiling';
 @injectable()
 export class StorageClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -46,22 +73,36 @@ export class StorageClient extends HttpClient {
   }
 
   public async createLayerTasks(metadata: LayerMetadata, zoomRanges: ITaskZoomRange[]): Promise<ITillerRequest[]> {
-    const id = metadata.id as string;
+    const resourceId = metadata.id as string;
     const version = metadata.version as string;
-    const createLayerTasksUrl = `/discrete/${id}/${version}`;
-    const body = {
-      metadata: metadata,
-      tasks: zoomRanges,
+    const createLayerTasksUrl = `/jobs`;
+    const createJobRequest: ICreateJobBody = {
+      resourceId: resourceId,
+      version: version,
+      type: jobType,
+      parameters: metadata as Record<string, unknown>,
+      tasks: zoomRanges.map((range) => {
+        return {
+          type: jobType,
+          parameters: {
+            minZoom: range.minZoom,
+            maxZoom: range.maxZoom,
+          },
+        };
+      }),
     };
+
     try {
-      const res = await this.post<string[]>(createLayerTasksUrl, body);
-      const tasks = res.map((taskId, idx) => {
+      const res = await this.post<ICreateJobResponse>(createLayerTasksUrl, createJobRequest);
+      const tasks = res.taskIds.map((taskId, idx) => {
         const tillerReq: ITillerRequest = {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: id,
-          version: version,
+          job_id: res.id,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: taskId,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: resourceId,
+          version: version,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           min_zoom_level: zoomRanges[idx].minZoom,
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -78,50 +119,43 @@ export class StorageClient extends HttpClient {
     }
   }
 
-  public async getCompletedZoomLevels(taskId: ITaskId): Promise<ICompletedTasks> {
-    const getCompletedZoomLevelsUrl = `/discrete/${taskId.id}/${taskId.version}`;
-    const res = await this.get<IDiscreteData>(getCompletedZoomLevelsUrl);
+  public async getCompletedZoomLevels(jobId: string): Promise<ICompletedTasks> {
+    const getJobUrl = `/jobs/${jobId}`;
+    const res = await this.get<IGetJobResponse>(getJobUrl);
     let completedCounter = 0;
     let failedCounter = 0;
-    res.tasks.forEach((task) => {
+    res.tasks?.forEach((task) => {
       switch (task.status) {
-        case TaskState.COMPLETED:
+        case OperationStatus.COMPLETED:
           completedCounter++;
           break;
-        case TaskState.FAILED:
+        case OperationStatus.FAILED:
           failedCounter++;
           break;
         default:
       }
     });
     return {
-      completed: completedCounter + failedCounter == res.tasks.length,
-      successful: failedCounter < res.tasks.length,
-      metaData: res.metadata,
+      completed: completedCounter + failedCounter == (res.tasks?.length ?? 0),
+      successful: failedCounter < (res.tasks?.length ?? 0),
+      metaData: res.parameters as LayerMetadata,
     };
   }
 
-  public async updateTaskStatus(taskId: ITaskId, status: TaskState, reason?: string): Promise<void> {
-    const updateTaskUrl = `/discrete/${taskId.id}/${taskId.version}`;
+  public async updateJobStatus(jobId: string, status: OperationStatus, reason?: string): Promise<void> {
+    const updateTaskUrl = `/jobs/${jobId}`;
     await this.put(updateTaskUrl, {
       status: status,
       reason: reason,
     });
   }
 
-  public async getLayerStatus(taskId: ITaskId): Promise<TaskState | undefined> {
-    const getLayerUrl = `/discrete/${taskId.id}/${taskId.version}`;
-    try {
-      const res = await this.get<IDiscreteData>(getLayerUrl);
-      return res.status;
-    } catch (err) {
-      if (err instanceof NotFoundError) {
-        return undefined;
-      } else {
-        throw err;
-      }
+  public async findJobs(resourceId: string, version: string): Promise<IGetJobResponse[]> {
+    const getLayerUrl = `/jobs`;
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, version, type: jobType });
+    if (typeof res === 'string' || res.length === 0) {
+      return [];
     }
+    return res;
   }
 }
-
-export { TaskState };

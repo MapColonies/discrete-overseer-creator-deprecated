@@ -1,15 +1,15 @@
 import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
-import { createLayerTasksMock, getLayerStatusMock, dbClientMock } from '../../../mocks/clients/storageClient';
+import { createLayerTasksMock, findJobsMock, dbClientMock } from '../../../mocks/clients/storageClient';
 import { addTilingRequestMock, tillerClientMock } from '../../../mocks/clients/tillerClient';
 import { catalogExistsMock, catalogClientMock } from '../../../mocks/clients/catalogClient';
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { getMock as configGetMock, configMock } from '../../../mocks/config';
 import { logger } from '../../../mocks/logger';
 import { fileValidatorValidateExistsMock, fileValidatorMock } from '../../../mocks/fileValidator';
-import { TaskState } from '../../../../src/serviceClients/storageClient';
 import { ConflictError } from '../../../../src/common/exceptions/http/conflictError';
 import { BadRequestError } from '../../../../src/common/exceptions/http/badRequestError';
+import { OperationStatus } from '../../../../src/common/enums';
 
 let layersManager: LayersManager;
 
@@ -90,7 +90,7 @@ describe('LayersManager', () => {
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
-      getLayerStatusMock.mockResolvedValue(undefined);
+      findJobsMock.mockResolvedValue([]);
 
       layersManager = new LayersManager(
         logger,
@@ -159,7 +159,7 @@ describe('LayersManager', () => {
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
-      getLayerStatusMock.mockResolvedValue(undefined);
+      findJobsMock.mockResolvedValue([]);
 
       layersManager = new LayersManager(
         logger,
@@ -239,7 +239,7 @@ describe('LayersManager', () => {
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
-      getLayerStatusMock.mockResolvedValue(TaskState.PENDING);
+      findJobsMock.mockResolvedValue([{ status: OperationStatus.PENDING }]);
 
       layersManager = new LayersManager(
         logger,
@@ -282,7 +282,7 @@ describe('LayersManager', () => {
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
-      getLayerStatusMock.mockResolvedValue(TaskState.IN_PROGRESS);
+      findJobsMock.mockResolvedValue([{ status: OperationStatus.IN_PROGRESS }]);
 
       layersManager = new LayersManager(
         logger,
@@ -325,7 +325,7 @@ describe('LayersManager', () => {
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
-      getLayerStatusMock.mockResolvedValue(TaskState.COMPLETED);
+      findJobsMock.mockResolvedValue([{ status: OperationStatus.COMPLETED }]);
 
       layersManager = new LayersManager(
         logger,
@@ -368,7 +368,7 @@ describe('LayersManager', () => {
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
-      getLayerStatusMock.mockResolvedValue(TaskState.FAILED);
+      findJobsMock.mockResolvedValue([{ status: OperationStatus.FAILED }]);
 
       layersManager = new LayersManager(
         logger,
@@ -411,7 +411,7 @@ describe('LayersManager', () => {
       mapExistsMock.mockResolvedValue(true);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
-      getLayerStatusMock.mockResolvedValue(undefined);
+      findJobsMock.mockResolvedValue([]);
 
       layersManager = new LayersManager(
         logger,
@@ -454,7 +454,7 @@ describe('LayersManager', () => {
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(true);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
-      getLayerStatusMock.mockResolvedValue(undefined);
+      findJobsMock.mockResolvedValue([]);
 
       layersManager = new LayersManager(
         logger,
@@ -497,7 +497,7 @@ describe('LayersManager', () => {
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(false);
-      getLayerStatusMock.mockResolvedValue(undefined);
+      findJobsMock.mockResolvedValue([]);
 
       layersManager = new LayersManager(
         logger,
