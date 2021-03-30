@@ -1,4 +1,3 @@
-import { ITaskId } from '../../../../src/tasks/interfaces';
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
 import { getCompletedZoomLevelsMock, dbClientMock } from '../../../mocks/clients/storageClient';
 import { publishLayerMock, mapPublisherClientMock } from '../../../mocks/clients/mapPublisherClient';
@@ -9,10 +8,9 @@ let tasksManager: TasksManager;
 
 //TODO: add catalog mock when catalog is added
 
-const testData: ITaskId = {
-  id: 'test',
-  version: '1',
-};
+const jobId = 'c3e8d0c6-6663-49e5-9257-323674161725';
+const taskId = '517059cc-f60b-4542-8a41-fdd163358d74';
+
 describe('TasksManager', () => {
   beforeEach(function () {
     jest.resetAllMocks();
@@ -33,7 +31,7 @@ describe('TasksManager', () => {
       });
       tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock);
 
-      await tasksManager.taskComplete(testData);
+      await tasksManager.taskComplete(jobId, taskId);
 
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
       //expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
@@ -54,7 +52,7 @@ describe('TasksManager', () => {
       });
       tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock);
 
-      await tasksManager.taskComplete(testData);
+      await tasksManager.taskComplete(jobId, taskId);
 
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
       //expect(publishToCatalogMock).toHaveBeenCalledTimes(0);
