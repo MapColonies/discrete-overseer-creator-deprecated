@@ -23,7 +23,7 @@ paths:
       responses:
         200:
           description: OK
-  /tasks/{id}/{version}/completed:
+  /tasks/{jobId}/{taskId}/completed:
     post:
       operationId: completeTask
       tags:
@@ -31,17 +31,19 @@ paths:
       summary: update overseer on completion of tiling task
       parameters:
         - in: path
-          name: id
+          name: jobId
           schema:
             type: string
+            format: uuid
           required: true
-          description: layer id
+          description: job id
         - in: path
-          name: version
+          name: taskId
           schema:
             type: string
+            format: uuid
           required: true
-          description: layer version
+          description: task id
       responses:
         200:
           description: OK

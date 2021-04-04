@@ -1,15 +1,12 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
-import { ITaskId } from '../../../src/tasks/interfaces';
 import { getCompletedZoomLevelsMock } from '../../mocks/clients/storageClient';
 import { publishLayerMock } from '../../mocks/clients/mapPublisherClient';
 import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
 
-const testData: ITaskId = {
-  id: 'testId',
-  version: '1',
-};
+const jobId = 'c3e8d0c6-6663-49e5-9257-323674161725';
+const taskId = '517059cc-f60b-4542-8a41-fdd163358d74';
 
 describe('layers', function () {
   beforeAll(function () {
@@ -29,7 +26,7 @@ describe('layers', function () {
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: true,
       });
-      const response = await requestSender.completeTask(testData.id, testData.version);
+      const response = await requestSender.completeTask(jobId, taskId);
       expect(response.status).toBe(httpStatusCodes.OK);
     });
 
@@ -37,7 +34,7 @@ describe('layers', function () {
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: false,
       });
-      const response = await requestSender.completeTask(testData.id, testData.version);
+      const response = await requestSender.completeTask(jobId, taskId);
       expect(response.status).toBe(httpStatusCodes.OK);
     });
   });
@@ -52,7 +49,7 @@ describe('layers', function () {
       getCompletedZoomLevelsMock.mockImplementation(() => {
         throw new Error('test error');
       });
-      const response = await requestSender.completeTask(testData.id, testData.version);
+      const response = await requestSender.completeTask(jobId, taskId);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
 
@@ -60,7 +57,7 @@ describe('layers', function () {
       publishLayerMock.mockImplementation(() => {
         throw new Error('test error');
       });
-      const response = await requestSender.completeTask(testData.id, testData.version);
+      const response = await requestSender.completeTask(jobId, taskId);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
 
@@ -69,7 +66,7 @@ describe('layers', function () {
       // storage.publishToCatalogMock.mockImplementation(() => {
       //   throw new Error('test error');
       // });
-      const response = await requestSender.completeTask(testData.id, testData.version);
+      const response = await requestSender.completeTask(jobId, taskId);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
   });
