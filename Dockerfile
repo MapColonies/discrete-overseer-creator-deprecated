@@ -12,7 +12,9 @@ RUN npm run build
 FROM node:12.20.1-slim as production
 
 ENV NODE_ENV=production
-RUN groupadd -r app && useradd -r -g app app
+RUN chgrp -R 0 /usr/app && \
+    chmod -R g=u /usr/app
+RUN useradd -ms /bin/bash user && usermod -a -G root user
 ENV SERVER_PORT=8080
 
 WORKDIR /usr/app
@@ -24,6 +26,6 @@ COPY --from=build /tmp/buildApp/dist .
 COPY --from=build /tmp/buildApp/node_modules ./node_modules
 COPY ./config ./config
 
-USER app:app
+USER user
 EXPOSE 8080
 CMD ["node", "--max_old_space_size=512", "./index.js"]
