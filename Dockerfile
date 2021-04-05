@@ -12,8 +12,8 @@ RUN npm run build
 FROM node:12.20.1-slim as production
 
 ENV NODE_ENV=production
-RUN chgrp -R 0 /usr/app && \
-    chmod -R g=u /usr/app
+RUN chgrp -R 0 /usr && \
+    chmod -R g=u /usr
 RUN useradd -ms /bin/bash user && usermod -a -G root user
 ENV SERVER_PORT=8080
 
