@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
-import { LayerMetadata } from '@map-colonies/mc-model-types';
+import { IngestionParams } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
@@ -72,15 +72,15 @@ export class StorageClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async createLayerTasks(metadata: LayerMetadata, zoomRanges: ITaskZoomRange[]): Promise<ITillerRequest[]> {
-    const resourceId = metadata.id as string;
-    const version = metadata.version as string;
+  public async createLayerTasks(data: IngestionParams, zoomRanges: ITaskZoomRange[]): Promise<ITillerRequest[]> {
+    const resourceId = data.metadata.id as string;
+    const version = data.metadata.version as string;
     const createLayerTasksUrl = `/jobs`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
       version: version,
       type: jobType,
-      parameters: metadata as Record<string, unknown>,
+      parameters: (data as unknown) as Record<string, unknown>,
       tasks: zoomRanges.map((range) => {
         return {
           type: jobType,
@@ -138,7 +138,7 @@ export class StorageClient extends HttpClient {
     return {
       completed: completedCounter + failedCounter == (res.tasks?.length ?? 0),
       successful: failedCounter < (res.tasks?.length ?? 0),
-      metaData: res.parameters as LayerMetadata,
+      metaData: ((res.parameters as unknown) as IngestionParams).metadata,
     };
   }
 

@@ -1,4 +1,4 @@
-import { LayerMetadata } from '@map-colonies/mc-model-types';
+import { IngestionParams } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { OperationStatus } from '../../common/enums';
@@ -27,10 +27,10 @@ export class LayersManager {
     this.zoomRanges = this.getZoomRanges(config);
   }
 
-  public async createLayer(metadata: LayerMetadata): Promise<void> {
-    await this.validateRunConditions(metadata);
-    this.logger.log('info', `saving metadata for layer ${metadata.source as string}`);
-    const tillerRequests = await this.db.createLayerTasks(metadata, this.zoomRanges);
+  public async createLayer(data: IngestionParams): Promise<void> {
+    await this.validateRunConditions(data);
+    this.logger.log('info', `saving metadata for layer ${data.metadata.source as string}`);
+    const tillerRequests = await this.db.createLayerTasks(data, this.zoomRanges);
     //add tiling tasks to queue
     const tillerTasks: Promise<void>[] = [];
     tillerRequests.forEach((req) => {
@@ -55,18 +55,18 @@ export class LayersManager {
     return zoomRanges;
   }
 
-  private async validateRunConditions(metadata: LayerMetadata): Promise<void> {
-    const resourceId = metadata.id as string;
-    const version = metadata.version as string;
+  private async validateRunConditions(data: IngestionParams): Promise<void> {
+    const resourceId = data.metadata.id as string;
+    const version = data.metadata.version as string;
     await this.validateNotRunning(resourceId, version);
 
     await this.validateNotExistsInCatalog(resourceId, version);
     await this.validateNotExistsInMapServer(resourceId, version);
-    await this.validateFiles(metadata);
+    await this.validateFiles(data);
   }
 
-  private async validateFiles(metadata: LayerMetadata): Promise<void> {
-    const filesExists = await this.fileValidator.validateExists(metadata.fileUris as string[]);
+  private async validateFiles(data: IngestionParams): Promise<void> {
+    const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
     if (!filesExists) {
       throw new BadRequestError('invalid files list');
     }

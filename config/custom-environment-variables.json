@@ -8,6 +8,7 @@
   "server": {
     "port": "SERVER_PORT"
   },
+  "LayerSourceDir": "LAYER_SOURCE_DIR",
   "tilerKafka": {
     "clientId": "TILER_KAFKA_CLIENT_ID",
     "brokers": "TILER_KAFKA_BROKERS",

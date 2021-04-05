@@ -1,16 +1,21 @@
 import { promises as fsPromises, constants as fsConstants } from 'fs';
 import path from 'path';
-import { singleton } from 'tsyringe';
+import { inject, singleton } from 'tsyringe';
+import { Services } from '../../common/constants';
+import { IConfig } from '../../common/interfaces';
 
 @singleton()
 export class FileValidator {
-  public async validateExists(files: string[]): Promise<boolean> {
-    const filePromises = files.map((file) => {
-      if (!path.isAbsolute(file)) {
-        return false;
-      }
+  private readonly sourceMount: string;
+  public constructor(@inject(Services.CONFIG) config: IConfig) {
+    this.sourceMount = config.get('LayerSourceDir');
+  }
+
+  public async validateExists(srcDir: string, files: string[]): Promise<boolean> {
+    const filePromises = files.map(async (file) => {
+      const fullPath = path.join(this.sourceMount, srcDir, file);
       return fsPromises
-        .access(file, fsConstants.F_OK)
+        .access(fullPath, fsConstants.F_OK)
         .then(() => true)
         .catch(() => false);
     });
