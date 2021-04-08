@@ -35,7 +35,11 @@ export abstract class KafkaClient {
     );
     let brokers = this.kafkaConfig.brokers;
     if (typeof brokers === 'string' || brokers instanceof String) {
-      brokers = brokers.split(',');
+      if (brokers.startsWith('[')) {
+        brokers = JSON.parse(brokers as string) as string[];
+      } else {
+        brokers = brokers.split(',');
+      }
     }
     const sslOptions = this.parseSSLOptions();
     const internalKafkaConfig: KafkaConfig = {

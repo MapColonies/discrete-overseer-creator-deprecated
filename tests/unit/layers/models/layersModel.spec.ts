@@ -1,4 +1,4 @@
-import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
+import { IngestionParams, LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
 import { createLayerTasksMock, findJobsMock, dbClientMock } from '../../../mocks/clients/storageClient';
 import { addTilingRequestMock, tillerClientMock } from '../../../mocks/clients/tillerClient';
@@ -24,7 +24,6 @@ const testImageMetadata: LayerMetadata = {
   scale: '3',
   sensorType: SensorType.OTHER,
   updateDate: new Date('01/01/2020'),
-  fileUris: [],
   geometry: {
     type: 'Polygon',
     coordinates: [
@@ -37,6 +36,11 @@ const testImageMetadata: LayerMetadata = {
       ],
     ],
   },
+};
+const testData: IngestionParams = {
+  fileNames: [],
+  metadata: testImageMetadata,
+  originDirectory: '/here',
 };
 describe('LayersManager', () => {
   beforeEach(function () {
@@ -102,10 +106,10 @@ describe('LayersManager', () => {
         fileValidatorMock
       );
 
-      await layersManager.createLayer(testImageMetadata);
+      await layersManager.createLayer(testData);
 
       expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
-      expect(createLayerTasksMock).toHaveBeenCalledWith(testImageMetadata, [
+      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, [
         { minZoom: 1, maxZoom: 1 },
         { minZoom: 2, maxZoom: 3 },
       ]);
@@ -171,9 +175,9 @@ describe('LayersManager', () => {
         fileValidatorMock
       );
 
-      await layersManager.createLayer(testImageMetadata);
+      await layersManager.createLayer(testData);
 
-      expect(createLayerTasksMock).toHaveBeenCalledWith(testImageMetadata, [
+      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, [
         { minZoom: 1, maxZoom: 1 },
         { minZoom: 5, maxZoom: 8 },
         { minZoom: 2, maxZoom: 2 },
@@ -252,7 +256,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testImageMetadata);
+        await layersManager.createLayer(testData);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -295,7 +299,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testImageMetadata);
+        await layersManager.createLayer(testData);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -338,7 +342,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testImageMetadata);
+        await layersManager.createLayer(testData);
       };
       await expect(action()).resolves.not.toThrow();
     });
@@ -381,7 +385,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testImageMetadata);
+        await layersManager.createLayer(testData);
       };
       await expect(action()).resolves.not.toThrow();
     });
@@ -424,7 +428,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testImageMetadata);
+        await layersManager.createLayer(testData);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -467,7 +471,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testImageMetadata);
+        await layersManager.createLayer(testData);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -510,7 +514,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testImageMetadata);
+        await layersManager.createLayer(testData);
       };
       await expect(action).rejects.toThrow(BadRequestError);
     });

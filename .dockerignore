@@ -7,3 +7,7 @@ node_modules
 .prettierrc.json
 commitlint.config.json
 README.md
+dist
+reports
+Schema
+bundledApi.yaml

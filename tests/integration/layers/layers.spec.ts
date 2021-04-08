@@ -31,11 +31,20 @@ const validTestImageMetadata: LayerMetadata = {
   updateDate: new Date('11/16/2017'),
   resolution: 0.7,
   sensorType: SensorType.RGB,
-  fileUris: [],
+};
+const validTestData = {
+  fileNames: [],
+  metadata: validTestImageMetadata,
+  originDirectory: '/here',
 };
 const invalidTestImageMetadata = {
   source: 'testId',
   invalidFiled: 'invalid',
+};
+const invalidTestData = {
+  fileNames: [],
+  metadata: invalidTestImageMetadata,
+  originDirectory: '/here',
 };
 
 describe('layers', function () {
@@ -56,7 +65,7 @@ describe('layers', function () {
     it('should return 200 status code', async function () {
       findJobsMock.mockResolvedValue([]);
 
-      const response = await requestSender.createLayer(validTestImageMetadata);
+      const response = await requestSender.createLayer(validTestData);
 
       expect(response.status).toBe(httpStatusCodes.OK);
     });
@@ -65,7 +74,7 @@ describe('layers', function () {
   describe('Bad Path', function () {
     // All requests with status code of 400
     it('should return 400 status code', async function () {
-      const response = await requestSender.createLayer((invalidTestImageMetadata as unknown) as LayerMetadata);
+      const response = await requestSender.createLayer(invalidTestData);
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
   });
@@ -76,14 +85,14 @@ describe('layers', function () {
       const jobs = [{ status: OperationStatus.FAILED }, { status: OperationStatus.IN_PROGRESS }];
       findJobsMock.mockResolvedValue(jobs);
 
-      const response = await requestSender.createLayer(validTestImageMetadata);
+      const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
     });
     it('should return 500 status code on db error', async function () {
       createLayerTasksMock.mockImplementation(() => {
         throw new Error('test error');
       });
-      const response = await requestSender.createLayer(validTestImageMetadata);
+      const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
 
@@ -91,7 +100,7 @@ describe('layers', function () {
       addTilingRequestMock.mockImplementation(() => {
         throw new Error('test error');
       });
-      const response = await requestSender.createLayer(validTestImageMetadata);
+      const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
   });
