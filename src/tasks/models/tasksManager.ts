@@ -23,15 +23,15 @@ export class TasksManager {
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
     this.logger.log('info', `checking tiling status of job ${jobId} task  ${taskId}`);
-    const res = await this.db.getCompletedZoomLevels(taskId);
+    const res = await this.db.getCompletedZoomLevels(jobId);
     if (res.completed) {
       if (res.successful) {
-        await this.publishToMappingServer(taskId, res.metaData);
-        await this.publishToCatalog(taskId, res.metaData);
-        await this.db.updateJobStatus(taskId, OperationStatus.COMPLETED);
+        await this.publishToMappingServer(jobId, res.metaData);
+        await this.publishToCatalog(jobId, res.metaData);
+        await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
       } else {
         this.logger.log('error', `failed generating tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`);
-        await this.db.updateJobStatus(taskId, OperationStatus.FAILED, 'Failed to generate tiles');
+        await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to generate tiles');
       }
     }
   }
