@@ -23,7 +23,10 @@
     "ssl": {
       "rejectUnauthorized": "TILER_KAFKA_SSL_REJECT_UNAUTHORIZED",
       "ca": "TILER_KAFKA_SSL_CA",
-      "key": "TILER_KAFKA_SSL_KEY",
+      "key": {
+        "pem": "TILER_KAFKA_SSL_KEY",
+        "password": "TILER_KAFKA_SSL_KEY_PASSWORD"
+      },
       "cert": "TILER_KAFKA_SSL_CERT"
     }
   },

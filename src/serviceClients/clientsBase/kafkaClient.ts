@@ -1,4 +1,4 @@
-import { ConnectionOptions } from 'tls';
+import { ConnectionOptions, KeyObject } from 'tls';
 import { readFileSync } from 'fs';
 import { Kafka, Producer, Partitioners, KafkaConfig, RetryOptions } from 'kafkajs';
 import { inject } from 'tsyringe';
@@ -8,10 +8,15 @@ import { KafkaDisconnectError } from '../../common/exceptions/kafka/KafkaDisconn
 import { KafkaSendError } from '../../common/exceptions/kafka/kafkaSendError';
 import { ILogger } from '../../common/interfaces';
 
+interface IKafkaKeyOptions {
+  pem: string;
+  password: string;
+}
+
 export interface IKafkaSSLOptions {
   rejectUnauthorized: boolean;
   ca: string;
-  key: string;
+  key: IKafkaKeyOptions;
   cert: string;
 }
 
@@ -95,14 +100,25 @@ export abstract class KafkaClient {
   }
 
   private parseSSLOptions(): ConnectionOptions | undefined {
-    if (this.kafkaConfig.ssl.ca && this.kafkaConfig.ssl.cert && this.kafkaConfig.ssl.key) {
-      return {
-        rejectUnauthorized: this.kafkaConfig.ssl.rejectUnauthorized,
-        ca: readFileSync(this.kafkaConfig.ssl.ca, 'utf-8'),
-        cert: readFileSync(this.kafkaConfig.ssl.cert, 'utf-8'),
-        key: readFileSync(this.kafkaConfig.ssl.key, 'utf-8'),
-      };
+    const sslOptions: ConnectionOptions = {};
+
+    if (this.kafkaConfig.ssl.ca) {
+      sslOptions.rejectUnauthorized = this.kafkaConfig.ssl.rejectUnauthorized;
+      sslOptions.ca = [readFileSync(this.kafkaConfig.ssl.ca, 'utf-8')];
     }
-    return undefined;
+
+    if (this.kafkaConfig.ssl.cert) {
+      sslOptions.cert = readFileSync(this.kafkaConfig.ssl.cert, 'utf-8');
+    }
+
+    if (this.kafkaConfig.ssl.key.pem && this.kafkaConfig.ssl.key.password) {
+      const key: KeyObject = {
+        pem: readFileSync(this.kafkaConfig.ssl.key.pem, 'utf-8'),
+        passphrase: this.kafkaConfig.ssl.key.password,
+      };
+      sslOptions.key = [key];
+    }
+
+    return Object.keys(sslOptions).length === 0 ? undefined : sslOptions;
   }
 }

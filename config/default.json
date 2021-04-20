@@ -26,7 +26,10 @@
     "ssl": {
       "rejectUnauthorized": false,
       "ca": null,
-      "key": null,
+      "key": {
+        "pem": null,
+        "password": null
+      },
       "cert": null
     }
   },
