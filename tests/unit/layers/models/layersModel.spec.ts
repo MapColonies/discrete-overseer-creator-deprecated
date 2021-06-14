@@ -1,4 +1,4 @@
-import { IngestionParams, LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
+import { IngestionParams, LayerMetadata, RecordType, SensorType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
 import { createLayerTasksMock, findJobsMock, dbClientMock } from '../../../mocks/clients/storageClient';
 import { addTilingRequestMock, tillerClientMock } from '../../../mocks/clients/tillerClient';
@@ -14,17 +14,17 @@ import { OperationStatus } from '../../../../src/common/enums';
 let layersManager: LayersManager;
 
 const testImageMetadata: LayerMetadata = {
-  source: 'test',
-  version: '1.22',
-  sourceName: 'test name',
-  dsc: 'test desc',
-  ep90: 3,
+  productId: 'test',
+  productVersion: '1.22',
+  productName: 'test name',
+  description: 'test desc',
+  accuracyCE90: 3,
   resolution: 0.3,
   rms: 0.5,
   scale: '3',
   sensorType: SensorType.OTHER,
   updateDate: new Date('01/01/2020'),
-  geometry: {
+  footprint: {
     type: 'Polygon',
     coordinates: [
       [
@@ -36,6 +36,17 @@ const testImageMetadata: LayerMetadata = {
       ],
     ],
   },
+  classification: '',
+  creationDate: new Date('02/01/2020'),
+  ingestionDate: new Date('03/01/2020'),
+  producerName: 'testProducer',
+  productType: 'orthophoto',
+  region: '',
+  sourceDateEnd: new Date('06/01/2020'),
+  sourceDateStart: new Date('05/01/2020'),
+  srsId: '4326',
+  srsName: 'epsg:4326',
+  type: RecordType.RECORD_RASTER,
 };
 const testData: IngestionParams = {
   fileNames: [],
@@ -58,8 +69,8 @@ describe('LayersManager', () => {
       const tillingReqs = [
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -69,8 +80,8 @@ describe('LayersManager', () => {
         },
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -121,8 +132,8 @@ describe('LayersManager', () => {
       const tillingReqs = [
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -132,8 +143,8 @@ describe('LayersManager', () => {
         },
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '2',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -143,8 +154,8 @@ describe('LayersManager', () => {
         },
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '3',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -185,8 +196,8 @@ describe('LayersManager', () => {
       expect(addTilingRequestMock).toHaveBeenCalledTimes(3);
       expect(addTilingRequestMock).toHaveBeenCalledWith({
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        discrete_id: testImageMetadata.source,
-        version: testImageMetadata.version,
+        discrete_id: testImageMetadata.productId,
+        version: testImageMetadata.productVersion,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         task_id: '1',
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -196,8 +207,8 @@ describe('LayersManager', () => {
       });
       expect(addTilingRequestMock).toHaveBeenCalledWith({
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        discrete_id: testImageMetadata.source,
-        version: testImageMetadata.version,
+        discrete_id: testImageMetadata.productId,
+        version: testImageMetadata.productVersion,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         task_id: '2',
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -207,8 +218,8 @@ describe('LayersManager', () => {
       });
       expect(addTilingRequestMock).toHaveBeenCalledWith({
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        discrete_id: testImageMetadata.source,
-        version: testImageMetadata.version,
+        discrete_id: testImageMetadata.productId,
+        version: testImageMetadata.productVersion,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         task_id: '3',
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -228,8 +239,8 @@ describe('LayersManager', () => {
       const tillingReqs = [
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -271,8 +282,8 @@ describe('LayersManager', () => {
       const tillingReqs = [
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -314,8 +325,8 @@ describe('LayersManager', () => {
       const tillingReqs = [
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -357,8 +368,8 @@ describe('LayersManager', () => {
       const tillingReqs = [
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -400,8 +411,8 @@ describe('LayersManager', () => {
       const tillingReqs = [
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -443,8 +454,8 @@ describe('LayersManager', () => {
       const tillingReqs = [
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -486,8 +497,8 @@ describe('LayersManager', () => {
       const tillingReqs = [
         {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.source,
-          version: testImageMetadata.version,
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           task_id: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -29,7 +29,7 @@ export class LayersManager {
 
   public async createLayer(data: IngestionParams): Promise<void> {
     await this.validateRunConditions(data);
-    this.logger.log('info', `saving metadata for layer ${data.metadata.source as string}`);
+    this.logger.log('info', `saving metadata for layer ${data.metadata.productId as string}`);
     const tillerRequests = await this.db.createLayerTasks(data, this.zoomRanges);
     //add tiling tasks to queue
     const tillerTasks: Promise<void>[] = [];
@@ -56,8 +56,8 @@ export class LayersManager {
   }
 
   private async validateRunConditions(data: IngestionParams): Promise<void> {
-    const resourceId = data.metadata.id as string;
-    const version = data.metadata.version as string;
+    const resourceId = data.metadata.productId as string;
+    const version = data.metadata.productVersion as string;
     await this.validateNotRunning(resourceId, version);
 
     await this.validateNotExistsInCatalog(resourceId, version);

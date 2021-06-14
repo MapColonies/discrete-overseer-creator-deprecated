@@ -3,7 +3,7 @@ import { LayerMetadata } from '@map-colonies/mc-model-types';
 export interface ICompletedTasks {
   completed: boolean;
   successful: boolean;
-  metaData: LayerMetadata;
+  metadata: LayerMetadata;
 }
 
 export interface ITillerRequest {
