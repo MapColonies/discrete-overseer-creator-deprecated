@@ -26,8 +26,8 @@ export class TasksManager {
     const res = await this.db.getCompletedZoomLevels(jobId);
     if (res.completed) {
       if (res.successful) {
-        await this.publishToMappingServer(jobId, res.metaData);
-        await this.publishToCatalog(jobId, res.metaData);
+        await this.publishToMappingServer(jobId, res.metadata);
+        await this.publishToCatalog(jobId, res.metadata);
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
       } else {
         this.logger.log('error', `failed generating tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`);
@@ -38,7 +38,7 @@ export class TasksManager {
 
   private async publishToCatalog(jobId: string, metadata: LayerMetadata): Promise<void> {
     try {
-      this.logger.log('info', `publishing layer ${metadata.id as string} version  ${metadata.version as string} to catalog`);
+      this.logger.log('info', `publishing layer ${metadata.productId as string} version  ${metadata.productVersion as string} to catalog`);
       //TODO: add publish to catalog step
       //await this.db.publishToCatalog(taskId);
     } catch (err) {
@@ -49,13 +49,13 @@ export class TasksManager {
   }
 
   private async publishToMappingServer(jobId: string, metadata: LayerMetadata): Promise<void> {
-    const id = metadata.id as string;
-    const version = metadata.version as string;
+    const id = metadata.productId as string;
+    const version = metadata.productVersion as string;
     try {
       this.logger.log('info', `publishing layer ${id} version  ${version} to server`);
       const publishReq: IPublishMapLayerRequest = {
         name: `${id}-${version}`,
-        description: metadata.dsc as string,
+        description: metadata.description as string,
         //TODO: replace with zoom base on both config and source resolution
         maxZoomLevel: this.maxZoom,
         tilesPath: `${id}/${version}`,

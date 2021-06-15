@@ -22,11 +22,11 @@ describe('TasksManager', () => {
       getCompletedZoomLevelsMock.mockReturnValue({
         completed: true,
         successful: true,
-        metaData: {
-          dsc: 'test desc',
-          source: 'test-1',
-          version: '1',
-          id: 'test',
+        metadata: {
+          description: 'test desc',
+          productName: 'test-1',
+          productVersion: '1',
+          productId: 'test',
         },
       });
       tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock);

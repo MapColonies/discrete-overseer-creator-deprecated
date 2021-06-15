@@ -18,12 +18,12 @@ function mockCreateLayerTasks(): void {
   const idBuilder = {
     counter: 0,
   };
-  createLayerTasksMock.mockImplementation((metaData: LayerMetadata, ranges: ITaskZoomRange[]) => {
+  createLayerTasksMock.mockImplementation((metadata: LayerMetadata, ranges: ITaskZoomRange[]) => {
     return ranges.map((range) => {
       const req = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        discrete_id: metaData.source,
-        version: metaData.version,
+        discrete_id: metadata.productId,
+        version: metadata.productVersion,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         task_id: idBuilder.counter,
         // eslint-disable-next-line @typescript-eslint/naming-convention
