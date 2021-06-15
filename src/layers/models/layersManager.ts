@@ -29,7 +29,7 @@ export class LayersManager {
 
   public async createLayer(data: IngestionParams): Promise<void> {
     await this.validateRunConditions(data);
-    this.logger.log('info', `saving metadata for layer ${data.metadata.productId as string}`);
+    this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const tillerRequests = await this.db.createLayerTasks(data, this.zoomRanges);
     //add tiling tasks to queue
     const tillerTasks: Promise<void>[] = [];

@@ -22,7 +22,7 @@ const testImageMetadata: LayerMetadata = {
   resolution: 0.3,
   rms: 0.5,
   scale: '3',
-  sensorType: SensorType.OTHER,
+  sensorType: [SensorType.OTHER],
   updateDate: new Date('01/01/2020'),
   footprint: {
     type: 'Polygon',
@@ -47,6 +47,7 @@ const testImageMetadata: LayerMetadata = {
   srsId: '4326',
   srsName: 'epsg:4326',
   type: RecordType.RECORD_RASTER,
+  layerPolygonParts: undefined,
 };
 const testData: IngestionParams = {
   fileNames: [],
