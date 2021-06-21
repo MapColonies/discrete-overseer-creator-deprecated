@@ -36,6 +36,7 @@
   "storageServiceURL": "http://localhost:8081",
   "mapPublishingServiceURL": "http://localhost:8082",
   "catalogPublishingServiceURL": "",
+  "mapServerUrl": "http://localhost:8083",
   "tiling": {
     "zoomGroups": "0-10,11,12,13,14,15,16,17,18"
   },
@@ -43,5 +44,6 @@
     "attempts": 5,
     "delay": "exponential",
     "shouldResetTimeout": true
-  }
+  },
+  "linkTemplatesPath": "config/linkTemplates.template"
 }

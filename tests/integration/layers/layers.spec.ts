@@ -5,6 +5,8 @@ import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/cor
 import { registerTestValues } from '../testContainerConfig';
 import { createLayerTasksMock, mockCreateLayerTasks, findJobsMock } from '../../mocks/clients/storageClient';
 import { addTilingRequestMock } from '../../mocks/clients/tillerClient';
+import { mapExistsMock } from '../../mocks/clients/mapPublisherClient';
+import { catalogExistsMock } from '../../mocks/clients/catalogClient';
 import { OperationStatus } from '../../../src/common/enums';
 import * as requestSender from './helpers/requestSender';
 
@@ -114,6 +116,20 @@ describe('layers', function () {
       });
       const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+    });
+
+    it('should return 409 status code when layer exists in map server', async function () {
+      findJobsMock.mockResolvedValue([]);
+      mapExistsMock.mockResolvedValue(true);
+      const response = await requestSender.createLayer(validTestData);
+      expect(response.status).toBe(httpStatusCodes.CONFLICT);
+    });
+
+    it('should return 409 status code when layer exists in catalog', async function () {
+      findJobsMock.mockResolvedValue([]);
+      catalogExistsMock.mockResolvedValue(true);
+      const response = await requestSender.createLayer(validTestData);
+      expect(response.status).toBe(httpStatusCodes.CONFLICT);
     });
   });
 });

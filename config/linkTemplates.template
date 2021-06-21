@@ -1,0 +1,20 @@
+[
+  {
+    "name": "",
+    "description": "",
+    "protocol": "WMS",
+    "url": "{{serverUrl}}/service?REQUEST=GetCapabilities"
+  },
+  {
+    "name": "",
+    "description": "",
+    "protocol": "WMTS",
+    "url": "{{serverUrl}}/wmts/1.0.0/WMTSCapabilities.xml"
+  },
+  {
+    "name": "",
+    "description": "",
+    "protocol": "WMTS_tile",
+    "url": "{{serverUrl}}/wmts/{{layerName}}/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}.png"
+  }
+]
