@@ -119,15 +119,17 @@ describe('layers', function () {
     });
 
     it('should return 409 status code when layer exists in map server', async function () {
+      findJobsMock.mockResolvedValue([]);
       mapExistsMock.mockResolvedValue(true);
       const response = await requestSender.createLayer(validTestData);
-      expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+      expect(response.status).toBe(httpStatusCodes.CONFLICT);
     });
 
     it('should return 409 status code when layer exists in catalog', async function () {
+      findJobsMock.mockResolvedValue([]);
       catalogExistsMock.mockResolvedValue(true);
       const response = await requestSender.createLayer(validTestData);
-      expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+      expect(response.status).toBe(httpStatusCodes.CONFLICT);
     });
   });
 });
