@@ -1,24 +1,30 @@
-import { LayerMetadata } from '@map-colonies/mc-model-types';
+import { IRasterCatalogUpsertRequestBody, LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { OperationStatus } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
 import { IPublishMapLayerRequest } from '../../layers/interfaces';
+import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
+import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 
 @injectable()
 export class TasksManager {
   private readonly maxZoom: number;
+  private readonly mapServerUrl: string;
 
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig,
     private readonly db: StorageClient,
-    private readonly mapPublisher: MapPublisherClient
+    private readonly mapPublisher: MapPublisherClient,
+    private readonly catalogClient: CatalogClient,
+    private readonly linkBuilder: LinkBuilder
   ) {
     const zoomConfig = config.get<string>('tiling.zoomGroups');
     this.maxZoom = this.getMaxZoom(zoomConfig);
+    this.mapServerUrl = config.get<string>('mapServerUrl');
   }
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
@@ -26,8 +32,9 @@ export class TasksManager {
     const res = await this.db.getCompletedZoomLevels(jobId);
     if (res.completed) {
       if (res.successful) {
-        await this.publishToMappingServer(jobId, res.metadata);
-        await this.publishToCatalog(jobId, res.metadata);
+        const layerName = `${res.metadata.productId as string}-${res.metadata.productVersion as string}`;
+        await this.publishToMappingServer(jobId, res.metadata, layerName);
+        await this.publishToCatalog(jobId, res.metadata, layerName);
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
       } else {
         this.logger.log('error', `failed generating tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`);
@@ -36,25 +43,31 @@ export class TasksManager {
     }
   }
 
-  private async publishToCatalog(jobId: string, metadata: LayerMetadata): Promise<void> {
+  private async publishToCatalog(jobId: string, metadata: LayerMetadata, layerName: string): Promise<void> {
     try {
       this.logger.log('info', `publishing layer ${metadata.productId as string} version  ${metadata.productVersion as string} to catalog`);
-      //TODO: add publish to catalog step
-      //await this.db.publishToCatalog(taskId);
+      const linkData: ILinkBuilderData = {
+        serverUrl: this.mapServerUrl,
+        layerName: layerName,
+      };
+      const publishModel: IRasterCatalogUpsertRequestBody = {
+        metadata: metadata,
+        links: this.linkBuilder.createLinks(linkData),
+      };
+      await this.catalogClient.publish(publishModel);
     } catch (err) {
       await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer to catalog');
-      //TODO: add error handling logic in case publishing to catalog failed after publishing to map proxy
       throw err;
     }
   }
 
-  private async publishToMappingServer(jobId: string, metadata: LayerMetadata): Promise<void> {
+  private async publishToMappingServer(jobId: string, metadata: LayerMetadata, layerName: string): Promise<void> {
     const id = metadata.productId as string;
     const version = metadata.productVersion as string;
     try {
       this.logger.log('info', `publishing layer ${id} version  ${version} to server`);
       const publishReq: IPublishMapLayerRequest = {
-        name: `${id}-${version}`,
+        name: `${layerName}`,
         description: metadata.description as string,
         //TODO: replace with zoom base on both config and source resolution
         maxZoomLevel: this.maxZoom,
@@ -63,7 +76,6 @@ export class TasksManager {
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
       await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer');
-      //TODO: add error handling logic in case publishing to catalog failed after publishing to map proxy
       throw err;
     }
   }

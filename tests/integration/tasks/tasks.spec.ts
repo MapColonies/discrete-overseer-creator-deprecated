@@ -2,6 +2,7 @@ import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { getCompletedZoomLevelsMock } from '../../mocks/clients/storageClient';
 import { publishLayerMock } from '../../mocks/clients/mapPublisherClient';
+import { publishToCatalogMock } from '../../mocks/clients/catalogClient';
 import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
 
@@ -61,11 +62,10 @@ describe('layers', function () {
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
 
-    //TODO: readd test after catalog integration
-    it.skip('should return 500 if failed to publish to catalog', async function () {
-      // storage.publishToCatalogMock.mockImplementation(() => {
-      //   throw new Error('test error');
-      // });
+    it('should return 500 if failed to publish to catalog', async function () {
+      publishToCatalogMock.mockImplementation(() => {
+        throw new Error('test error');
+      });
       const response = await requestSender.completeTask(jobId, taskId);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
