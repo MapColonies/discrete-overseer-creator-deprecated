@@ -26,7 +26,6 @@ export class TocController {
       }
 
       res.set('Content-Type', responseType);
-      console.log(schemaString);
       return res.status(httpStatus.OK).send(schemaString);
     } catch (err) {
       next(err);
