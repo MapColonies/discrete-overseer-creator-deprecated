@@ -1,8 +1,8 @@
 import { inject, injectable } from 'tsyringe';
+import XmlBuilder from 'xmlbuilder';
 import { Services } from '../../common/constants';
 import { IConfig, ILogger } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
-import XmlBuilder from 'xmlbuilder';
 import { ITocParams, TocOperation } from '../interfaces';
 import { NotFoundError } from '../../common/exceptions/http/notFoundError';
 
@@ -35,6 +35,11 @@ export class TocManager {
         throw new NotFoundError(`Wanted ${params.sourceType} does not exist. id: ${params.productId}, version: ${params.productVersion}`);
       }
       metadata = data;
+    } else {
+      metadata = {
+        productId: params.productId,
+        productVersion: params.productVersion,
+      };
     }
 
     return {

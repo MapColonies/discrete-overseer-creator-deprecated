@@ -1,73 +1,12 @@
-import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
-import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
 import { registerTestValues } from '../testContainerConfig';
 import { mockCreateLayerTasks } from '../../mocks/clients/storageClient';
 import { getMetadataFromCatalogMock } from '../../mocks/clients/catalogClient';
-import * as requestSender from './helpers/requestSender';
-import { ITocParams, TocOperation, TocSourceType } from '../../../src/toc/interfaces';
 import { NotFoundError } from '../../../src/common/exceptions/http/notFoundError';
 import { InternalServerError } from '../../../src/common/exceptions/http/internalServerError';
-import xmlbuilder from 'xmlbuilder';
-
-const validTestImageMetadata: LayerMetadata = {
-  productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  productVersion: '1.234.5',
-  productName: 'test layer',
-  description: 'test layer desc',
-  accuracyCE90: 0.7,
-  footprint: {
-    type: 'Polygon',
-    coordinates: [
-      [
-        [100, 0],
-        [101, 0],
-        [101, 1],
-        [100, 1],
-        [100, 0],
-      ],
-    ],
-  },
-  scale: '3.5',
-  rms: 2.6,
-  updateDate: new Date('11/16/2017'),
-  resolution: 0.7,
-  sensorType: [SensorType.RGB],
-  classification: 'test',
-  type: RecordType.RECORD_RASTER,
-  productType: 'orthophoto',
-  srsId: 'EPSG:4326',
-  srsName: 'wgs84',
-  producerName: 'testProducer',
-  creationDate: new Date('11/16/2017'),
-  ingestionDate: new Date('11/16/2017'),
-  sourceDateEnd: new Date('11/16/2017'),
-  sourceDateStart: new Date('11/16/2017'),
-  layerPolygonParts: undefined,
-  region: '',
-};
-
-const validTestData: ITocParams = {
-  operation: TocOperation.ADD,
-  sourceType: TocSourceType.BSETMOSAIC,
-  productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  productVersion: '1.234.5',
-};
-
-const validTestResponseData = {
-  operation: TocOperation.ADD,
-  sourceType: TocSourceType.BSETMOSAIC,
-  metadata: validTestImageMetadata,
-};
-
-const validTestJsonResponseData = JSON.parse(JSON.stringify(validTestResponseData));
-
-const validTestXmlResponseData = xmlbuilder.create(validTestResponseData, { version: '1.0', encoding: 'UTF-8' }).end({ pretty: true });
-
-const invalidTestData = ({
-  productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-} as unknown) as ITocParams;
+import * as requestSender from './helpers/requestSender';
+import { invalidTestData, validTestData, validTestImageMetadata, validTestJsonResponseData, validTestXmlResponseData } from './helpers/data';
 
 describe('layers', function () {
   beforeAll(function () {
@@ -93,7 +32,6 @@ describe('layers', function () {
 
       const response = await requestSender.getMetadata(validTestData);
       expect(response.status).toBe(httpStatusCodes.OK);
-      // Stringify then parse for placing dates in string
       expect(response.body).toEqual(validTestJsonResponseData);
     });
 
@@ -104,7 +42,6 @@ describe('layers', function () {
 
       const response = await requestSender.getMetadata(validTestData, 'application/xml');
       expect(response.status).toBe(httpStatusCodes.OK);
-      // Stringify then parse for placing dates in string
       expect(response.text).toEqual(validTestXmlResponseData);
     });
   });
