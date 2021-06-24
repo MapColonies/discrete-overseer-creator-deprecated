@@ -1,5 +1,5 @@
 {
-  "name": "service-name",
+  "name": "discrete-overseer-creator",
   "version": "1.0.2",
   "description": "This is template for map colonies typescript service",
   "main": "./src/index.ts",
@@ -58,7 +58,8 @@
     "kafkajs": "^1.15.0",
     "reflect-metadata": "^0.1.13",
     "swagger-ui-express": "^4.1.6",
-    "tsyringe": "^4.4.0"
+    "tsyringe": "^4.4.0",
+    "xmlbuilder": "^15.1.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^9.1.1",
