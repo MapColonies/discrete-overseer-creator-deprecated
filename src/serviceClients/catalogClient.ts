@@ -28,18 +28,18 @@ export class CatalogClient extends HttpClient {
   }
 
   public async getMetadata(productId: string, productVersion: string): Promise<LayerMetadata | undefined> {
-    const req = { 
+    const req = {
       metadata: {
         productId,
-        productVersion
-      }
+        productVersion,
+      },
     };
 
     // Get product information
     const res = await this.post<FindRecordResponse>('/records/find', req);
-    
+
     // Check if product exists with given version
-    if(res.length == 0) {
+    if (res.length == 0) {
       return undefined;
     }
 

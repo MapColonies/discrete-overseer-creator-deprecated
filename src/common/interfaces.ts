@@ -1,4 +1,4 @@
-import { IRasterCatalogUpsertRequestBody } from "@map-colonies/mc-model-types";
+import { IRasterCatalogUpsertRequestBody } from '@map-colonies/mc-model-types';
 
 export interface ILogger {
   log: (level: string, message: string) => void;
