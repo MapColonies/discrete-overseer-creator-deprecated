@@ -1,14 +1,9 @@
-import { IRasterCatalogUpsertRequestBody } from '@map-colonies/mc-model-types';
+import { IRasterCatalogUpsertRequestBody, LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../common/constants';
-import { IConfig, ILogger } from '../common/interfaces';
+import { FindRecordResponse, IConfig, ILogger } from '../common/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
-interface IFindResponseRecord extends IRasterCatalogUpsertRequestBody {
-  id: string;
-}
-
-type FindRecordResponse = IFindResponseRecord[];
 @injectable()
 export class CatalogClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -30,6 +25,26 @@ export class CatalogClient extends HttpClient {
     const res = await this.post<FindRecordResponse>('/records/find', req);
 
     return res.length > 0;
+  }
+
+  public async getMetadata(productId: string, productVersion: string): Promise<LayerMetadata | undefined> {
+    const req = {
+      metadata: {
+        productId,
+        productVersion,
+      },
+    };
+
+    // Get product information
+    const res = await this.post<FindRecordResponse>('/records/find', req);
+
+    // Check if product exists with given version
+    if (res.length == 0) {
+      return undefined;
+    }
+
+    // Return metadata
+    return res[0].metadata;
   }
 
   public async publish(record: IRasterCatalogUpsertRequestBody): Promise<void> {
