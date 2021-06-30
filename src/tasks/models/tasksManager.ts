@@ -7,11 +7,11 @@ import { IPublishMapLayerRequest } from '../../layers/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
+import { ZoomToResolutionUtils } from '../../utils/zoomToResulation';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 
 @injectable()
 export class TasksManager {
-  private readonly maxZoom: number;
   private readonly mapServerUrl: string;
 
   public constructor(
@@ -22,8 +22,6 @@ export class TasksManager {
     private readonly catalogClient: CatalogClient,
     private readonly linkBuilder: LinkBuilder
   ) {
-    const zoomConfig = config.get<string>('tiling.zoomGroups');
-    this.maxZoom = this.getMaxZoom(zoomConfig);
     this.mapServerUrl = config.get<string>('mapServerUrl');
   }
 
@@ -66,11 +64,12 @@ export class TasksManager {
     const version = metadata.productVersion as string;
     try {
       this.logger.log('info', `publishing layer ${id} version  ${version} to server`);
+      const maxZoom = ZoomToResolutionUtils.getZoomByResolution(metadata.resolution as number);
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
         description: metadata.description as string,
         //TODO: replace with zoom base on both config and source resolution
-        maxZoomLevel: this.maxZoom,
+        maxZoomLevel: maxZoom,
         tilesPath: `${id}/${version}`,
       };
       await this.mapPublisher.publishLayer(publishReq);

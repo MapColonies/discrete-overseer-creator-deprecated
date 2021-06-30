@@ -11,6 +11,7 @@ import { StorageClient } from '../../serviceClients/storageClient';
 import { TillerClient } from '../../serviceClients/tillerClient';
 import { ITaskZoomRange } from '../../tasks/interfaces';
 import { FileValidator } from './fileValidator';
+import { ZoomToResolutionUtils } from '../../utils/zoomToResulation';
 
 @injectable()
 export class LayersManager {
@@ -30,7 +31,14 @@ export class LayersManager {
   public async createLayer(data: IngestionParams): Promise<void> {
     await this.validateRunConditions(data);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
-    const tillerRequests = await this.db.createLayerTasks(data, this.zoomRanges);
+    const maxZoom = ZoomToResolutionUtils.getZoomByResolution(data.metadata.resolution as number);
+    const layerZoomRanges = this.zoomRanges.filter((range) => {
+      return range.minZoom > maxZoom;
+    }).map((range) => {
+      const taskRange: ITaskZoomRange = { minZoom: range.minZoom, maxZoom: range.maxZoom <= maxZoom ? range.maxZoom : maxZoom };
+      return taskRange;
+    })
+    const tillerRequests = await this.db.createLayerTasks(data, layerZoomRanges);
     //add tiling tasks to queue
     const tillerTasks: Promise<void>[] = [];
     tillerRequests.forEach((req) => {
@@ -95,3 +103,4 @@ export class LayersManager {
     }
   }
 }
+
