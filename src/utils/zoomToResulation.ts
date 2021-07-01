@@ -79,14 +79,13 @@ export function getZoomByResolution(resolution: number): number {
     throw new BadRequestError(`invalid resolution: ${resolution}`);
   }
 
-  const sortedArray = zoomToResolutionArray.sort((a, b) => a - b);
-  if (resolution <= sortedArray[0]) {
-    return sortedArray.length;
+  if (resolution <= zoomToResolutionArray[0]) {
+    return zoomToResolutionArray.length;
   }
-  if (resolution >= sortedArray[sortedArray.length - 1]) {
+  if (resolution >= zoomToResolutionArray[zoomToResolutionArray.length - 1]) {
     return 0;
   }
 
-  const result = lowerInsertionPoint(sortedArray, resolution);
-  return sortedArray.length - result;
+  const result = lowerInsertionPoint(zoomToResolutionArray, resolution);
+  return zoomToResolutionArray.length - result;
 }
