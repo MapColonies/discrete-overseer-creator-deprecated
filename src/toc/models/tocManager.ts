@@ -25,7 +25,7 @@ export class TocManager {
     return JSON.stringify(toc);
   }
 
-  private async getTocObject(params: ITocParams) {
+  private async getTocObject(params: ITocParams): Promise<unknown> {
     let metadata = {};
 
     if (params.operation != TocOperation.REMOVE) {

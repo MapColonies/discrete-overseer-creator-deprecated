@@ -68,7 +68,6 @@ export class TasksManager {
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
         description: metadata.description as string,
-        //TODO: replace with zoom base on both config and source resolution
         maxZoomLevel: maxZoom,
         tilesPath: `${id}/${version}`,
       };

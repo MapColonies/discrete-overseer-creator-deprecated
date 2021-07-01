@@ -21,7 +21,7 @@ describe('zoomToResulation', () => {
       expect(zoomLevelResult).toEqual(6);
     });
 
-    it('Check for resolution smaller than last existing resolution, res <=> 1.67638063430786e-7, (zoom 22), return 23', function () {
+    it('Check for resolution smaller than last existing resolution, res < 1.67638063430786e-7, (zoom 22), return 23', function () {
       const zoomLevelResult = getZoomByResolution(0.67638063430786e-7);
       expect(zoomLevelResult).toEqual(23);
     });

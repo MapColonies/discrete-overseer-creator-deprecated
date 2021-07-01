@@ -1,3 +1,5 @@
+import { BadRequestError } from '../common/exceptions/http/badRequestError';
+
 // eslint-disable-next-line import/exports-last
 export const zoomToResolutionArray: number[] = [
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
@@ -46,7 +48,7 @@ export const zoomToResolutionArray: number[] = [
   3.35276126861572e-7, // 21
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
   1.67638063430786e-7, // 22
-];
+].reverse();
 
 function lowerInsertionPoint(arr: number[], resolution: number): number {
   if (resolution < arr[0]) {
@@ -73,8 +75,8 @@ function lowerInsertionPoint(arr: number[], resolution: number): number {
 }
 
 export function getZoomByResolution(resolution: number): number {
-  if (resolution === 0) {
-    return 0;
+  if (resolution <= 0) {
+    throw new BadRequestError(`invalid resolution: ${resolution}`);
   }
 
   const sortedArray = zoomToResolutionArray.sort((a, b) => a - b);
