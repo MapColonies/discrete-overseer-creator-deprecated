@@ -19,7 +19,7 @@ const testImageMetadata: LayerMetadata = {
   productName: 'test name',
   description: 'test desc',
   accuracyCE90: 3,
-  resolution: 0.3,
+  resolution: 2.68220901489258e-6,
   rms: 0.5,
   scale: '3',
   sensorType: [SensorType.OTHER],
@@ -49,11 +49,13 @@ const testImageMetadata: LayerMetadata = {
   type: RecordType.RECORD_RASTER,
   layerPolygonParts: undefined,
 };
+
 const testData: IngestionParams = {
   fileNames: [],
   metadata: testImageMetadata,
   originDirectory: '/here',
 };
+
 describe('LayersManager', () => {
   beforeEach(function () {
     jest.resetAllMocks();

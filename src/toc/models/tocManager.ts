@@ -25,7 +25,8 @@ export class TocManager {
     return JSON.stringify(toc);
   }
 
-  private async getTocObject(params: ITocParams) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  private async getTocObject(params: ITocParams): Promise<Record<string, Object>> {
     let metadata = {};
 
     if (params.operation != TocOperation.REMOVE) {
