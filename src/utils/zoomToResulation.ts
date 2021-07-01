@@ -51,8 +51,7 @@ export const zoomToResolutionArray: number[] = [
 function lowerInsertionPoint(arr: number[], resolution: number): number {
   if (resolution < arr[0]) {
     return 0;
-  }
-  else if (resolution > arr[arr.length - 1]) {
+  } else if (resolution > arr[arr.length - 1]) {
     return arr.length - 1;
   }
 

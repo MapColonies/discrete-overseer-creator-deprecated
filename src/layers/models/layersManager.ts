@@ -10,8 +10,8 @@ import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
 import { TillerClient } from '../../serviceClients/tillerClient';
 import { ITaskZoomRange } from '../../tasks/interfaces';
-import { FileValidator } from './fileValidator';
 import { getZoomByResolution } from '../../utils/zoomToResulation';
+import { FileValidator } from './fileValidator';
 
 @injectable()
 export class LayersManager {
@@ -32,12 +32,14 @@ export class LayersManager {
     await this.validateRunConditions(data);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const maxZoom = getZoomByResolution(data.metadata.resolution as number);
-    const layerZoomRanges = this.zoomRanges.filter((range) => {
-      return range.minZoom < maxZoom;
-    }).map((range) => {
-      const taskRange: ITaskZoomRange = { minZoom: range.minZoom, maxZoom: range.maxZoom <= maxZoom ? range.maxZoom : maxZoom };
-      return taskRange;
-    })
+    const layerZoomRanges = this.zoomRanges
+      .filter((range) => {
+        return range.minZoom < maxZoom;
+      })
+      .map((range) => {
+        const taskRange: ITaskZoomRange = { minZoom: range.minZoom, maxZoom: range.maxZoom <= maxZoom ? range.maxZoom : maxZoom };
+        return taskRange;
+      });
     const tillerRequests = await this.db.createLayerTasks(data, layerZoomRanges);
     //add tiling tasks to queue
     const tillerTasks: Promise<void>[] = [];
@@ -103,4 +105,3 @@ export class LayersManager {
     }
   }
 }
-

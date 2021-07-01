@@ -27,7 +27,7 @@ describe('TasksManager', () => {
           productName: 'test-1',
           productVersion: '1',
           productId: 'test',
-          resolution: 2.68220901489258e-6
+          resolution: 2.68220901489258e-6,
         },
       });
       tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock, catalogClientMock, linkBuilderMock);
