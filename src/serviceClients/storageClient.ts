@@ -61,6 +61,7 @@ interface IGetJobResponse {
 }
 
 const jobType = 'Discrete-Tiling';
+const taskType = 'Discrete-Tiling';
 @injectable()
 export class StorageClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -75,6 +76,8 @@ export class StorageClient extends HttpClient {
   public async createLayerTasks(data: IngestionParams, zoomRanges: ITaskZoomRange[]): Promise<ITillerRequest[]> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
+    const fileNames = data.fileNames;
+    const originDirectory = data.originDirectory;
     const createLayerTasksUrl = `/jobs`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
@@ -83,8 +86,12 @@ export class StorageClient extends HttpClient {
       parameters: (data as unknown) as Record<string, unknown>,
       tasks: zoomRanges.map((range) => {
         return {
-          type: jobType,
+          type: taskType,
           parameters: {
+            discreteId: resourceId,
+            version: version,
+            fileNames: fileNames,
+            originDirectory: originDirectory,
             minZoom: range.minZoom,
             maxZoom: range.maxZoom,
           },
