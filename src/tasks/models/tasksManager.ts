@@ -22,7 +22,7 @@ export class TasksManager {
     private readonly catalogClient: CatalogClient,
     private readonly linkBuilder: LinkBuilder
   ) {
-    this.mapServerUrl = config.get<string>('mapServerUrl');
+    this.mapServerUrl = config.get<string>('publicMapServerURL');
   }
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
