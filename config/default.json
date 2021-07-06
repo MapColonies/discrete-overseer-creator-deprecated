@@ -14,6 +14,7 @@
   "LayerSourceDir": "/layerSources",
   "storageServiceURL": "http://localhost:8081",
   "mapPublishingServiceURL": "http://localhost:8082",
+  "publicMapServerURL": "http://localhost:8082",
   "catalogPublishingServiceURL": "",
   "mapServerUrl": "http://localhost:8083",
   "tiling": {
