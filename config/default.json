@@ -12,27 +12,6 @@
     "port": "8080"
   },
   "LayerSourceDir": "/layerSources",
-  "tilerKafka": {
-    "clientId": "discrete-overseer-creator",
-    "brokers": "192.168.0.14:9092",
-    "topic": "tile-creator",
-    "retry": {
-      "maxRetryTime": 10000,
-      "initialRetryTime": 100,
-      "factor": 0.2,
-      "multiplier": 2,
-      "retries": 3
-    },
-    "ssl": {
-      "rejectUnauthorized": false,
-      "ca": null,
-      "key": {
-        "pem": null,
-        "password": null
-      },
-      "cert": null
-    }
-  },
   "storageServiceURL": "http://localhost:8081",
   "mapPublishingServiceURL": "http://localhost:8082",
   "catalogPublishingServiceURL": "",

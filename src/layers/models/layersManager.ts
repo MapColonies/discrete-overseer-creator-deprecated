@@ -8,7 +8,6 @@ import { IConfig, ILogger } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
-import { TillerClient } from '../../serviceClients/tillerClient';
 import { ITaskZoomRange } from '../../tasks/interfaces';
 import { getZoomByResolution } from '../../utils/zoomToResulation';
 import { FileValidator } from './fileValidator';
@@ -19,7 +18,6 @@ export class LayersManager {
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig,
-    private readonly tiller: TillerClient,
     private readonly db: StorageClient,
     private readonly catalog: CatalogClient,
     private readonly mapPublisher: MapPublisherClient,
@@ -40,15 +38,7 @@ export class LayersManager {
         const taskRange: ITaskZoomRange = { minZoom: range.minZoom, maxZoom: range.maxZoom <= maxZoom ? range.maxZoom : maxZoom };
         return taskRange;
       });
-    const tillerRequests = await this.db.createLayerTasks(data, layerZoomRanges);
-    //add tiling tasks to queue
-    const tillerTasks: Promise<void>[] = [];
-    tillerRequests.forEach((req) => {
-      //TODO: handle case of kafka errors after metadata save
-      tillerTasks.push(this.tiller.addTilingRequest(req));
-      this.logger.log('info', `queuing zoom levels: ${req.min_zoom_level}-${req.max_zoom_level} for layer ${req.discrete_id}-${req.version}`);
-    });
-    await Promise.all(tillerTasks);
+    await this.db.createLayerTasks(data, layerZoomRanges);
   }
 
   private getZoomRanges(config: IConfig): ITaskZoomRange[] {

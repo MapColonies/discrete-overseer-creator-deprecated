@@ -4,7 +4,6 @@ import { container } from 'tsyringe';
 import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
 import { registerTestValues } from '../testContainerConfig';
 import { createLayerTasksMock, mockCreateLayerTasks, findJobsMock } from '../../mocks/clients/storageClient';
-import { addTilingRequestMock } from '../../mocks/clients/tillerClient';
 import { mapExistsMock } from '../../mocks/clients/mapPublisherClient';
 import { catalogExistsMock } from '../../mocks/clients/catalogClient';
 import { OperationStatus } from '../../../src/common/enums';
@@ -102,16 +101,9 @@ describe('layers', function () {
       const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
     });
+
     it('should return 500 status code on db error', async function () {
       createLayerTasksMock.mockImplementation(() => {
-        throw new Error('test error');
-      });
-      const response = await requestSender.createLayer(validTestData);
-      expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
-    });
-
-    it('should return 500 status code on kafka error', async function () {
-      addTilingRequestMock.mockImplementation(() => {
         throw new Error('test error');
       });
       const response = await requestSender.createLayer(validTestData);
