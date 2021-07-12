@@ -8,6 +8,7 @@ import { HttpError } from '../../common/exceptions/http/httpError';
 import { InternalServerError } from '../../common/exceptions/http/internalServerError';
 import { NotFoundError } from '../../common/exceptions/http/notFoundError';
 import { ILogger } from '../../common/interfaces';
+import { ConflictError } from '../../common/exceptions/http/conflictError';
 
 export abstract class HttpClient {
   protected targetService = '';
@@ -76,6 +77,9 @@ export abstract class HttpClient {
       case HttpStatus.NOT_FOUND:
         this.logger.log('debug', `request url not found for service ${this.targetService}, target url: ${url}, error: ${err.message}`);
         return new NotFoundError(err);
+      case HttpStatus.CONFLICT:
+        this.logger.log('debug', `request url conflicted, for service ${this.targetService}, target url: ${url}, error: ${err.message}`);
+        return new ConflictError(err);
       default:
         if (body !== undefined) {
           body = JSON.stringify(body);
