@@ -4,7 +4,7 @@ import { IngestionParams } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
-import { ICompletedTasks, ITaskZoomRange, ITillerRequest } from '../tasks/interfaces';
+import { ICompletedTasks, ITaskZoomRange } from '../tasks/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
 interface ICreateTaskBody {
