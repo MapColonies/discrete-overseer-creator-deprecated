@@ -26,19 +26,25 @@
     "ssl": {
       "rejectUnauthorized": false,
       "ca": null,
-      "key": null,
+      "key": {
+        "pem": null,
+        "password": null
+      },
       "cert": null
     }
   },
   "storageServiceURL": "http://localhost:8081",
   "mapPublishingServiceURL": "http://localhost:8082",
+  "publicMapServerURL": "http://localhost:8082",
   "catalogPublishingServiceURL": "",
+  "mapServerUrl": "http://localhost:8083",
   "tiling": {
-    "zoomGroups": "0-10,11,12,13,14,15,16,17,18"
+    "zoomGroups": "0-10,11,12,13,14,15,16,17,18,19,20,21,22,23"
   },
   "httpRetry": {
     "attempts": 5,
     "delay": "exponential",
     "shouldResetTimeout": true
-  }
+  },
+  "linkTemplatesPath": "config/linkTemplates.template"
 }

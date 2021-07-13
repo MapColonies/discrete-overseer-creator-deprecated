@@ -6,8 +6,6 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-servers:
-  - url: http://localhost:8080
 paths:
   /layers:
     post:
@@ -19,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: ./Schema/discreteIngestion/ingestionParams.yaml#/components/schemas/IngestionParams
+              $ref: './Schema/discreteIngestion/ingestionParams.yaml#/components/schemas/IngestionParams'
       responses:
         200:
           description: OK
@@ -47,3 +45,69 @@ paths:
       responses:
         200:
           description: OK
+  /toc:
+    post:
+      operationId: getToc
+      tags:
+        - toc
+      summary: gets a toc file representing the given layer
+      requestBody:
+        description: A json object containing operation and toc source type
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+                productVersion:
+                  type: string
+                operation:
+                  $ref: '#/components/schemas/operation'
+                sourceType:
+                  $ref: '#/components/schemas/sourceType'
+              required:
+                - productId
+                - productVersion
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tocResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/tocResponse'
+components:
+  schemas:
+    tocResponse:
+      type: object
+      properties:
+        operation:
+          $ref: '#/components/schemas/operation'
+        sourceType:
+          $ref: '#/components/schemas/sourceType'
+        metadata:
+          type: object
+          properties:
+            productId:
+              type: string
+              format: uuid
+            productVersion:
+              type: string
+            data:
+              $ref: './Schema/updateLayerMetadata.yaml#/components/schemas/updateLayerMetadata'
+    operation:
+      type: string
+      enum:
+        - ADD
+        - UPDATE
+        - REMOVE
+    sourceType:
+      type: string
+      enum:
+        - DISCRETE
+        - BSETMOSAIC

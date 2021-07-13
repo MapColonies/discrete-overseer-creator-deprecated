@@ -73,8 +73,8 @@ export class StorageClient extends HttpClient {
   }
 
   public async createLayerTasks(data: IngestionParams, zoomRanges: ITaskZoomRange[]): Promise<ITillerRequest[]> {
-    const resourceId = data.metadata.id as string;
-    const version = data.metadata.version as string;
+    const resourceId = data.metadata.productId as string;
+    const version = data.metadata.productVersion as string;
     const createLayerTasksUrl = `/jobs`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
@@ -138,7 +138,7 @@ export class StorageClient extends HttpClient {
     return {
       completed: completedCounter + failedCounter == (res.tasks?.length ?? 0),
       successful: failedCounter < (res.tasks?.length ?? 0),
-      metaData: ((res.parameters as unknown) as IngestionParams).metadata,
+      metadata: ((res.parameters as unknown) as IngestionParams).metadata,
     };
   }
 

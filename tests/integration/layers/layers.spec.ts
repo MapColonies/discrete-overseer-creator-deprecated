@@ -1,20 +1,22 @@
 import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
+import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
 import { registerTestValues } from '../testContainerConfig';
 import { createLayerTasksMock, mockCreateLayerTasks, findJobsMock } from '../../mocks/clients/storageClient';
 import { addTilingRequestMock } from '../../mocks/clients/tillerClient';
+import { mapExistsMock } from '../../mocks/clients/mapPublisherClient';
+import { catalogExistsMock } from '../../mocks/clients/catalogClient';
 import { OperationStatus } from '../../../src/common/enums';
 import * as requestSender from './helpers/requestSender';
 
 const validTestImageMetadata: LayerMetadata = {
-  id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  version: '1.234.5',
-  source: '3fa85f64-5717-4562-b3fc-2c963f66afa6-1.234.5',
-  sourceName: 'test layer',
-  dsc: 'test layer desc',
-  ep90: 0.7,
-  geometry: {
+  productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+  productVersion: '1.234.5',
+  productName: 'test layer',
+  description: 'test layer desc',
+  accuracyCE90: 0.7,
+  footprint: {
     type: 'Polygon',
     coordinates: [
       [
@@ -30,17 +32,29 @@ const validTestImageMetadata: LayerMetadata = {
   rms: 2.6,
   updateDate: new Date('11/16/2017'),
   resolution: 0.7,
-  sensorType: SensorType.RGB,
+  sensorType: [SensorType.RGB],
+  classification: 'test',
+  type: RecordType.RECORD_RASTER,
+  productType: 'orthophoto',
+  srsId: 'EPSG:4326',
+  srsName: 'wgs84',
+  producerName: 'testProducer',
+  creationDate: new Date('11/16/2017'),
+  ingestionDate: new Date('11/16/2017'),
+  sourceDateEnd: new Date('11/16/2017'),
+  sourceDateStart: new Date('11/16/2017'),
+  layerPolygonParts: undefined,
+  region: '',
 };
 const validTestData = {
   fileNames: [],
   metadata: validTestImageMetadata,
   originDirectory: '/here',
 };
-const invalidTestImageMetadata = {
+const invalidTestImageMetadata = ({
   source: 'testId',
   invalidFiled: 'invalid',
-};
+} as unknown) as LayerMetadata;
 const invalidTestData = {
   fileNames: [],
   metadata: invalidTestImageMetadata,
@@ -102,6 +116,20 @@ describe('layers', function () {
       });
       const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+    });
+
+    it('should return 409 status code when layer exists in map server', async function () {
+      findJobsMock.mockResolvedValue([]);
+      mapExistsMock.mockResolvedValue(true);
+      const response = await requestSender.createLayer(validTestData);
+      expect(response.status).toBe(httpStatusCodes.CONFLICT);
+    });
+
+    it('should return 409 status code when layer exists in catalog', async function () {
+      findJobsMock.mockResolvedValue([]);
+      catalogExistsMock.mockResolvedValue(true);
+      const response = await requestSender.createLayer(validTestData);
+      expect(response.status).toBe(httpStatusCodes.CONFLICT);
     });
   });
 });

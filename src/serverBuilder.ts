@@ -3,12 +3,14 @@ import bodyParser from 'body-parser';
 import { container, inject, injectable } from 'tsyringe';
 import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
+import './tasks/models/linksBuilder';
 import { RequestLogger } from './common/middlewares/RequestLogger';
 import { Services } from './common/constants';
 import { IConfig, ILogger } from './common/interfaces';
 import { layersRouterFactory } from './layers/routes/layersRouter';
 import { tasksRouterFactory } from './tasks/routes/tasksRouter';
 import { openapiRouterFactory } from './common/routes/openapi';
+import { tocRouterFactory } from './toc/routes/tocRouter';
 
 @injectable()
 export class ServerBuilder {
@@ -33,6 +35,7 @@ export class ServerBuilder {
   private buildRoutes(): void {
     this.serverInstance.use('/layers', layersRouterFactory(container));
     this.serverInstance.use('/tasks', tasksRouterFactory(container));
+    this.serverInstance.use('/toc', tocRouterFactory(container));
     this.serverInstance.use('/', openapiRouterFactory(container));
   }
 
