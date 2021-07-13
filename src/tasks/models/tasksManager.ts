@@ -1,9 +1,9 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
-import { OperationStatus } from '../../common/enums';
+import { OperationStatus, StorageProvider } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
-import { IPublishMapLayerRequest } from '../../layers/interfaces';
+import { IPublishMapLayerRequest, PublishedMapLayerCacheType } from '../../layers/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
@@ -13,6 +13,7 @@ import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 @injectable()
 export class TasksManager {
   private readonly mapServerUrl: string;
+  private readonly storageProvider: string;
 
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
@@ -23,6 +24,7 @@ export class TasksManager {
     private readonly linkBuilder: LinkBuilder
   ) {
     this.mapServerUrl = config.get<string>('publicMapServerURL');
+    this.storageProvider = config.get('StorageProvider');
   }
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
@@ -65,17 +67,37 @@ export class TasksManager {
     try {
       this.logger.log('info', `publishing layer ${id} version  ${version} to server`);
       const maxZoom = getZoomByResolution(metadata.resolution as number);
+      const cacheType = this.getCacheType();
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
         description: metadata.description as string,
         maxZoomLevel: maxZoom,
         tilesPath: `${id}/${version}`,
+        cacheType: cacheType
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
       await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer');
       throw err;
     }
+  }
+
+  private getCacheType(): PublishedMapLayerCacheType {
+    let cacheType: PublishedMapLayerCacheType;
+    switch (this.storageProvider.toLowerCase()) {
+      case StorageProvider.S3.toLowerCase(): {
+        cacheType = PublishedMapLayerCacheType.S3;
+        break;
+      }
+      case StorageProvider.FS.toLowerCase(): {
+        cacheType = PublishedMapLayerCacheType.FS;
+        break;
+      }
+      default: {
+        throw new Error(`Unsupported storageProvider configuration ${this.storageProvider}`);
+      }
+    }
+    return cacheType;
   }
 
   private getMaxZoom(zoomConfig: string): number {

@@ -5,3 +5,8 @@ export enum OperationStatus {
   COMPLETED = 'Completed',
   FAILED = 'Failed',
 }
+
+export enum StorageProvider {
+  FS = 'FS',
+  S3 = 'S3'
+}
