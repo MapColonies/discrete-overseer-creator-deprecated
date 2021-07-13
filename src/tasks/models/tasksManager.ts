@@ -13,7 +13,7 @@ import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 @injectable()
 export class TasksManager {
   private readonly mapServerUrl: string;
-  private readonly storageProvider: string;
+  private readonly cacheType: PublishedMapLayerCacheType;
 
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
@@ -24,7 +24,8 @@ export class TasksManager {
     private readonly linkBuilder: LinkBuilder
   ) {
     this.mapServerUrl = config.get<string>('publicMapServerURL');
-    this.storageProvider = config.get('StorageProvider');
+    const storageProviderConfig = config.get<string>('StorageProvider');
+    this.cacheType = this.getCacheType(storageProviderConfig);
   }
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
@@ -67,13 +68,12 @@ export class TasksManager {
     try {
       this.logger.log('info', `publishing layer ${id} version  ${version} to server`);
       const maxZoom = getZoomByResolution(metadata.resolution as number);
-      const cacheType = this.getCacheType();
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
         description: metadata.description as string,
         maxZoomLevel: maxZoom,
         tilesPath: `${id}/${version}`,
-        cacheType: cacheType,
+        cacheType: this.cacheType,
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
@@ -82,9 +82,9 @@ export class TasksManager {
     }
   }
 
-  private getCacheType(): PublishedMapLayerCacheType {
+  private getCacheType(storageProvider: string): PublishedMapLayerCacheType {
     let cacheType: PublishedMapLayerCacheType;
-    switch (this.storageProvider.toLowerCase()) {
+    switch (storageProvider.toLowerCase()) {
       case StorageProvider.S3.toLowerCase(): {
         cacheType = PublishedMapLayerCacheType.S3;
         break;
@@ -94,7 +94,7 @@ export class TasksManager {
         break;
       }
       default: {
-        throw new Error(`Unsupported storageProvider configuration ${this.storageProvider}`);
+        throw new Error(`Unsupported storageProvider configuration ${storageProvider}`);
       }
     }
     return cacheType;
