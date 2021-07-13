@@ -12,6 +12,7 @@
     "port": "8080"
   },
   "LayerSourceDir": "/layerSources",
+  "StorageProvider": "FS",
   "tilerKafka": {
     "clientId": "discrete-overseer-creator",
     "brokers": "192.168.0.14:9092",

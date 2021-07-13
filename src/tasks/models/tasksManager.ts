@@ -1,9 +1,9 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
-import { OperationStatus } from '../../common/enums';
+import { OperationStatus, StorageProvider } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
-import { IPublishMapLayerRequest } from '../../layers/interfaces';
+import { IPublishMapLayerRequest, PublishedMapLayerCacheType } from '../../layers/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
@@ -13,6 +13,7 @@ import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 @injectable()
 export class TasksManager {
   private readonly mapServerUrl: string;
+  private readonly cacheType: PublishedMapLayerCacheType;
 
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
@@ -23,6 +24,8 @@ export class TasksManager {
     private readonly linkBuilder: LinkBuilder
   ) {
     this.mapServerUrl = config.get<string>('publicMapServerURL');
+    const storageProviderConfig = config.get<string>('StorageProvider');
+    this.cacheType = this.getCacheType(storageProviderConfig);
   }
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
@@ -70,12 +73,31 @@ export class TasksManager {
         description: metadata.description as string,
         maxZoomLevel: maxZoom,
         tilesPath: `${id}/${version}`,
+        cacheType: this.cacheType,
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
       await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer');
       throw err;
     }
+  }
+
+  private getCacheType(storageProvider: string): PublishedMapLayerCacheType {
+    let cacheType: PublishedMapLayerCacheType;
+    switch (storageProvider.toLowerCase()) {
+      case StorageProvider.S3.toLowerCase(): {
+        cacheType = PublishedMapLayerCacheType.S3;
+        break;
+      }
+      case StorageProvider.FS.toLowerCase(): {
+        cacheType = PublishedMapLayerCacheType.FS;
+        break;
+      }
+      default: {
+        throw new Error(`Unsupported storageProvider configuration ${storageProvider}`);
+      }
+    }
+    return cacheType;
   }
 
   private getMaxZoom(zoomConfig: string): number {
