@@ -8,5 +8,5 @@ export enum OperationStatus {
 
 export enum StorageProvider {
   FS = 'FS',
-  S3 = 'S3'
+  S3 = 'S3',
 }

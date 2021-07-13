@@ -7,7 +7,7 @@ export interface IPublishMapLayerRequest {
 }
 
 export enum PublishedMapLayerCacheType {
-  FS ='file',
+  FS = 'file',
   S3 = 's3',
-  GPKG = 'geopackage'
+  GPKG = 'geopackage',
 }

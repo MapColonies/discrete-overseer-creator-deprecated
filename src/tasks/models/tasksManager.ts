@@ -73,7 +73,7 @@ export class TasksManager {
         description: metadata.description as string,
         maxZoomLevel: maxZoom,
         tilesPath: `${id}/${version}`,
-        cacheType: cacheType
+        cacheType: cacheType,
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
