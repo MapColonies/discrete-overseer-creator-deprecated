@@ -25,5 +25,7 @@
     "delay": "exponential",
     "shouldResetTimeout": true
   },
-  "linkTemplatesPath": "config/linkTemplates.template"
+  "linkTemplatesPath": "config/linkTemplates.template",
+  "jobType": "Discrete-Tiling",
+  "taskType": "Discrete-Tiling"
 }
