@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.1.0...v1.2.0) (2021-07-14)
+
+
+### Features
+
+* send tiles location to mapProxyAPI ([#65](https://github.com/MapColonies/discrete-overseer-creator/issues/65)) ([f68c238](https://github.com/MapColonies/discrete-overseer-creator/commit/f68c238367981a9f0d1906a28324f52c9bf487a5))
+
+
+### Bug Fixes
+
+* Dockerfile to reduce vulnerabilities ([#63](https://github.com/MapColonies/discrete-overseer-creator/issues/63)) ([ed34de1](https://github.com/MapColonies/discrete-overseer-creator/commit/ed34de1ad282494ff995de4fb08f31cf47da5aa3))
+
 ## [1.1.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.0.2...v1.1.0) (2021-07-06)
 
 
