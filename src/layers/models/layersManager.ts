@@ -68,14 +68,14 @@ export class LayersManager {
   private async validateFiles(data: IngestionParams): Promise<void> {
     const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
     if (!filesExists) {
-      throw new BadRequestError('invalid files list');
+      throw new BadRequestError('invalid files list, some files are missing');
     }
   }
 
   private async validateNotExistsInMapServer(resourceId: string, version: string): Promise<void> {
     const existsInMapServer = await this.mapPublisher.exists(`${resourceId}-${version}`);
     if (existsInMapServer) {
-      throw new ConflictError('layer already exists');
+      throw new ConflictError(`layer ${resourceId}-${version} already exists on mapProxy`);
     }
   }
 
@@ -83,7 +83,7 @@ export class LayersManager {
     const jobs = await this.db.findJobs(resourceId, version);
     jobs.forEach((job) => {
       if (job.status == OperationStatus.IN_PROGRESS || job.status == OperationStatus.PENDING) {
-        throw new ConflictError('layer generation is already running');
+        throw new ConflictError(`layer id: ${resourceId} version: ${version}, generation is already running`);
       }
     });
   }
@@ -91,7 +91,7 @@ export class LayersManager {
   private async validateNotExistsInCatalog(resourceId: string, version: string): Promise<void> {
     const existsInCatalog = await this.catalog.exists(resourceId, version);
     if (existsInCatalog) {
-      throw new ConflictError('layer already exists in catalog');
+      throw new ConflictError(`layer id: ${resourceId} version: ${version}, already exists in catalog`);
     }
   }
 }

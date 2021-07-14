@@ -18,7 +18,6 @@ describe('TasksManager', () => {
 
   describe('completeWorkerTask', () => {
     it('publish layer if all tasks are done', async function () {
-      configGetMock.mockReturnValue('0-10,11,12,13,14,15,16,17,18');
       getCompletedZoomLevelsMock.mockReturnValue({
         completed: true,
         successful: true,
@@ -30,7 +29,9 @@ describe('TasksManager', () => {
           resolution: 2.68220901489258e-6,
         },
       });
+      configGetMock.mockReturnValue('fs');
       tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock, catalogClientMock, linkBuilderMock);
+      configGetMock.mockReturnValue('0-10,11,12,13,14,15,16,17,18');
 
       await tasksManager.taskComplete(jobId, taskId);
 
@@ -42,16 +43,18 @@ describe('TasksManager', () => {
         maxZoomLevel: 18,
         name: 'test-1',
         tilesPath: 'test/1',
+        cacheType: 'file',
       };
       expect(publishLayerMock).toHaveBeenCalledWith(expectedPublishReq);
     });
 
     it('do nothing if some tasks are not done', async function () {
-      configGetMock.mockReturnValue('');
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: false,
       });
+      configGetMock.mockReturnValue('fs');
       tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock, catalogClientMock, linkBuilderMock);
+      configGetMock.mockReturnValue('');
 
       await tasksManager.taskComplete(jobId, taskId);
 

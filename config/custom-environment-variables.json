@@ -9,6 +9,7 @@
     "port": "SERVER_PORT"
   },
   "LayerSourceDir": "LAYER_SOURCE_DIR",
+  "StorageProvider": "STORAGE_PROVIDER",
   "storageServiceURL": "STORAGE_SERVICE_URL",
   "mapPublishingServiceURL": "MAP_PUBLISHING_SERVICE_URL",
   "publicMapServerURL": "PUBLIC_MAP_SERVER_URL",
