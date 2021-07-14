@@ -1,7 +1,6 @@
 import { IngestionParams, LayerMetadata, RecordType, SensorType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
 import { createLayerTasksMock, findJobsMock, dbClientMock } from '../../../mocks/clients/storageClient';
-import { addTilingRequestMock, tillerClientMock } from '../../../mocks/clients/tillerClient';
 import { catalogExistsMock, catalogClientMock } from '../../../mocks/clients/catalogClient';
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { getMock as configGetMock, configMock } from '../../../mocks/config';
@@ -93,32 +92,16 @@ describe('LayersManager', () => {
           max_zoom_level: 3,
         },
       ];
-      let saved = false;
-      let tiledBeforeSave = false;
+
       createLayerTasksMock.mockImplementation(async () => {
-        saved = true;
         return Promise.resolve(tillingReqs);
-      });
-      addTilingRequestMock.mockImplementation(async () => {
-        if (!saved) {
-          tiledBeforeSave = true;
-        }
-        return Promise.resolve();
       });
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      layersManager = new LayersManager(
-        logger,
-        configMock,
-        tillerClientMock,
-        dbClientMock,
-        catalogClientMock,
-        mapPublisherClientMock,
-        fileValidatorMock
-      );
+      layersManager = new LayersManager(logger, configMock, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       await layersManager.createLayer(testData);
 
@@ -127,8 +110,6 @@ describe('LayersManager', () => {
         { minZoom: 1, maxZoom: 1 },
         { minZoom: 2, maxZoom: 3 },
       ]);
-      expect(addTilingRequestMock).toHaveBeenCalledTimes(2);
-      expect(tiledBeforeSave).toBe(false);
     });
 
     it('split the tasks based on configuration', async function () {
@@ -179,15 +160,7 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      layersManager = new LayersManager(
-        logger,
-        configMock,
-        tillerClientMock,
-        dbClientMock,
-        catalogClientMock,
-        mapPublisherClientMock,
-        fileValidatorMock
-      );
+      layersManager = new LayersManager(logger, configMock, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       await layersManager.createLayer(testData);
 
@@ -196,40 +169,6 @@ describe('LayersManager', () => {
         { minZoom: 5, maxZoom: 8 },
         { minZoom: 2, maxZoom: 2 },
       ]);
-      expect(addTilingRequestMock).toHaveBeenCalledTimes(3);
-      expect(addTilingRequestMock).toHaveBeenCalledWith({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        discrete_id: testImageMetadata.productId,
-        version: testImageMetadata.productVersion,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        task_id: '1',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        min_zoom_level: 1,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        max_zoom_level: 1,
-      });
-      expect(addTilingRequestMock).toHaveBeenCalledWith({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        discrete_id: testImageMetadata.productId,
-        version: testImageMetadata.productVersion,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        task_id: '2',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        min_zoom_level: 5,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        max_zoom_level: 8,
-      });
-      expect(addTilingRequestMock).toHaveBeenCalledWith({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        discrete_id: testImageMetadata.productId,
-        version: testImageMetadata.productVersion,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        task_id: '3',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        min_zoom_level: 2,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        max_zoom_level: 2,
-      });
     });
 
     it('fail if layer status is pending', async function () {
@@ -253,21 +192,12 @@ describe('LayersManager', () => {
         },
       ];
       createLayerTasksMock.mockResolvedValue(tillingReqs);
-      addTilingRequestMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.PENDING }]);
 
-      layersManager = new LayersManager(
-        logger,
-        configMock,
-        tillerClientMock,
-        dbClientMock,
-        catalogClientMock,
-        mapPublisherClientMock,
-        fileValidatorMock
-      );
+      layersManager = new LayersManager(logger, configMock, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -296,21 +226,12 @@ describe('LayersManager', () => {
         },
       ];
       createLayerTasksMock.mockResolvedValue(tillingReqs);
-      addTilingRequestMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.IN_PROGRESS }]);
 
-      layersManager = new LayersManager(
-        logger,
-        configMock,
-        tillerClientMock,
-        dbClientMock,
-        catalogClientMock,
-        mapPublisherClientMock,
-        fileValidatorMock
-      );
+      layersManager = new LayersManager(logger, configMock, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -339,21 +260,12 @@ describe('LayersManager', () => {
         },
       ];
       createLayerTasksMock.mockResolvedValue(tillingReqs);
-      addTilingRequestMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.COMPLETED }]);
 
-      layersManager = new LayersManager(
-        logger,
-        configMock,
-        tillerClientMock,
-        dbClientMock,
-        catalogClientMock,
-        mapPublisherClientMock,
-        fileValidatorMock
-      );
+      layersManager = new LayersManager(logger, configMock, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -382,21 +294,12 @@ describe('LayersManager', () => {
         },
       ];
       createLayerTasksMock.mockResolvedValue(tillingReqs);
-      addTilingRequestMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.FAILED }]);
 
-      layersManager = new LayersManager(
-        logger,
-        configMock,
-        tillerClientMock,
-        dbClientMock,
-        catalogClientMock,
-        mapPublisherClientMock,
-        fileValidatorMock
-      );
+      layersManager = new LayersManager(logger, configMock, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -425,21 +328,12 @@ describe('LayersManager', () => {
         },
       ];
       createLayerTasksMock.mockResolvedValue(tillingReqs);
-      addTilingRequestMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(true);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      layersManager = new LayersManager(
-        logger,
-        configMock,
-        tillerClientMock,
-        dbClientMock,
-        catalogClientMock,
-        mapPublisherClientMock,
-        fileValidatorMock
-      );
+      layersManager = new LayersManager(logger, configMock, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -468,21 +362,12 @@ describe('LayersManager', () => {
         },
       ];
       createLayerTasksMock.mockResolvedValue(tillingReqs);
-      addTilingRequestMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(true);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      layersManager = new LayersManager(
-        logger,
-        configMock,
-        tillerClientMock,
-        dbClientMock,
-        catalogClientMock,
-        mapPublisherClientMock,
-        fileValidatorMock
-      );
+      layersManager = new LayersManager(logger, configMock, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -511,21 +396,12 @@ describe('LayersManager', () => {
         },
       ];
       createLayerTasksMock.mockResolvedValue(tillingReqs);
-      addTilingRequestMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(false);
       findJobsMock.mockResolvedValue([]);
 
-      layersManager = new LayersManager(
-        logger,
-        configMock,
-        tillerClientMock,
-        dbClientMock,
-        catalogClientMock,
-        mapPublisherClientMock,
-        fileValidatorMock
-      );
+      layersManager = new LayersManager(logger, configMock, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);

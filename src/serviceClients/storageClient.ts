@@ -1,10 +1,10 @@
-import { IConfig } from 'config';
+import config, { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
 import { IngestionParams } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
-import { ICompletedTasks, ITaskZoomRange, ITillerRequest } from '../tasks/interfaces';
+import { ICompletedTasks, ITaskZoomRange } from '../tasks/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
 interface ICreateTaskBody {
@@ -60,7 +60,8 @@ interface IGetJobResponse {
   isCleaned: boolean;
 }
 
-const jobType = 'Discrete-Tiling';
+const jobType = config.get<string>('jobType');
+const taskType = config.get<string>('taskType');
 @injectable()
 export class StorageClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -72,9 +73,11 @@ export class StorageClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async createLayerTasks(data: IngestionParams, zoomRanges: ITaskZoomRange[]): Promise<ITillerRequest[]> {
+  public async createLayerTasks(data: IngestionParams, zoomRanges: ITaskZoomRange[]): Promise<void> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
+    const fileNames = data.fileNames;
+    const originDirectory = data.originDirectory;
     const createLayerTasksUrl = `/jobs`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
@@ -83,8 +86,12 @@ export class StorageClient extends HttpClient {
       parameters: (data as unknown) as Record<string, unknown>,
       tasks: zoomRanges.map((range) => {
         return {
-          type: jobType,
+          type: taskType,
           parameters: {
+            discreteId: resourceId,
+            version: version,
+            fileNames: fileNames,
+            originDirectory: originDirectory,
             minZoom: range.minZoom,
             maxZoom: range.maxZoom,
           },
@@ -92,31 +99,7 @@ export class StorageClient extends HttpClient {
       }),
     };
 
-    try {
-      const res = await this.post<ICreateJobResponse>(createLayerTasksUrl, createJobRequest);
-      const tasks = res.taskIds.map((taskId, idx) => {
-        const tillerReq: ITillerRequest = {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          job_id: res.id,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          task_id: taskId,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: resourceId,
-          version: version,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          min_zoom_level: zoomRanges[idx].minZoom,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_zoom_level: zoomRanges[idx].maxZoom,
-        };
-        return tillerReq;
-      });
-      return tasks;
-    } catch (err) {
-      //TODO: add error handling
-      const error = err as Error;
-      this.logger.log('error', error.message);
-      throw err;
-    }
+    await this.post<ICreateJobResponse>(createLayerTasksUrl, createJobRequest);
   }
 
   public async getCompletedZoomLevels(jobId: string): Promise<ICompletedTasks> {

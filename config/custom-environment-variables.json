@@ -10,27 +10,6 @@
   },
   "LayerSourceDir": "LAYER_SOURCE_DIR",
   "StorageProvider": "STORAGE_PROVIDER",
-  "tilerKafka": {
-    "clientId": "TILER_KAFKA_CLIENT_ID",
-    "brokers": "TILER_KAFKA_BROKERS",
-    "topic": "TILER_KAFKA_TOPIC",
-    "retry": {
-      "maxRetryTime": "TILER_KAFKA_MAX_RETRY_TIME",
-      "initialRetryTime": "TILER_KAFKA_INITIAL_RETRY_TIME",
-      "factor": "TILER_KAFKA_RETRY_FACTOR",
-      "multiplier": "TILER_KAFKA_RETRY_MULTIPLIER",
-      "retries": "TILER_KAFKA_RETRIES"
-    },
-    "ssl": {
-      "rejectUnauthorized": "TILER_KAFKA_SSL_REJECT_UNAUTHORIZED",
-      "ca": "TILER_KAFKA_SSL_CA",
-      "key": {
-        "pem": "TILER_KAFKA_SSL_KEY",
-        "password": "TILER_KAFKA_SSL_KEY_PASSWORD"
-      },
-      "cert": "TILER_KAFKA_SSL_CERT"
-    }
-  },
   "storageServiceURL": "STORAGE_SERVICE_URL",
   "mapPublishingServiceURL": "MAP_PUBLISHING_SERVICE_URL",
   "publicMapServerURL": "PUBLIC_MAP_SERVER_URL",
@@ -42,5 +21,7 @@
     "attempts": "HTTP_RETRY_ATTEMPTS",
     "delay": "HTTP_RETRY_DELAY",
     "shouldResetTimeout": "HTTP_RETRY_RESET_TIMEOUT"
-  }
+  },
+  "jobType": "DISCRETE_JOB_TYPE",
+  "taskType": "DISCRETE_TASK_TYPE"
 }
