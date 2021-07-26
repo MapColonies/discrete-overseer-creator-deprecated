@@ -22,6 +22,7 @@
     "delay": "HTTP_RETRY_DELAY",
     "shouldResetTimeout": "HTTP_RETRY_RESET_TIMEOUT"
   },
+  "linkTemplatesPath": "LINKS_TEMPLATE_PATH",
   "jobType": "DISCRETE_JOB_TYPE",
   "taskType": "DISCRETE_TASK_TYPE"
 }
