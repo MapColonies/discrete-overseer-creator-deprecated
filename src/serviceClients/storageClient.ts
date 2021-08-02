@@ -83,6 +83,7 @@ export class StorageClient extends HttpClient {
       resourceId: resourceId,
       version: version,
       type: jobType,
+      status: OperationStatus.IN_PROGRESS,
       parameters: (data as unknown) as Record<string, unknown>,
       tasks: zoomRanges.map((range) => {
         return {
