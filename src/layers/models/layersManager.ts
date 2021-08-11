@@ -4,33 +4,28 @@ import { Services } from '../../common/constants';
 import { OperationStatus } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
-import { IConfig, ILogger } from '../../common/interfaces';
+import { ILogger } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
-import { ITaskZoomRange } from '../../tasks/interfaces';
-import { createLayerZoomRanges, getZoomRanges } from '../../utils/zoomToResulation';
+import { ZoomLevelCalculateor } from '../../utils/zoomToResulation';
 import { FileValidator } from './fileValidator';
 
 @injectable()
 export class LayersManager {
-  private readonly zoomRanges: ITaskZoomRange[];
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
-    @inject(Services.CONFIG) private readonly config: IConfig,
+    private readonly zoomLevelCalculateor: ZoomLevelCalculateor,
     private readonly db: StorageClient,
     private readonly catalog: CatalogClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator
-  ) {
-    const batches = config.get<string>('tiling.zoomGroups');
-    this.zoomRanges = getZoomRanges(batches);
-  }
+  ) {}
 
   public async createLayer(data: IngestionParams): Promise<void> {
     await this.validateRunConditions(data);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
-    const layerZoomRanges = createLayerZoomRanges(data.metadata.resolution as number, this.zoomRanges);
+    const layerZoomRanges = this.zoomLevelCalculateor.createLayerZoomRanges(data.metadata.resolution as number);
     await this.db.createLayerTasks(data, layerZoomRanges);
   }
 
