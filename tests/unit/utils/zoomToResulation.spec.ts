@@ -1,4 +1,4 @@
-import { getZoomByResolution } from '../../../src/utils/zoomToResulation';
+import { createLayerZoomRanges, getZoomByResolution, getZoomRanges } from '../../../src/utils/zoomToResulation';
 
 describe('zoomToResulation', () => {
   beforeEach(function () {
@@ -24,6 +24,32 @@ describe('zoomToResulation', () => {
     it('Check for resolution smaller than last existing resolution, res < 1.67638063430786e-7, (zoom 22), return 23', function () {
       const zoomLevelResult = getZoomByResolution(0.67638063430786e-7);
       expect(zoomLevelResult).toEqual(23);
+    });
+  });
+
+  describe('check zoom ranges by resolution and config zoom ranges', () => {
+    it('Check for resolution res = 2.14576721191406e-5, zoom level 15 return 6 tasks', function () {
+      const zoomRanges = getZoomRanges('0-10,11,12,13,14,15,16,17,18,19,20,21,22,23');
+      const zoomLevelResult = createLayerZoomRanges(2.14576721191406e-5, zoomRanges);
+      expect(zoomLevelResult).toHaveLength(6);
+      expect(zoomLevelResult[zoomLevelResult.length - 1].minZoom).toEqual(15);
+      expect(zoomLevelResult[zoomLevelResult.length - 1].maxZoom).toEqual(15);
+    });
+
+    it('Check for resolution res = 2.04576721191406e-5, zoom level > 15 && zoom level < 16 return 7 tasks', function () {
+      const zoomRanges = getZoomRanges('0-10,11,12,13,14,15,16,17,18,19,20,21,22,23');
+      const zoomLevelResult = createLayerZoomRanges(2.04576721191406e-5, zoomRanges);
+      expect(zoomLevelResult).toHaveLength(7);
+      expect(zoomLevelResult[zoomLevelResult.length - 1].minZoom).toEqual(16);
+      expect(zoomLevelResult[zoomLevelResult.length - 1].maxZoom).toEqual(16);
+    });
+
+    it('Check for resolution res = 0.02197265625, zoom level = 5 return 1 task', function () {
+      const zoomRanges = getZoomRanges('0-10,11,12,13,14,15,16,17,18,19,20,21,22,23');
+      const zoomLevelResult = createLayerZoomRanges(0.02197265625, zoomRanges);
+      expect(zoomLevelResult).toHaveLength(1);
+      expect(zoomLevelResult[zoomLevelResult.length - 1].minZoom).toEqual(0);
+      expect(zoomLevelResult[zoomLevelResult.length - 1].maxZoom).toEqual(5);
     });
   });
 });

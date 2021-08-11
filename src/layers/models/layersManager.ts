@@ -9,7 +9,7 @@ import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
 import { ITaskZoomRange } from '../../tasks/interfaces';
-import { getZoomByResolution } from '../../utils/zoomToResulation';
+import { createLayerZoomRanges, getZoomRanges } from '../../utils/zoomToResulation';
 import { FileValidator } from './fileValidator';
 
 @injectable()
@@ -23,36 +23,15 @@ export class LayersManager {
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator
   ) {
-    this.zoomRanges = this.getZoomRanges(config);
+    const batches = config.get<string>('tiling.zoomGroups');
+    this.zoomRanges = getZoomRanges(batches);
   }
 
   public async createLayer(data: IngestionParams): Promise<void> {
     await this.validateRunConditions(data);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
-    const maxZoom = getZoomByResolution(data.metadata.resolution as number);
-    const layerZoomRanges = this.zoomRanges
-      .filter((range) => {
-        return range.minZoom < maxZoom;
-      })
-      .map((range) => {
-        const taskRange: ITaskZoomRange = { minZoom: range.minZoom, maxZoom: range.maxZoom <= maxZoom ? range.maxZoom : maxZoom };
-        return taskRange;
-      });
+    const layerZoomRanges = createLayerZoomRanges(data.metadata.resolution as number, this.zoomRanges);
     await this.db.createLayerTasks(data, layerZoomRanges);
-  }
-
-  private getZoomRanges(config: IConfig): ITaskZoomRange[] {
-    const batches = config.get<string>('tiling.zoomGroups');
-    const zoomBatches = batches.split(',');
-    const zoomRanges = zoomBatches.map((batch) => {
-      const limits = batch.split('-').map((value) => Number.parseInt(value));
-      const zoomRange: ITaskZoomRange = {
-        minZoom: Math.min(...limits),
-        maxZoom: Math.max(...limits),
-      };
-      return zoomRange;
-    });
-    return zoomRanges;
   }
 
   private async validateRunConditions(data: IngestionParams): Promise<void> {

@@ -1,4 +1,5 @@
 import { BadRequestError } from '../common/exceptions/http/badRequestError';
+import { ITaskZoomRange } from '../tasks/interfaces';
 
 // eslint-disable-next-line import/exports-last
 export const zoomToResolutionArray: number[] = [
@@ -88,4 +89,30 @@ export function getZoomByResolution(resolution: number): number {
 
   const result = lowerInsertionPoint(zoomToResolutionArray, resolution);
   return zoomToResolutionArray.length - result;
+}
+
+export function createLayerZoomRanges(resolution: number, zoomRanges: ITaskZoomRange[]): ITaskZoomRange[] {
+  const maxZoom = getZoomByResolution(resolution);
+  const layerZoomRanges = zoomRanges
+    .filter((range) => {
+      return range.minZoom <= maxZoom;
+    })
+    .map((range) => {
+      const taskRange: ITaskZoomRange = { minZoom: range.minZoom, maxZoom: range.maxZoom <= maxZoom ? range.maxZoom : maxZoom };
+      return taskRange;
+    });
+  return layerZoomRanges;
+}
+
+export function getZoomRanges(batches: string): ITaskZoomRange[] {
+  const zoomBatches = batches.split(',');
+  const zoomRanges = zoomBatches.map((batch) => {
+    const limits = batch.split('-').map((value) => Number.parseInt(value));
+    const zoomRange: ITaskZoomRange = {
+      minZoom: Math.min(...limits),
+      maxZoom: Math.max(...limits),
+    };
+    return zoomRange;
+  });
+  return zoomRanges;
 }
