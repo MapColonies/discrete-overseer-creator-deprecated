@@ -4,55 +4,29 @@ import { Services } from '../../common/constants';
 import { OperationStatus } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
-import { IConfig, ILogger } from '../../common/interfaces';
+import { ILogger } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
-import { ITaskZoomRange } from '../../tasks/interfaces';
-import { getZoomByResolution } from '../../utils/zoomToResulation';
+import { ZoomLevelCalculateor } from '../../utils/zoomToResulation';
 import { FileValidator } from './fileValidator';
 
 @injectable()
 export class LayersManager {
-  private readonly zoomRanges: ITaskZoomRange[];
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
-    @inject(Services.CONFIG) private readonly config: IConfig,
+    private readonly zoomLevelCalculateor: ZoomLevelCalculateor,
     private readonly db: StorageClient,
     private readonly catalog: CatalogClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator
-  ) {
-    this.zoomRanges = this.getZoomRanges(config);
-  }
+  ) {}
 
   public async createLayer(data: IngestionParams): Promise<void> {
     await this.validateRunConditions(data);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
-    const maxZoom = getZoomByResolution(data.metadata.resolution as number);
-    const layerZoomRanges = this.zoomRanges
-      .filter((range) => {
-        return range.minZoom < maxZoom;
-      })
-      .map((range) => {
-        const taskRange: ITaskZoomRange = { minZoom: range.minZoom, maxZoom: range.maxZoom <= maxZoom ? range.maxZoom : maxZoom };
-        return taskRange;
-      });
+    const layerZoomRanges = this.zoomLevelCalculateor.createLayerZoomRanges(data.metadata.resolution as number);
     await this.db.createLayerTasks(data, layerZoomRanges);
-  }
-
-  private getZoomRanges(config: IConfig): ITaskZoomRange[] {
-    const batches = config.get<string>('tiling.zoomGroups');
-    const zoomBatches = batches.split(',');
-    const zoomRanges = zoomBatches.map((batch) => {
-      const limits = batch.split('-').map((value) => Number.parseInt(value));
-      const zoomRange: ITaskZoomRange = {
-        minZoom: Math.min(...limits),
-        maxZoom: Math.max(...limits),
-      };
-      return zoomRange;
-    });
-    return zoomRanges;
   }
 
   private async validateRunConditions(data: IngestionParams): Promise<void> {

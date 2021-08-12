@@ -1,4 +1,8 @@
+import { inject, singleton } from 'tsyringe';
 import { BadRequestError } from '../common/exceptions/http/badRequestError';
+import { ITaskZoomRange } from '../tasks/interfaces';
+import { Services } from '../common/constants';
+import { IConfig, ILogger } from '../common/interfaces';
 
 // eslint-disable-next-line import/exports-last
 export const zoomToResolutionArray: number[] = [
@@ -50,42 +54,78 @@ export const zoomToResolutionArray: number[] = [
   1.67638063430786e-7, // 22
 ].reverse();
 
-function lowerInsertionPoint(arr: number[], resolution: number): number {
-  if (resolution < arr[0]) {
-    return 0;
-  } else if (resolution > arr[arr.length - 1]) {
-    return arr.length - 1;
+@singleton()
+export class ZoomLevelCalculateor {
+  private readonly zoomRanges: ITaskZoomRange[];
+
+  public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, @inject(Services.CONFIG) private readonly config: IConfig) {
+    const batches = config.get<string>('tiling.zoomGroups');
+    this.zoomRanges = this.getZoomRanges(batches);
   }
 
-  let lowerPnt = 0;
-  let i = 1;
-
-  while (i < arr.length && arr[i] < resolution) {
-    lowerPnt = i;
-    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    i = i * 2;
+  public createLayerZoomRanges(resolution: number): ITaskZoomRange[] {
+    const maxZoom = this.getZoomByResolution(resolution);
+    const layerZoomRanges = this.zoomRanges
+      .filter((range) => {
+        return range.minZoom <= maxZoom;
+      })
+      .map((range) => {
+        const taskRange: ITaskZoomRange = { minZoom: range.minZoom, maxZoom: range.maxZoom <= maxZoom ? range.maxZoom : maxZoom };
+        return taskRange;
+      });
+    return layerZoomRanges;
   }
 
-  // Final check for the remaining elements which are < resolution
-  while (lowerPnt < arr.length && arr[lowerPnt] <= resolution) {
-    lowerPnt++;
+  public getZoomByResolution(resolution: number): number {
+    if (resolution <= 0) {
+      throw new BadRequestError(`invalid resolution: ${resolution}`);
+    }
+
+    if (resolution <= zoomToResolutionArray[0]) {
+      return zoomToResolutionArray.length;
+    }
+    if (resolution >= zoomToResolutionArray[zoomToResolutionArray.length - 1]) {
+      return 0;
+    }
+
+    const result = this.lowerInsertionPoint(zoomToResolutionArray, resolution);
+    return zoomToResolutionArray.length - result;
   }
 
-  return lowerPnt;
-}
-
-export function getZoomByResolution(resolution: number): number {
-  if (resolution <= 0) {
-    throw new BadRequestError(`invalid resolution: ${resolution}`);
+  private getZoomRanges(batches: string): ITaskZoomRange[] {
+    const zoomBatches = batches.split(',');
+    const zoomRanges = zoomBatches.map((batch) => {
+      const limits = batch.split('-').map((value) => Number.parseInt(value));
+      const zoomRange: ITaskZoomRange = {
+        minZoom: Math.min(...limits),
+        maxZoom: Math.max(...limits),
+      };
+      return zoomRange;
+    });
+    return zoomRanges;
   }
 
-  if (resolution <= zoomToResolutionArray[0]) {
-    return zoomToResolutionArray.length;
-  }
-  if (resolution >= zoomToResolutionArray[zoomToResolutionArray.length - 1]) {
-    return 0;
-  }
+  private lowerInsertionPoint(arr: number[], resolution: number): number {
+    if (resolution < arr[0]) {
+      return 0;
+    } else if (resolution > arr[arr.length - 1]) {
+      return arr.length - 1;
+    }
 
-  const result = lowerInsertionPoint(zoomToResolutionArray, resolution);
-  return zoomToResolutionArray.length - result;
+    let lowerPnt = 0;
+    let i = 1;
+
+    while (i < arr.length && arr[i] < resolution) {
+      lowerPnt = i;
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+      i = i * 2;
+    }
+
+    // Final check for the remaining elements which are < resolution
+    while (lowerPnt < arr.length && arr[lowerPnt] <= resolution) {
+      lowerPnt++;
+    }
+
+    return lowerPnt;
+  }
 }

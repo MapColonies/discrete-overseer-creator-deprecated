@@ -5,6 +5,7 @@ import { catalogClientMock, publishToCatalogMock } from '../../../mocks/clients/
 import { getMock as configGetMock, configMock } from '../../../mocks/config';
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
+import { ZoomLevelCalculateor } from '../../../../src/utils/zoomToResulation';
 
 let tasksManager: TasksManager;
 
@@ -30,7 +31,16 @@ describe('TasksManager', () => {
         },
       });
       configGetMock.mockReturnValue('fs');
-      tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock, catalogClientMock, linkBuilderMock);
+      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
+      tasksManager = new TasksManager(
+        logger,
+        configMock,
+        zoomLevelCalculateor,
+        dbClientMock,
+        mapPublisherClientMock,
+        catalogClientMock,
+        linkBuilderMock
+      );
       configGetMock.mockReturnValue('0-10,11,12,13,14,15,16,17,18');
 
       await tasksManager.taskComplete(jobId, taskId);
@@ -53,7 +63,16 @@ describe('TasksManager', () => {
         allCompleted: false,
       });
       configGetMock.mockReturnValue('fs');
-      tasksManager = new TasksManager(logger, configMock, dbClientMock, mapPublisherClientMock, catalogClientMock, linkBuilderMock);
+      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
+      tasksManager = new TasksManager(
+        logger,
+        configMock,
+        zoomLevelCalculateor,
+        dbClientMock,
+        mapPublisherClientMock,
+        catalogClientMock,
+        linkBuilderMock
+      );
       configGetMock.mockReturnValue('');
 
       await tasksManager.taskComplete(jobId, taskId);
