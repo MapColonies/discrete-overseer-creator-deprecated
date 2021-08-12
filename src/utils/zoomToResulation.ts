@@ -56,7 +56,7 @@ export const zoomToResolutionArray: number[] = [
 
 @singleton()
 export class ZoomLevelCalculateor {
-  public zoomRanges: ITaskZoomRange[];
+  private readonly zoomRanges: ITaskZoomRange[];
 
   public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, @inject(Services.CONFIG) private readonly config: IConfig) {
     const batches = config.get<string>('tiling.zoomGroups');
