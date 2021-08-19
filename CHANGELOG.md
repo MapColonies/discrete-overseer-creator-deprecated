@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.2.1...v1.2.2) (2021-08-19)
+
+
+### Features
+
+* fix resolution tasks creation bug ([#70](https://github.com/MapColonies/discrete-overseer-creator/issues/70)) ([3d0aa2c](https://github.com/MapColonies/discrete-overseer-creator/commit/3d0aa2c21ec964c8ce2827170c224d4f0984b516))
+* set job initial status to in-progress instead of pending ([#68](https://github.com/MapColonies/discrete-overseer-creator/issues/68)) ([7e07e95](https://github.com/MapColonies/discrete-overseer-creator/commit/7e07e95a49f03eaca5c2dfa32984065ed5c8b58b))
+
 ### [1.2.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.1.0...v1.2.1) (2021-07-26)
 
 
