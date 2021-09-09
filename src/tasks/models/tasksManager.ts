@@ -1,5 +1,6 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
+import { AxiosError } from 'axios';
 import { Services } from '../../common/constants';
 import { OperationStatus, StorageProvider } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
@@ -8,6 +9,7 @@ import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
 import { ZoomLevelCalculateor } from '../../utils/zoomToResulation';
+import { SyncClient, SyncTypeEnum } from '../../serviceClients/syncClient';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 
 @injectable()
@@ -18,6 +20,7 @@ export class TasksManager {
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig,
+    @inject(SyncClient) private readonly syncClient: SyncClient,
     private readonly zoomLevelCalculateor: ZoomLevelCalculateor,
     private readonly db: StorageClient,
     private readonly mapPublisher: MapPublisherClient,
@@ -38,6 +41,16 @@ export class TasksManager {
         await this.publishToMappingServer(jobId, res.metadata, layerName);
         await this.publishToCatalog(jobId, res.metadata, layerName);
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
+        try {
+          void this.syncClient.triggerSync(res.metadata.productId as string, res.metadata.productVersion as string, SyncTypeEnum.NEW_DISCRETE);
+        } catch (err) {
+          this.logger.log(
+            'error',
+            `[TasksManager][taskComplete] failed to trigger sync productId ${res.metadata.productId as string} productVersion ${
+              res.metadata.productVersion as string
+            }. error=${(err as AxiosError).message}`
+          );
+        }
       } else {
         this.logger.log('error', `failed generating tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`);
         await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to generate tiles');

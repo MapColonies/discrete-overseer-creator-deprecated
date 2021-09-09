@@ -2,6 +2,7 @@ import { TasksManager } from '../../../../src/tasks/models/tasksManager';
 import { getCompletedZoomLevelsMock, dbClientMock } from '../../../mocks/clients/storageClient';
 import { publishLayerMock, mapPublisherClientMock } from '../../../mocks/clients/mapPublisherClient';
 import { catalogClientMock, publishToCatalogMock } from '../../../mocks/clients/catalogClient';
+import { syncClientMock, triggerSyncMock } from '../../../mocks/clients/syncClient';
 import { getMock as configGetMock, configMock } from '../../../mocks/config';
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
@@ -35,6 +36,7 @@ describe('TasksManager', () => {
       tasksManager = new TasksManager(
         logger,
         configMock,
+        syncClientMock,
         zoomLevelCalculateor,
         dbClientMock,
         mapPublisherClientMock,
@@ -48,6 +50,7 @@ describe('TasksManager', () => {
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
+      expect(triggerSyncMock).toHaveBeenCalledTimes(1);
       const expectedPublishReq = {
         description: 'test desc',
         maxZoomLevel: 18,
@@ -67,6 +70,7 @@ describe('TasksManager', () => {
       tasksManager = new TasksManager(
         logger,
         configMock,
+        syncClientMock,
         zoomLevelCalculateor,
         dbClientMock,
         mapPublisherClientMock,
@@ -80,6 +84,7 @@ describe('TasksManager', () => {
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(0);
       expect(publishLayerMock).toHaveBeenCalledTimes(0);
+      expect(triggerSyncMock).toHaveBeenCalledTimes(0);
     });
   });
 });

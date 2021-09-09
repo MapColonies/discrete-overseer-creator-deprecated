@@ -14,6 +14,7 @@
   "LayerSourceDir": "/layerSources",
   "StorageProvider": "FS",
   "storageServiceURL": "http://localhost:8081",
+  "syncServiceURL": "http://localhost:8081",
   "mapPublishingServiceURL": "http://localhost:8082",
   "publicMapServerURL": "http://localhost:8082",
   "catalogPublishingServiceURL": "",

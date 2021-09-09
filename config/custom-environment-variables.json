@@ -11,6 +11,7 @@
   "LayerSourceDir": "LAYER_SOURCE_DIR",
   "StorageProvider": "STORAGE_PROVIDER",
   "storageServiceURL": "STORAGE_SERVICE_URL",
+  "syncServiceURL": "SYNC_SERVICE_URL",
   "mapPublishingServiceURL": "MAP_PUBLISHING_SERVICE_URL",
   "publicMapServerURL": "PUBLIC_MAP_SERVER_URL",
   "catalogPublishingServiceURL": "CATALOG_PUBLISHING_SERVICE_URL",
@@ -18,9 +19,15 @@
     "zoomGroups": "TILING_ZOOM_GROUPS"
   },
   "httpRetry": {
-    "attempts": "HTTP_RETRY_ATTEMPTS",
+    "attempts": {
+      "__name": "HTTP_RETRY_ATTEMPTS",
+      "__format": "number"
+    },
     "delay": "HTTP_RETRY_DELAY",
-    "shouldResetTimeout": "HTTP_RETRY_RESET_TIMEOUT"
+    "shouldResetTimeout": {
+      "__name": "HTTP_RETRY_RESET_TIMEOUT",
+      "__format": "boolean"
+    }
   },
   "linkTemplatesPath": "LINKS_TEMPLATE_PATH",
   "jobType": "DISCRETE_JOB_TYPE",
