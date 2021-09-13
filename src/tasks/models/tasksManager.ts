@@ -9,7 +9,7 @@ import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
 import { ZoomLevelCalculateor } from '../../utils/zoomToResulation';
-import { SyncClient, SyncTypeEnum } from '../../serviceClients/syncClient';
+import { OperationTypeEnum, SyncClient, SyncTypeEnum } from '../../serviceClients/syncClient';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 
 @injectable()
@@ -42,7 +42,7 @@ export class TasksManager {
         await this.publishToCatalog(jobId, res.metadata, layerName);
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
         try {
-          void this.syncClient.triggerSync(res.metadata.productId as string, res.metadata.productVersion as string, SyncTypeEnum.NEW_DISCRETE);
+          void this.syncClient.triggerSync(res.metadata.productId as string, res.metadata.productVersion as string, SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD);
         } catch (err) {
           this.logger.log(
             'error',

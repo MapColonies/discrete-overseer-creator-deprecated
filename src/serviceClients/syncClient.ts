@@ -4,15 +4,22 @@ import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
-interface ISyncClientRequest {
+export interface ISyncClientRequest {
   resourceId: string;
   version: string;
-  type?: string;
+  operation: OperationTypeEnum;
+  sourceType?: SyncTypeEnum;
 }
 
 export enum SyncTypeEnum {
   NEW_DISCRETE = 'NEW_DISCRETE',
-  UPDATED_DISCRETE = 'UPDATED_DISCRETE',
+  UPDATED_DISCRETE = 'UPDATED_DISCRETE'
+}
+
+export enum OperationTypeEnum {
+  ADD = 'ADD',
+  UPDATE = 'UPDATE',
+  REMOVE = 'REMOVE'
 }
 
 @injectable()
@@ -26,13 +33,14 @@ export class SyncClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('syncServiceURL');
   }
 
-  public async triggerSync(resourceId: string, version: string, syncType: SyncTypeEnum): Promise<void> {
+  public async triggerSync(resourceId: string, version: string, syncType: SyncTypeEnum, operation: OperationTypeEnum): Promise<void> {
     this.logger.log('info', `[SyncClient][triggerSync] resourceId=${resourceId}, version=${version}, syncType=${syncType}`);
     const createSyncRequest: ISyncClientRequest = {
       resourceId: resourceId,
       version: version,
-      type: syncType,
+      sourceType: syncType,
+      operation: operation
     };
-    await this.post<ISyncClientRequest>(`/`, createSyncRequest);
+    await this.post<ISyncClientRequest>(`/synchronize/trigger`, createSyncRequest);
   }
 }
