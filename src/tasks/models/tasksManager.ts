@@ -1,6 +1,5 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
-import { AxiosError } from 'axios';
 import { Services } from '../../common/constants';
 import { OperationStatus, StorageProvider } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
@@ -42,7 +41,7 @@ export class TasksManager {
         await this.publishToCatalog(jobId, res.metadata, layerName);
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
         try {
-          void this.syncClient.triggerSync(
+          await this.syncClient.triggerSync(
             res.metadata.productId as string,
             res.metadata.productVersion as string,
             SyncTypeEnum.NEW_DISCRETE,
@@ -53,7 +52,7 @@ export class TasksManager {
             'error',
             `[TasksManager][taskComplete] failed to trigger sync productId ${res.metadata.productId as string} productVersion ${
               res.metadata.productVersion as string
-            }. error=${(err as AxiosError).message}`
+            }. error=${(err as Error).message}`
           );
         }
       } else {

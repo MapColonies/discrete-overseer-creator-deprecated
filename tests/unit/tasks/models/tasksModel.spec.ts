@@ -1,12 +1,13 @@
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
-import { getCompletedZoomLevelsMock, dbClientMock } from '../../../mocks/clients/storageClient';
-import { publishLayerMock, mapPublisherClientMock } from '../../../mocks/clients/mapPublisherClient';
+import { dbClientMock, getCompletedZoomLevelsMock } from '../../../mocks/clients/storageClient';
+import { mapPublisherClientMock, publishLayerMock } from '../../../mocks/clients/mapPublisherClient';
 import { catalogClientMock, publishToCatalogMock } from '../../../mocks/clients/catalogClient';
 import { syncClientMock, triggerSyncMock } from '../../../mocks/clients/syncClient';
-import { getMock as configGetMock, configMock } from '../../../mocks/config';
+import { configMock, getMock as configGetMock } from '../../../mocks/config';
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
 import { ZoomLevelCalculateor } from '../../../../src/utils/zoomToResulation';
+import { OperationTypeEnum, SyncTypeEnum } from '../../../../src/serviceClients/syncClient';
 
 let tasksManager: TasksManager;
 
@@ -59,6 +60,7 @@ describe('TasksManager', () => {
         cacheType: 'file',
       };
       expect(publishLayerMock).toHaveBeenCalledWith(expectedPublishReq);
+      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD);
     });
 
     it('do nothing if some tasks are not done', async function () {

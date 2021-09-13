@@ -41,6 +41,6 @@ export class SyncClient extends HttpClient {
       sourceType: syncType,
       operation: operation,
     };
-    await this.post<ISyncClientRequest>(`/synchronize/trigger`, createSyncRequest);
+    await this.post(`/synchronize/trigger`, createSyncRequest);
   }
 }
