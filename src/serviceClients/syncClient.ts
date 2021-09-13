@@ -13,13 +13,13 @@ export interface ISyncClientRequest {
 
 export enum SyncTypeEnum {
   NEW_DISCRETE = 'NEW_DISCRETE',
-  UPDATED_DISCRETE = 'UPDATED_DISCRETE'
+  UPDATED_DISCRETE = 'UPDATED_DISCRETE',
 }
 
 export enum OperationTypeEnum {
   ADD = 'ADD',
   UPDATE = 'UPDATE',
-  REMOVE = 'REMOVE'
+  REMOVE = 'REMOVE',
 }
 
 @injectable()
@@ -39,7 +39,7 @@ export class SyncClient extends HttpClient {
       resourceId: resourceId,
       version: version,
       sourceType: syncType,
-      operation: operation
+      operation: operation,
     };
     await this.post<ISyncClientRequest>(`/synchronize/trigger`, createSyncRequest);
   }
