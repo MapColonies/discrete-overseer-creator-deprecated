@@ -8,6 +8,7 @@ import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
 import { ZoomLevelCalculateor } from '../../utils/zoomToResulation';
+import { OperationTypeEnum, SyncClient, SyncTypeEnum } from '../../serviceClients/syncClient';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 
 @injectable()
@@ -18,6 +19,7 @@ export class TasksManager {
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig,
+    @inject(SyncClient) private readonly syncClient: SyncClient,
     private readonly zoomLevelCalculateor: ZoomLevelCalculateor,
     private readonly db: StorageClient,
     private readonly mapPublisher: MapPublisherClient,
@@ -30,7 +32,7 @@ export class TasksManager {
   }
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
-    this.logger.log('info', `checking tiling status of job ${jobId} task  ${taskId}`);
+    this.logger.log('info', `[TasksManager][taskComplete] checking tiling status of job ${jobId} task  ${taskId}`);
     const res = await this.db.getCompletedZoomLevels(jobId);
     if (res.completed) {
       if (res.successful) {
@@ -38,8 +40,26 @@ export class TasksManager {
         await this.publishToMappingServer(jobId, res.metadata, layerName);
         await this.publishToCatalog(jobId, res.metadata, layerName);
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
+        try {
+          await this.syncClient.triggerSync(
+            res.metadata.productId as string,
+            res.metadata.productVersion as string,
+            SyncTypeEnum.NEW_DISCRETE,
+            OperationTypeEnum.ADD
+          );
+        } catch (err) {
+          this.logger.log(
+            'error',
+            `[TasksManager][taskComplete] failed to trigger sync productId ${res.metadata.productId as string} productVersion ${
+              res.metadata.productVersion as string
+            }. error=${(err as Error).message}`
+          );
+        }
       } else {
-        this.logger.log('error', `failed generating tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`);
+        this.logger.log(
+          'error',
+          `[TasksManager][taskComplete] failed to generate tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`
+        );
         await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to generate tiles');
       }
     }
@@ -47,7 +67,7 @@ export class TasksManager {
 
   private async publishToCatalog(jobId: string, metadata: LayerMetadata, layerName: string): Promise<void> {
     try {
-      this.logger.log('info', `publishing layer ${metadata.productId as string} version  ${metadata.productVersion as string} to catalog`);
+      this.logger.log('info', `[TasksManager][publishToCatalog] layer ${metadata.productId as string} version ${metadata.productVersion as string}`);
       const linkData: ILinkBuilderData = {
         serverUrl: this.mapServerUrl,
         layerName: layerName,
@@ -67,7 +87,7 @@ export class TasksManager {
     const id = metadata.productId as string;
     const version = metadata.productVersion as string;
     try {
-      this.logger.log('info', `publishing layer ${id} version  ${version} to server`);
+      this.logger.log('info', `[TasksManager][publishToMappingServer] layer ${id} version  ${version}`);
       const maxZoom = this.zoomLevelCalculateor.getZoomByResolution(metadata.resolution as number);
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
@@ -99,10 +119,5 @@ export class TasksManager {
       }
     }
     return cacheType;
-  }
-
-  private getMaxZoom(zoomConfig: string): number {
-    const zooms = zoomConfig.split(/,|-/).map((value) => Number.parseInt(value));
-    return Math.max(...zooms);
   }
 }
