@@ -41,7 +41,7 @@ export class TasksManager {
         await this.publishToCatalog(jobId, res.metadata, layerName);
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
 
-        const shouldSync = this.config.get<boolean>('shouldBeSynced');
+        const shouldSync = this.config.get<boolean>('shouldSync');
 
         if (shouldSync) {
           try {

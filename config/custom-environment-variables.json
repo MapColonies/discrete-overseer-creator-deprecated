@@ -29,7 +29,7 @@
       "__format": "boolean"
     }
   },
-  "shouldBeSynced": "SHOULD_SYNC",
+  "shouldSync": "SHOULD_SYNC",
   "linkTemplatesPath": "LINKS_TEMPLATE_PATH",
   "jobType": "DISCRETE_JOB_TYPE",
   "taskType": "DISCRETE_TASK_TYPE"
