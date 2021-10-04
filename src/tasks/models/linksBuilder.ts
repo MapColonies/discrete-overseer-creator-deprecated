@@ -1,4 +1,3 @@
-import { readFileSync } from 'fs';
 import { inject, singleton } from 'tsyringe';
 import { compile } from 'handlebars';
 import { Link } from '@map-colonies/mc-model-types';

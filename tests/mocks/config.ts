@@ -20,7 +20,7 @@ const setValue = (key: string | Record<string, unknown>, value?: unknown): void 
   if (typeof key === 'string') {
     mockConfig[key] = value;
   } else {
-    mockConfig = {...mockConfig, ...key };
+    mockConfig = { ...mockConfig, ...key };
   }
 };
 

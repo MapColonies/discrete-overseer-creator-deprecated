@@ -14,7 +14,7 @@ let tasksManager: TasksManager;
 const jobId = 'c3e8d0c6-6663-49e5-9257-323674161725';
 const taskId = '517059cc-f60b-4542-8a41-fdd163358d74';
 
-describe.only('TasksManager', () => {
+describe('TasksManager', () => {
   beforeEach(function () {
     jest.resetAllMocks();
     initMockConfig();
@@ -22,6 +22,7 @@ describe.only('TasksManager', () => {
 
   describe('completeWorkerTask', () => {
     it('publish layer if all tasks are done', async function () {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       setValue({ StorageProvider: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
 
       getCompletedZoomLevelsMock.mockReturnValue({
@@ -65,6 +66,7 @@ describe.only('TasksManager', () => {
     });
 
     it('do nothing if some tasks are not done', async function () {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       setValue({ StorageProvider: 'fs', 'tiling.zoomGroups': '' });
 
       getCompletedZoomLevelsMock.mockReturnValue({
