@@ -7,7 +7,7 @@ import { IPublishMapLayerRequest, PublishedMapLayerCacheType } from '../../layer
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
-import { ZoomLevelCalculateor } from '../../utils/zoomToResulation';
+import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { OperationTypeEnum, SyncClient, SyncTypeEnum } from '../../serviceClients/syncClient';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 
@@ -20,7 +20,7 @@ export class TasksManager {
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig,
     @inject(SyncClient) private readonly syncClient: SyncClient,
-    private readonly zoomLevelCalculateor: ZoomLevelCalculateor,
+    private readonly zoomLevelCalculateor: ZoomLevelCalculator,
     private readonly db: StorageClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly catalogClient: CatalogClient,

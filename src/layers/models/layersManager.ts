@@ -1,5 +1,7 @@
 import { IngestionParams } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
+import bbox from '@turf/bbox';
+import { GeoJSON } from 'geojson';
 import { Services } from '../../common/constants';
 import { OperationStatus } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
@@ -8,14 +10,14 @@ import { ILogger } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
-import { ZoomLevelCalculateor } from '../../utils/zoomToResulation';
+import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { FileValidator } from './fileValidator';
 
 @injectable()
 export class LayersManager {
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
-    private readonly zoomLevelCalculateor: ZoomLevelCalculateor,
+    private readonly zoomLevelCalculator: ZoomLevelCalculator,
     private readonly db: StorageClient,
     private readonly catalog: CatalogClient,
     private readonly mapPublisher: MapPublisherClient,
@@ -24,8 +26,9 @@ export class LayersManager {
 
   public async createLayer(data: IngestionParams): Promise<void> {
     await this.validateRunConditions(data);
+    data.metadata.productBoundingBox = this.createBBox(data.metadata.footprint as GeoJSON);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
-    const layerZoomRanges = this.zoomLevelCalculateor.createLayerZoomRanges(data.metadata.resolution as number);
+    const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.resolution as number);
     await this.db.createLayerTasks(data, layerZoomRanges);
   }
 
@@ -67,5 +70,11 @@ export class LayersManager {
     if (existsInCatalog) {
       throw new ConflictError(`layer id: ${resourceId} version: ${version}, already exists in catalog`);
     }
+  }
+
+  private createBBox(footprint: GeoJSON): string {
+    const bboxCords = bbox(footprint);
+    //format: "minX,minY : maxX,maxY"
+    return `${bboxCords[0]},${bboxCords[1]} : ${bboxCords[2]},${bboxCords[3]}`;
   }
 }

@@ -55,7 +55,7 @@ export const zoomToResolutionArray: number[] = [
 ].reverse();
 
 @singleton()
-export class ZoomLevelCalculateor {
+export class ZoomLevelCalculator {
   private readonly zoomRanges: ITaskZoomRange[];
 
   public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, @inject(Services.CONFIG) private readonly config: IConfig) {

@@ -46,6 +46,7 @@
     "@map-colonies/mc-logger": "^2.0.2",
     "@map-colonies/mc-model-types": "file:../mc-models/map-colonies-mc-model-types-8.0.5.tgz",
     "@map-colonies/mc-probe": "^1.0.0",
+    "@turf/bbox": "^6.5.0",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.9",
     "config": "^3.3.4",

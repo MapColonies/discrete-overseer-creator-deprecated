@@ -9,7 +9,7 @@ import { fileValidatorValidateExistsMock, fileValidatorMock } from '../../../moc
 import { ConflictError } from '../../../../src/common/exceptions/http/conflictError';
 import { BadRequestError } from '../../../../src/common/exceptions/http/badRequestError';
 import { OperationStatus } from '../../../../src/common/enums';
-import { ZoomLevelCalculateor } from '../../../../src/utils/zoomToResulation';
+import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
 
 let layersManager: LayersManager;
 
@@ -106,8 +106,8 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
-      layersManager = new LayersManager(logger, zoomLevelCalculateor, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(logger, zoomLevelCalculator, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       await layersManager.createLayer(testData);
 
@@ -166,8 +166,8 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
-      layersManager = new LayersManager(logger, zoomLevelCalculateor, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(logger, zoomLevelCalculator, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       await layersManager.createLayer(testData);
 
@@ -204,8 +204,8 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.PENDING }]);
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
-      layersManager = new LayersManager(logger, zoomLevelCalculateor, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(logger, zoomLevelCalculator, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -239,8 +239,8 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.IN_PROGRESS }]);
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
-      layersManager = new LayersManager(logger, zoomLevelCalculateor, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(logger, zoomLevelCalculator, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -274,8 +274,8 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.COMPLETED }]);
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
-      layersManager = new LayersManager(logger, zoomLevelCalculateor, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(logger, zoomLevelCalculator, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -309,8 +309,8 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.FAILED }]);
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
-      layersManager = new LayersManager(logger, zoomLevelCalculateor, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(logger, zoomLevelCalculator, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -344,8 +344,8 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
-      layersManager = new LayersManager(logger, zoomLevelCalculateor, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(logger, zoomLevelCalculator, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -379,8 +379,8 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
-      layersManager = new LayersManager(logger, zoomLevelCalculateor, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(logger, zoomLevelCalculator, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
@@ -414,8 +414,8 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(false);
       findJobsMock.mockResolvedValue([]);
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
-      layersManager = new LayersManager(logger, zoomLevelCalculateor, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(logger, zoomLevelCalculator, dbClientMock, catalogClientMock, mapPublisherClientMock, fileValidatorMock);
 
       const action = async () => {
         await layersManager.createLayer(testData);
