@@ -1,4 +1,4 @@
-import { IngestionParams, LayerMetadata, RecordType, SensorType } from '@map-colonies/mc-model-types';
+import { IngestionParams, LayerMetadata, ProductType, RecordType, SensorType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
 import { createLayerTasksMock, findJobsMock, dbClientMock } from '../../../mocks/clients/storageClient';
 import { catalogExistsMock, catalogClientMock } from '../../../mocks/clients/catalogClient';
@@ -40,7 +40,7 @@ const testImageMetadata: LayerMetadata = {
   creationDate: new Date('02/01/2020'),
   ingestionDate: new Date('03/01/2020'),
   producerName: 'testProducer',
-  productType: 'orthophoto',
+  productType: ProductType.ORTHOPHOTO,
   region: '',
   sourceDateEnd: new Date('06/01/2020'),
   sourceDateStart: new Date('05/01/2020'),
@@ -48,6 +48,10 @@ const testImageMetadata: LayerMetadata = {
   srsName: 'epsg:4326',
   type: RecordType.RECORD_RASTER,
   layerPolygonParts: undefined,
+  includedInBests: undefined,
+  maxResolutionMeter: 0.2,
+  productBoundingBox: undefined,
+  rawProductData: undefined,
 };
 
 const testData: IngestionParams = {

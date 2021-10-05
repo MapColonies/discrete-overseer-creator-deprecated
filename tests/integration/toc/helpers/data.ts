@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { LayerMetadata, RecordType, SensorType } from '@map-colonies/mc-model-types';
+import { LayerMetadata, ProductType, RecordType, SensorType } from '@map-colonies/mc-model-types';
 import xmlbuilder from 'xmlbuilder';
 import { ITocParams, TocOperation, TocSourceType } from '../../../../src/toc/interfaces';
 
@@ -28,7 +28,7 @@ export const validTestImageMetadata: LayerMetadata = {
   sensorType: [SensorType.RGB],
   classification: 'test',
   type: RecordType.RECORD_RASTER,
-  productType: 'orthophoto',
+  productType: ProductType.ORTHOPHOTO,
   srsId: 'EPSG:4326',
   srsName: 'wgs84',
   producerName: 'testProducer',
@@ -38,6 +38,10 @@ export const validTestImageMetadata: LayerMetadata = {
   sourceDateStart: new Date('11/16/2017'),
   layerPolygonParts: undefined,
   region: '',
+  includedInBests: undefined,
+  maxResolutionMeter: 0.2,
+  productBoundingBox: undefined,
+  rawProductData: undefined,
 };
 
 export const validTestData: ITocParams = {
