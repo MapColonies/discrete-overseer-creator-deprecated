@@ -27,6 +27,7 @@
     "delay": "exponential",
     "shouldResetTimeout": true
   },
+  "shouldSync": true,
   "linkTemplatesPath": "config/linkTemplates.template",
   "jobType": "Discrete-Tiling",
   "taskType": "Discrete-Tiling"

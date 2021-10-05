@@ -40,20 +40,25 @@ export class TasksManager {
         await this.publishToMappingServer(jobId, res.metadata, layerName);
         await this.publishToCatalog(jobId, res.metadata, layerName);
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
-        try {
-          await this.syncClient.triggerSync(
-            res.metadata.productId as string,
-            res.metadata.productVersion as string,
-            SyncTypeEnum.NEW_DISCRETE,
-            OperationTypeEnum.ADD
-          );
-        } catch (err) {
-          this.logger.log(
-            'error',
-            `[TasksManager][taskComplete] failed to trigger sync productId ${res.metadata.productId as string} productVersion ${
-              res.metadata.productVersion as string
-            }. error=${(err as Error).message}`
-          );
+
+        const shouldSync = this.config.get<boolean>('shouldSync');
+
+        if (shouldSync) {
+          try {
+            await this.syncClient.triggerSync(
+              res.metadata.productId as string,
+              res.metadata.productVersion as string,
+              SyncTypeEnum.NEW_DISCRETE,
+              OperationTypeEnum.ADD
+            );
+          } catch (err) {
+            this.logger.log(
+              'error',
+              `[TasksManager][taskComplete] failed to trigger sync productId ${res.metadata.productId as string} productVersion ${
+                res.metadata.productVersion as string
+              }. error=${(err as Error).message}`
+            );
+          }
         }
       } else {
         this.logger.log(

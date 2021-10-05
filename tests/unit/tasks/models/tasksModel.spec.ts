@@ -3,7 +3,7 @@ import { dbClientMock, getCompletedZoomLevelsMock } from '../../../mocks/clients
 import { mapPublisherClientMock, publishLayerMock } from '../../../mocks/clients/mapPublisherClient';
 import { catalogClientMock, publishToCatalogMock } from '../../../mocks/clients/catalogClient';
 import { syncClientMock, triggerSyncMock } from '../../../mocks/clients/syncClient';
-import { configMock, getMock as configGetMock } from '../../../mocks/config';
+import { configMock, init as initMockConfig, setValue } from '../../../mocks/config';
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
 import { ZoomLevelCalculateor } from '../../../../src/utils/zoomToResulation';
@@ -17,10 +17,14 @@ const taskId = '517059cc-f60b-4542-8a41-fdd163358d74';
 describe('TasksManager', () => {
   beforeEach(function () {
     jest.resetAllMocks();
+    initMockConfig();
   });
 
   describe('completeWorkerTask', () => {
     it('publish layer if all tasks are done', async function () {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      setValue({ StorageProvider: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
+
       getCompletedZoomLevelsMock.mockReturnValue({
         completed: true,
         successful: true,
@@ -32,7 +36,6 @@ describe('TasksManager', () => {
           resolution: 2.68220901489258e-6,
         },
       });
-      configGetMock.mockReturnValue('fs');
       const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
       tasksManager = new TasksManager(
         logger,
@@ -44,7 +47,6 @@ describe('TasksManager', () => {
         catalogClientMock,
         linkBuilderMock
       );
-      configGetMock.mockReturnValue('0-10,11,12,13,14,15,16,17,18');
 
       await tasksManager.taskComplete(jobId, taskId);
 
@@ -64,10 +66,13 @@ describe('TasksManager', () => {
     });
 
     it('do nothing if some tasks are not done', async function () {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      setValue({ StorageProvider: 'fs', 'tiling.zoomGroups': '' });
+
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: false,
       });
-      configGetMock.mockReturnValue('fs');
+
       const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
       tasksManager = new TasksManager(
         logger,
@@ -79,7 +84,6 @@ describe('TasksManager', () => {
         catalogClientMock,
         linkBuilderMock
       );
-      configGetMock.mockReturnValue('');
 
       await tasksManager.taskComplete(jobId, taskId);
 
