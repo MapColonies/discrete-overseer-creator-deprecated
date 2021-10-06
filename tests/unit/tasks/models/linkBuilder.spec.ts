@@ -1,20 +1,13 @@
 import { ILinkBuilderData, LinkBuilder } from '../../../../src/tasks/models/linksBuilder';
-import { getMock as configGetMock, configMock } from '../../../mocks/config';
+import { getMock as configGetMock, configMock, init as initMockConfig } from '../../../mocks/config';
+import { filesManagerMock } from '../../../mocks/filesManager';
 import { logger } from '../../../mocks/logger';
 
 let linkBuilder: LinkBuilder;
-// eslint-disable-next-line no-var
-var readFileSyncMock: jest.Mock;
-jest.mock('fs', () => {
-  readFileSyncMock = jest.fn();
-  return {
-    readFileSync: readFileSyncMock,
-  };
-});
-
 describe('LinkBuilder', () => {
   beforeEach(function () {
     jest.resetAllMocks();
+    initMockConfig();
   });
 
   describe('createLinks', () => {
@@ -36,9 +29,9 @@ describe('LinkBuilder', () => {
         serverUrl: 'https://testUrl',
       };
       configGetMock.mockReturnValue('config/linkTemplates.template');
-      readFileSyncMock.mockReturnValue(linksTemplate);
+      jest.spyOn(filesManagerMock, 'readFileSync').mockReturnValue(linksTemplate);
 
-      linkBuilder = new LinkBuilder(logger, configMock);
+      linkBuilder = new LinkBuilder(logger, configMock, filesManagerMock);
 
       const res = linkBuilder.createLinks(testData);
 

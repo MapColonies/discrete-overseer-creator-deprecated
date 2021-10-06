@@ -1,5 +1,5 @@
 import { ZoomLevelCalculator } from '../../../src/utils/zoomToResolution';
-import { getMock as configGetMock, configMock } from '../../mocks/config';
+import { init as initMockConfig, setValue, configMock } from '../../mocks/config';
 import { logger } from '../../mocks/logger';
 
 let zoomLevelCalculator: ZoomLevelCalculator;
@@ -7,12 +7,8 @@ let zoomLevelCalculator: ZoomLevelCalculator;
 describe('zoomToResulation', () => {
   beforeEach(function () {
     jest.resetAllMocks();
-    configGetMock.mockImplementation((key: string) => {
-      switch (key) {
-        case 'tiling.zoomGroups':
-          return '0-10,11,12,13,14,15,16,17,18,19,20,21,22,23';
-      }
-    });
+    initMockConfig();
+    setValue({ 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18,19,20,21,22,23' });
     zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
   });
 
