@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.2.2...v1.3.0) (2021-10-11)
+
+
+### Features
+
+* add sync triggering from overseer ([#76](https://github.com/MapColonies/discrete-overseer-creator/issues/76)) ([ae725c5](https://github.com/MapColonies/discrete-overseer-creator/commit/ae725c578496b6ad76708590608b2402051711ae))
+
 ### [1.2.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.2.1...v1.2.2) (2021-08-19)
 
 
