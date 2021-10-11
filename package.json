@@ -44,8 +44,9 @@
   "dependencies": {
     "@map-colonies/error-express-handler": "^1.2.0",
     "@map-colonies/mc-logger": "^2.0.2",
-    "@map-colonies/mc-model-types": "^7.3.1",
+    "@map-colonies/mc-model-types": "^9.0.0",
     "@map-colonies/mc-probe": "^1.0.0",
+    "@turf/bbox": "^6.5.0",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.9",
     "config": "^3.3.4",
@@ -75,10 +76,10 @@
     "@types/yamljs": "^0.2.31",
     "commitlint": "^9.1.2",
     "copyfiles": "^2.3.0",
-    "cz-conventional-changelog": "^3.3.0",
+    "cz-conventional-changelog": "^3.0.1",
     "eslint": "^7.8.1",
     "husky": "^4.2.5",
-    "jest": "^26.6.3",
+    "jest": "^27.2.5",
     "jest-create-mock-instance": "^1.1.0",
     "jest-html-reporters": "^2.0.3",
     "nodemon": "^2.0.6",
@@ -86,7 +87,7 @@
     "rimraf": "^3.0.2",
     "standard-version": "^9.0.0",
     "supertest": "^6.0.1",
-    "ts-jest": "^26.3.0",
+    "ts-jest": "^27.0.5",
     "typescript": "^3.8.3"
   }
 }

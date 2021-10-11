@@ -1,4 +1,4 @@
-import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
+import { LayerMetadata, ProductType, SensorType } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
@@ -34,7 +34,7 @@ const validTestImageMetadata: LayerMetadata = {
   sensorType: [SensorType.RGB],
   classification: 'test',
   type: RecordType.RECORD_RASTER,
-  productType: 'orthophoto',
+  productType: ProductType.ORTHOPHOTO,
   srsId: 'EPSG:4326',
   srsName: 'wgs84',
   producerName: 'testProducer',
@@ -44,6 +44,10 @@ const validTestImageMetadata: LayerMetadata = {
   sourceDateStart: new Date('11/16/2017'),
   layerPolygonParts: undefined,
   region: '',
+  includedInBests: undefined,
+  maxResolutionMeter: 0.2,
+  productBoundingBox: undefined,
+  rawProductData: undefined,
 };
 const validTestData = {
   fileNames: [],

@@ -6,7 +6,7 @@ import { syncClientMock, triggerSyncMock } from '../../../mocks/clients/syncClie
 import { configMock, init as initMockConfig, setValue } from '../../../mocks/config';
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
-import { ZoomLevelCalculateor } from '../../../../src/utils/zoomToResulation';
+import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
 import { OperationTypeEnum, SyncTypeEnum } from '../../../../src/serviceClients/syncClient';
 
 let tasksManager: TasksManager;
@@ -36,12 +36,13 @@ describe('TasksManager', () => {
           resolution: 2.68220901489258e-6,
         },
       });
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
+
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       tasksManager = new TasksManager(
         logger,
         configMock,
         syncClientMock,
-        zoomLevelCalculateor,
+        zoomLevelCalculator,
         dbClientMock,
         mapPublisherClientMock,
         catalogClientMock,
@@ -73,12 +74,12 @@ describe('TasksManager', () => {
         allCompleted: false,
       });
 
-      const zoomLevelCalculateor = new ZoomLevelCalculateor(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       tasksManager = new TasksManager(
         logger,
         configMock,
         syncClientMock,
-        zoomLevelCalculateor,
+        zoomLevelCalculator,
         dbClientMock,
         mapPublisherClientMock,
         catalogClientMock,
