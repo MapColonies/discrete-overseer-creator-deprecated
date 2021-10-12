@@ -34,7 +34,7 @@ const validTestImageMetadata: LayerMetadata = {
   sensorType: [SensorType.RGB],
   classification: 'test',
   type: RecordType.RECORD_RASTER,
-  productType: ProductType.ORTHOPHOTO,
+  productType: ProductType.ORTHOPHOTO_HISTORY,
   srsId: 'EPSG:4326',
   srsName: 'wgs84',
   producerName: 'testProducer',

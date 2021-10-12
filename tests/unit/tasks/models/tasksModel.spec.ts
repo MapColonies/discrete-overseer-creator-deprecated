@@ -1,3 +1,4 @@
+import { ProductType } from '@map-colonies/mc-model-types';
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
 import { dbClientMock, getCompletedZoomLevelsMock } from '../../../mocks/clients/storageClient';
 import { mapPublisherClientMock, publishLayerMock } from '../../../mocks/clients/mapPublisherClient';
@@ -21,20 +22,81 @@ describe('TasksManager', () => {
   });
 
   describe('completeWorkerTask', () => {
-    it('publish layer if all tasks are done', async function () {
+    const testMetadata = {
+      description: 'test desc',
+      productType: ProductType.ORTHOPHOTO_HISTORY,
+      productName: 'test-1',
+      productVersion: '1',
+      productId: 'test',
+      resolution: 2.68220901489258e-6,
+    };
+
+    const mapPublishReq = {
+      description: 'test desc',
+      maxZoomLevel: 18,
+      name: `test-1-${ProductType.ORTHOPHOTO_HISTORY}`,
+      tilesPath: 'test/1',
+      cacheType: 'file',
+    };
+
+    const catalogReqData = {
+      metadata: { ...testMetadata },
+      links: undefined,
+    };
+
+    it('publish layer to catalog twice if all tasks are done for ORTHOPHOTO_HISTORY', async function () {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       setValue({ StorageProvider: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
 
       getCompletedZoomLevelsMock.mockReturnValue({
         completed: true,
         successful: true,
-        metadata: {
-          description: 'test desc',
-          productName: 'test-1',
-          productVersion: '1',
-          productId: 'test',
-          resolution: 2.68220901489258e-6,
-        },
+        metadata: testMetadata,
+      });
+
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      tasksManager = new TasksManager(
+        logger,
+        configMock,
+        syncClientMock,
+        zoomLevelCalculator,
+        dbClientMock,
+        mapPublisherClientMock,
+        catalogClientMock,
+        linkBuilderMock
+      );
+
+      await tasksManager.taskComplete(jobId, taskId);
+
+      expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
+      expect(publishToCatalogMock).toHaveBeenCalledTimes(2);
+      expect(publishLayerMock).toHaveBeenCalledTimes(2);
+
+      expect(triggerSyncMock).toHaveBeenCalledTimes(1);
+      expect(publishLayerMock).toHaveBeenCalledWith(mapPublishReq);
+      const expectedPublishReqSecond = { ...mapPublishReq };
+      expectedPublishReqSecond.name = `test-1-${ProductType.ORTHOPHOTO}`;
+      expect(publishLayerMock).toHaveBeenCalledWith(mapPublishReq);
+      expect(publishLayerMock).toHaveBeenCalledWith(expectedPublishReqSecond);
+
+      const expectedPublishTocCatalogReqFirst = { ...catalogReqData };
+      expectedPublishTocCatalogReqFirst.metadata.productType = ProductType.ORTHOPHOTO;
+      expect(publishToCatalogMock).toHaveBeenCalledWith(catalogReqData);
+      expect(publishToCatalogMock).toHaveBeenCalledWith(expectedPublishTocCatalogReqFirst);
+      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD);
+    });
+
+    it('publish layer to catalog once if all tasks are done for RASTER_MAP', async function () {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      setValue({ StorageProvider: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
+
+      const rasterMapTestData = { ...testMetadata };
+      rasterMapTestData.productType = ProductType.RASTER_MAP;
+
+      getCompletedZoomLevelsMock.mockReturnValue({
+        completed: true,
+        successful: true,
+        metadata: rasterMapTestData,
       });
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
@@ -54,15 +116,15 @@ describe('TasksManager', () => {
       expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
+
       expect(triggerSyncMock).toHaveBeenCalledTimes(1);
-      const expectedPublishReq = {
-        description: 'test desc',
-        maxZoomLevel: 18,
-        name: 'test-1',
-        tilesPath: 'test/1',
-        cacheType: 'file',
-      };
-      expect(publishLayerMock).toHaveBeenCalledWith(expectedPublishReq);
+      const mapPublishReqForRasterMap = { ...mapPublishReq };
+      mapPublishReqForRasterMap.name = `test-1-${ProductType.RASTER_MAP}`;
+      expect(publishLayerMock).toHaveBeenCalledWith(mapPublishReqForRasterMap);
+
+      const expectedPublishTocCatalogReq = { ...catalogReqData };
+      expectedPublishTocCatalogReq.metadata.productType = ProductType.RASTER_MAP;
+      expect(publishToCatalogMock).toHaveBeenCalledWith(expectedPublishTocCatalogReq);
       expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD);
     });
 
