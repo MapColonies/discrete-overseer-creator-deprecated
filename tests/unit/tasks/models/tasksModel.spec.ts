@@ -75,7 +75,7 @@ describe('TasksManager', () => {
       expect(triggerSyncMock).toHaveBeenCalledTimes(1);
       expect(publishLayerMock).toHaveBeenCalledWith(mapPublishReq);
       const expectedPublishReqSecond = { ...mapPublishReq };
-      expectedPublishReqSecond.name = `test-1-${ProductType.ORTHOPHOTO}`;
+      expectedPublishReqSecond.name = `test-${ProductType.ORTHOPHOTO}`;
       expect(publishLayerMock).toHaveBeenCalledWith(mapPublishReq);
       expect(publishLayerMock).toHaveBeenCalledWith(expectedPublishReqSecond);
 
