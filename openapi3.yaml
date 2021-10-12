@@ -99,9 +99,7 @@ components:
                 - RasterMap
                 - RasterAid
                 - RasterVector
-                - RasterVectorBest
-                - VectorBest
-              description: layer's type might be derived from the first letter
+              description: valid product types for ingestion
     tocResponse:
       type: object
       properties:

@@ -44,7 +44,7 @@ export class TasksManager {
         if (res.metadata.productType === ProductType.ORTHOPHOTO_HISTORY) {
           const clonedLayer = { ...res.metadata };
           clonedLayer.productType = ProductType.ORTHOPHOTO;
-          await this.publishToMappingServer(jobId, res.metadata, `${layerName}-${clonedLayer.productType}`);
+          await this.publishToMappingServer(jobId, res.metadata, `${res.metadata.productId as string}-${clonedLayer.productType}`);
           await this.publishToCatalog(jobId, clonedLayer, layerName);
         }
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
