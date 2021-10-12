@@ -3,7 +3,7 @@ import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
 import { registerTestValues } from '../testContainerConfig';
-import { createLayerTasksMock, mockCreateLayerTasks, findJobsMock } from '../../mocks/clients/storageClient';
+import { createLayerTasksMock, findJobsMock, mockCreateLayerTasks } from '../../mocks/clients/storageClient';
 import { mapExistsMock } from '../../mocks/clients/mapPublisherClient';
 import { catalogExistsMock } from '../../mocks/clients/catalogClient';
 import { OperationStatus } from '../../../src/common/enums';
@@ -34,7 +34,7 @@ const validTestImageMetadata: LayerMetadata = {
   sensorType: [SensorType.RGB],
   classification: 'test',
   type: RecordType.RECORD_RASTER,
-  productType: ProductType.ORTHOPHOTO,
+  productType: ProductType.ORTHOPHOTO_HISTORY,
   srsId: 'EPSG:4326',
   srsName: 'wgs84',
   producerName: 'testProducer',
@@ -90,8 +90,16 @@ describe('layers', function () {
 
   describe('Bad Path', function () {
     // All requests with status code of 400
-    it('should return 400 status code', async function () {
+    it('should return 400 status code for invalid Test Data', async function () {
       const response = await requestSender.createLayer(invalidTestData);
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 400 status code for invalid product type', async function () {
+      const invalidTestMetaDataProductType = { ...validTestData.metadata };
+      invalidTestMetaDataProductType.productType = ProductType.MODEL_3D;
+      const invalidTestDataForProductType = { ...validTestData, metadata: invalidTestMetaDataProductType };
+      const response = await requestSender.createLayer(invalidTestDataForProductType);
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
   });

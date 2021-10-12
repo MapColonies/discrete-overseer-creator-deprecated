@@ -1,4 +1,4 @@
-import { IngestionParams } from '@map-colonies/mc-model-types';
+import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import bbox from '@turf/bbox';
 import { GeoJSON } from 'geojson';
@@ -26,6 +26,9 @@ export class LayersManager {
 
   public async createLayer(data: IngestionParams): Promise<void> {
     await this.validateRunConditions(data);
+    if (data.metadata.productType === ProductType.ORTHOPHOTO) {
+      data.metadata.productType = ProductType.ORTHOPHOTO_HISTORY;
+    }
     data.metadata.productBoundingBox = this.createBBox(data.metadata.footprint as GeoJSON);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.resolution as number);

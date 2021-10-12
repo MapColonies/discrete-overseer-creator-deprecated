@@ -1,4 +1,4 @@
-import { IRasterCatalogUpsertRequestBody, LayerMetadata } from '@map-colonies/mc-model-types';
+import { IRasterCatalogUpsertRequestBody, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { OperationStatus, StorageProvider } from '../../common/enums';
@@ -37,8 +37,16 @@ export class TasksManager {
     if (res.completed) {
       if (res.successful) {
         const layerName = `${res.metadata.productId as string}-${res.metadata.productVersion as string}`;
-        await this.publishToMappingServer(jobId, res.metadata, layerName);
+        await this.publishToMappingServer(jobId, res.metadata, `${layerName}-${res.metadata.productType as string}`);
         await this.publishToCatalog(jobId, res.metadata, layerName);
+
+        // todo: In update scenario need to change the logic to support history and update unified files
+        if (res.metadata.productType === ProductType.ORTHOPHOTO_HISTORY) {
+          const clonedLayer = { ...res.metadata };
+          clonedLayer.productType = ProductType.ORTHOPHOTO;
+          await this.publishToMappingServer(jobId, res.metadata, `${res.metadata.productId as string}-${clonedLayer.productType}`);
+          await this.publishToCatalog(jobId, clonedLayer, layerName);
+        }
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
 
         const shouldSync = this.config.get<boolean>('shouldSync');
