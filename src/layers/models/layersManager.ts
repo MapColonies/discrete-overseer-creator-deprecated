@@ -25,25 +25,14 @@ export class LayersManager {
   ) {}
 
   public async createLayer(data: IngestionParams): Promise<void> {
-    this.validateProductType(data);
     await this.validateRunConditions(data);
+    if (data.metadata.productType === ProductType.ORTHOPHOTO) {
+      data.metadata.productType = ProductType.ORTHOPHOTO_HISTORY;
+    }
     data.metadata.productBoundingBox = this.createBBox(data.metadata.footprint as GeoJSON);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.resolution as number);
     await this.db.createLayerTasks(data, layerZoomRanges);
-  }
-
-  private validateProductType(data: IngestionParams): void {
-    if (data.metadata.productType === undefined) {
-      throw new BadRequestError('invalid productType, must contain a value');
-    }
-    switch (data.metadata.productType as string) {
-      case ProductType.BEST_ORTHOPHOTO:
-      case ProductType.BEST_RASTER_MAP:
-      case ProductType.ORTHOPHOTO: {
-        throw new BadRequestError(`unsupported productType '${data.metadata.productType}'`);
-      }
-    }
   }
 
   private async validateRunConditions(data: IngestionParams): Promise<void> {
