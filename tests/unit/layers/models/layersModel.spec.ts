@@ -41,6 +41,7 @@ const testImageMetadata: LayerMetadata = {
   ingestionDate: new Date('03/01/2020'),
   producerName: 'testProducer',
   productType: ProductType.ORTHOPHOTO,
+  productSubType: undefined,
   region: '',
   sourceDateEnd: new Date('06/01/2020'),
   sourceDateStart: new Date('05/01/2020'),
