@@ -11,7 +11,7 @@ import * as requestSender from './helpers/requestSender';
 
 const validTestImageMetadata: LayerMetadata = {
   productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  productVersion: '1.234',
+  productVersion: '1.23',
   productName: 'test layer',
   description: 'test layer desc',
   accuracyCE90: 0.7,
