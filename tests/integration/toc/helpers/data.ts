@@ -5,7 +5,7 @@ import { ITocParams, TocOperation, TocSourceType } from '../../../../src/toc/int
 
 export const validTestImageMetadata: LayerMetadata = {
   productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  productVersion: '1.234.5',
+  productVersion: '1.234',
   productName: 'test layer',
   description: 'test layer desc',
   accuracyCE90: 0.7,
@@ -21,15 +21,16 @@ export const validTestImageMetadata: LayerMetadata = {
       ],
     ],
   },
-  scale: '3.5',
+  scale: '100',
   rms: 2.6,
   updateDate: new Date('11/16/2017'),
-  resolution: 0.7,
+  resolution: 0.007,
   sensorType: [SensorType.RGB],
   classification: 'test',
   type: RecordType.RECORD_RASTER,
   productType: ProductType.ORTHOPHOTO,
-  srsId: 'EPSG:4326',
+  productSubType: undefined,
+  srsId: '4326',
   srsName: 'wgs84',
   producerName: 'testProducer',
   creationDate: new Date('11/16/2017'),
@@ -48,7 +49,7 @@ export const validTestData: ITocParams = {
   operation: TocOperation.ADD,
   sourceType: TocSourceType.BSETMOSAIC,
   productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  productVersion: '1.234.5',
+  productVersion: '1.234',
 };
 
 export const validTestResponseData = {

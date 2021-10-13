@@ -46,7 +46,7 @@ const testImageMetadata: LayerMetadata = {
   sourceDateEnd: new Date('06/01/2020'),
   sourceDateStart: new Date('05/01/2020'),
   srsId: '4326',
-  srsName: 'epsg:4326',
+  srsName: 'WGS84GEO',
   type: RecordType.RECORD_RASTER,
   layerPolygonParts: undefined,
   includedInBests: undefined,
