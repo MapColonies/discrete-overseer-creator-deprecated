@@ -121,7 +121,7 @@ export class StorageClient extends HttpClient {
     });
     return {
       completed: completedCounter + failedCounter == (res.tasks?.length ?? 0),
-      successful: failedCounter > 0,
+      successful: failedCounter === 0,
       metadata: (res.parameters as unknown as IngestionParams).metadata,
     };
   }
