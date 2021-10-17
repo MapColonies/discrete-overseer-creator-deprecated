@@ -29,6 +29,8 @@ export class LayersManager {
     if (data.metadata.productType === ProductType.ORTHOPHOTO) {
       data.metadata.productType = ProductType.ORTHOPHOTO_HISTORY;
     }
+    data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
+    data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
     data.metadata.productBoundingBox = this.createBBox(data.metadata.footprint as GeoJSON);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.resolution as number);
