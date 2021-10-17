@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.4.0...v1.5.0) (2021-10-17)
+
+
+### Features
+
+* fail job if task failed and set deafult srs name and id ([#82](https://github.com/MapColonies/discrete-overseer-creator/issues/82)) ([c8acc9a](https://github.com/MapColonies/discrete-overseer-creator/commit/c8acc9a23804f6d6b769288904882321cb5a56ee))
+
 ## [1.4.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.3.0...v1.4.0) (2021-10-17)
 
 
