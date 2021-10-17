@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.3.0...v1.4.0) (2021-10-17)
+
+
+### Features
+
+* publish layer twice - history and ortho ([#79](https://github.com/MapColonies/discrete-overseer-creator/issues/79)) ([9e2caea](https://github.com/MapColonies/discrete-overseer-creator/commit/9e2caea1494ff4ac4cce06bc2d5ccc999ac8e366))
+* updated models and validation ([#81](https://github.com/MapColonies/discrete-overseer-creator/issues/81)) ([3ec0c9a](https://github.com/MapColonies/discrete-overseer-creator/commit/3ec0c9a6a182e07f20bce7cfb8646ee5e8023c44))
+
 ## [1.3.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.2.2...v1.3.0) (2021-10-11)
 
 
