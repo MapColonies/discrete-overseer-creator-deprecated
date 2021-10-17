@@ -3,9 +3,9 @@ import { MapPublisherClient } from '../../../src/serviceClients/mapPublisherClie
 const publishLayerMock = jest.fn();
 const mapExistsMock = jest.fn();
 
-const mapPublisherClientMock = ({
+const mapPublisherClientMock = {
   publishLayer: publishLayerMock,
   exists: mapExistsMock,
-} as unknown) as MapPublisherClient;
+} as unknown as MapPublisherClient;
 
 export { publishLayerMock, mapExistsMock, mapPublisherClientMock };

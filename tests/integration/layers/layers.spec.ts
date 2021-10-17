@@ -11,7 +11,7 @@ import * as requestSender from './helpers/requestSender';
 
 const validTestImageMetadata: LayerMetadata = {
   productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  productVersion: '1.234.5',
+  productVersion: '1.23',
   productName: 'test layer',
   description: 'test layer desc',
   accuracyCE90: 0.7,
@@ -27,15 +27,16 @@ const validTestImageMetadata: LayerMetadata = {
       ],
     ],
   },
-  scale: '3.5',
+  scale: '100',
   rms: 2.6,
   updateDate: new Date('11/16/2017'),
-  resolution: 0.7,
+  resolution: 0.007,
   sensorType: [SensorType.RGB],
   classification: 'test',
   type: RecordType.RECORD_RASTER,
   productType: ProductType.ORTHOPHOTO_HISTORY,
-  srsId: 'EPSG:4326',
+  productSubType: undefined,
+  srsId: '4326',
   srsName: 'wgs84',
   producerName: 'testProducer',
   creationDate: new Date('11/16/2017'),
@@ -54,10 +55,10 @@ const validTestData = {
   metadata: validTestImageMetadata,
   originDirectory: '/here',
 };
-const invalidTestImageMetadata = ({
+const invalidTestImageMetadata = {
   source: 'testId',
   invalidFiled: 'invalid',
-} as unknown) as LayerMetadata;
+} as unknown as LayerMetadata;
 const invalidTestData = {
   fileNames: [],
   metadata: invalidTestImageMetadata,
@@ -97,7 +98,7 @@ describe('layers', function () {
 
     it('should return 400 status code for invalid product type', async function () {
       const invalidTestMetaDataProductType = { ...validTestData.metadata };
-      invalidTestMetaDataProductType.productType = ProductType.MODEL_3D;
+      invalidTestMetaDataProductType.productType = ProductType.PHOTO_REALISTIC_3D;
       const invalidTestDataForProductType = { ...validTestData, metadata: invalidTestMetaDataProductType };
       const response = await requestSender.createLayer(invalidTestDataForProductType);
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);

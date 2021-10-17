@@ -7,12 +7,12 @@ const getCompletedZoomLevelsMock = jest.fn();
 const updateJobStatusMock = jest.fn();
 const findJobsMock = jest.fn();
 
-const dbClientMock = ({
+const dbClientMock = {
   createLayerTasks: createLayerTasksMock,
   getCompletedZoomLevels: getCompletedZoomLevelsMock,
   updateJobStatus: updateJobStatusMock,
   findJobs: findJobsMock,
-} as unknown) as StorageClient;
+} as unknown as StorageClient;
 
 function mockCreateLayerTasks(): void {
   const idBuilder = {

@@ -84,7 +84,7 @@ export class StorageClient extends HttpClient {
       version: version,
       type: jobType,
       status: OperationStatus.IN_PROGRESS,
-      parameters: (data as unknown) as Record<string, unknown>,
+      parameters: data as unknown as Record<string, unknown>,
       tasks: zoomRanges.map((range) => {
         return {
           type: taskType,
@@ -122,7 +122,7 @@ export class StorageClient extends HttpClient {
     return {
       completed: completedCounter + failedCounter == (res.tasks?.length ?? 0),
       successful: failedCounter < (res.tasks?.length ?? 0),
-      metadata: ((res.parameters as unknown) as IngestionParams).metadata,
+      metadata: (res.parameters as unknown as IngestionParams).metadata,
     };
   }
 
