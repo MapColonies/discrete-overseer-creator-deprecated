@@ -75,6 +75,6 @@ export class LayersManager {
   private createBBox(footprint: GeoJSON): string {
     const bboxCords = bbox(footprint);
     //format: "minX,minY : maxX,maxY"
-    return `${bboxCords[0]},${bboxCords[1]} : ${bboxCords[2]},${bboxCords[3]}`;
+    return `${bboxCords[0]},${bboxCords[1]},${bboxCords[2]},${bboxCords[3]}`;
   }
 }
