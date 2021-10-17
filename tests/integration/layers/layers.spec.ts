@@ -55,10 +55,10 @@ const validTestData = {
   metadata: validTestImageMetadata,
   originDirectory: '/here',
 };
-const invalidTestImageMetadata = ({
+const invalidTestImageMetadata = {
   source: 'testId',
   invalidFiled: 'invalid',
-} as unknown) as LayerMetadata;
+} as unknown as LayerMetadata;
 const invalidTestData = {
   fileNames: [],
   metadata: invalidTestImageMetadata,

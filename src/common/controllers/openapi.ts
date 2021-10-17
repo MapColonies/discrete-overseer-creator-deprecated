@@ -8,6 +8,7 @@ import { resolveRefs } from 'json-refs';
 import httpStatus from 'http-status-codes';
 import { Services } from '../constants';
 import { ILogger, OpenApiConfig } from '../interfaces';
+
 @injectable()
 export class OpenapiController {
   public uiMiddleware: RequestHandler[];

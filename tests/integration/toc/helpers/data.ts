@@ -64,6 +64,6 @@ export const validTestJsonResponseData = JSON.parse(JSON.stringify(validTestResp
 
 export const validTestXmlResponseData = xmlbuilder.create(validTestResponseData, { version: '1.0', encoding: 'UTF-8' }).end({ pretty: true });
 
-export const invalidTestData = ({
+export const invalidTestData = {
   productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-} as unknown) as ITocParams;
+} as unknown as ITocParams;
