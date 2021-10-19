@@ -36,16 +36,17 @@ export class TasksManager {
     const res = await this.db.getCompletedZoomLevels(jobId);
     if (res.completed) {
       if (res.successful) {
-        const layerName = `${res.metadata.productId as string}-${res.metadata.productVersion as string}`;
-        await this.publishToMappingServer(jobId, res.metadata, `${layerName}-${res.metadata.productType as string}`);
+        const layerName = `${res.metadata.productId as string}-${res.metadata.productVersion as string}-${res.metadata.productType as string}`;
+        await this.publishToMappingServer(jobId, res.metadata, layerName);
         await this.publishToCatalog(jobId, res.metadata, layerName);
 
         // todo: In update scenario need to change the logic to support history and update unified files
         if (res.metadata.productType === ProductType.ORTHOPHOTO_HISTORY) {
           const clonedLayer = { ...res.metadata };
           clonedLayer.productType = ProductType.ORTHOPHOTO;
-          await this.publishToMappingServer(jobId, res.metadata, `${res.metadata.productId as string}-${clonedLayer.productType}`);
-          await this.publishToCatalog(jobId, clonedLayer, layerName);
+          const unifiedLayerName = `${res.metadata.productId as string}-${clonedLayer.productType}`;
+          await this.publishToMappingServer(jobId, res.metadata, unifiedLayerName);
+          await this.publishToCatalog(jobId, clonedLayer, unifiedLayerName);
         }
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
 
