@@ -11,6 +11,7 @@ import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
+import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { FileValidator } from './fileValidator';
 
 @injectable()
@@ -25,10 +26,10 @@ export class LayersManager {
   ) {}
 
   public async createLayer(data: IngestionParams): Promise<void> {
-    await this.validateRunConditions(data);
     if (data.metadata.productType === ProductType.ORTHOPHOTO) {
       data.metadata.productType = ProductType.ORTHOPHOTO_HISTORY;
     }
+    await this.validateRunConditions(data);
     data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
     data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
     data.metadata.productBoundingBox = this.createBBox(data.metadata.footprint as GeoJSON);
@@ -40,10 +41,11 @@ export class LayersManager {
   private async validateRunConditions(data: IngestionParams): Promise<void> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
+    const productType = data.metadata.productType as ProductType;
     await this.validateNotRunning(resourceId, version);
 
     await this.validateNotExistsInCatalog(resourceId, version);
-    await this.validateNotExistsInMapServer(resourceId, version);
+    await this.validateNotExistsInMapServer(resourceId, version, productType);
     await this.validateFiles(data);
   }
 
@@ -54,10 +56,11 @@ export class LayersManager {
     }
   }
 
-  private async validateNotExistsInMapServer(resourceId: string, version: string): Promise<void> {
-    const existsInMapServer = await this.mapPublisher.exists(`${resourceId}-${version}`);
+  private async validateNotExistsInMapServer(productId: string, productVersion: string, productType: ProductType): Promise<void> {
+    const layerName = getMapServingLayerName(productId, productVersion, productType);
+    const existsInMapServer = await this.mapPublisher.exists(layerName);
     if (existsInMapServer) {
-      throw new ConflictError(`layer ${resourceId}-${version} already exists on mapProxy`);
+      throw new ConflictError(`layer ${layerName}, already exists on mapProxy`);
     }
   }
 
