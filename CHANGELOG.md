@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.5.1...v1.5.2) (2021-10-26)
+
+
+### Bug Fixes
+
+* fix map serving layer validation ([#85](https://github.com/MapColonies/discrete-overseer-creator/issues/85)) ([00817f4](https://github.com/MapColonies/discrete-overseer-creator/commit/00817f46dcf48b757126e9eb83ba3d51a95d7fb5))
+
 ### [1.5.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.5.0...v1.5.1) (2021-10-19)
 
 
