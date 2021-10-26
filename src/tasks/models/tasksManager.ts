@@ -8,6 +8,7 @@ import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
+import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { OperationTypeEnum, SyncClient, SyncTypeEnum } from '../../serviceClients/syncClient';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 
@@ -36,7 +37,11 @@ export class TasksManager {
     const res = await this.db.getCompletedZoomLevels(jobId);
     if (res.completed) {
       if (res.successful) {
-        const layerName = `${res.metadata.productId as string}-${res.metadata.productVersion as string}-${res.metadata.productType as string}`;
+        const layerName = getMapServingLayerName(
+          res.metadata.productId as string,
+          res.metadata.productVersion as string,
+          res.metadata.productType as ProductType
+        );
         await this.publishToMappingServer(jobId, res.metadata, layerName);
         await this.publishToCatalog(jobId, res.metadata, layerName);
 
@@ -44,7 +49,11 @@ export class TasksManager {
         if (res.metadata.productType === ProductType.ORTHOPHOTO_HISTORY) {
           const clonedLayer = { ...res.metadata };
           clonedLayer.productType = ProductType.ORTHOPHOTO;
-          const unifiedLayerName = `${res.metadata.productId as string}-${clonedLayer.productType}`;
+          const unifiedLayerName = getMapServingLayerName(
+            clonedLayer.productId as string,
+            clonedLayer.productVersion as string,
+            clonedLayer.productType
+          );
           await this.publishToMappingServer(jobId, res.metadata, unifiedLayerName);
           await this.publishToCatalog(jobId, clonedLayer, unifiedLayerName);
         }
