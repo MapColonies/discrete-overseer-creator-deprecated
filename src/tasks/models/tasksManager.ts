@@ -42,7 +42,7 @@ export class TasksManager {
           res.metadata.productVersion as string,
           res.metadata.productType as ProductType
         );
-        await this.publishToMappingServer(jobId, res.metadata, layerName);
+        await this.publishToMappingServer(jobId, res.metadata, layerName, res.relativePath);
         await this.publishToCatalog(jobId, res.metadata, layerName);
 
         // todo: In update scenario need to change the logic to support history and update unified files
@@ -54,7 +54,7 @@ export class TasksManager {
             clonedLayer.productVersion as string,
             clonedLayer.productType
           );
-          await this.publishToMappingServer(jobId, res.metadata, unifiedLayerName);
+          await this.publishToMappingServer(jobId, res.metadata, unifiedLayerName, res.relativePath);
           await this.publishToCatalog(jobId, clonedLayer, unifiedLayerName);
         }
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
@@ -67,7 +67,8 @@ export class TasksManager {
               res.metadata.productId as string,
               res.metadata.productVersion as string,
               SyncTypeEnum.NEW_DISCRETE,
-              OperationTypeEnum.ADD
+              OperationTypeEnum.ADD,
+              res.relativePath
             );
           } catch (err) {
             this.logger.log(
@@ -106,7 +107,7 @@ export class TasksManager {
     }
   }
 
-  private async publishToMappingServer(jobId: string, metadata: LayerMetadata, layerName: string): Promise<void> {
+  private async publishToMappingServer(jobId: string, metadata: LayerMetadata, layerName: string, relativePath: string): Promise<void> {
     const id = metadata.productId as string;
     const version = metadata.productVersion as string;
     try {
@@ -116,7 +117,7 @@ export class TasksManager {
         name: `${layerName}`,
         description: metadata.description as string,
         maxZoomLevel: maxZoom,
-        tilesPath: `${id}/${version}`,
+        tilesPath: relativePath,
         cacheType: this.cacheType,
       };
       await this.mapPublisher.publishLayer(publishReq);

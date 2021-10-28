@@ -34,8 +34,8 @@ describe('TasksManager', () => {
     const mapPublishReq = {
       description: 'test desc',
       maxZoomLevel: 18,
-      name: `test-1-${ProductType.ORTHOPHOTO_HISTORY}`,
-      tilesPath: 'test/1',
+      name: `test-1-${testMetadata.productType}`,
+      tilesPath: `test/1/${testMetadata.productType}`,
       cacheType: 'file',
     };
 
@@ -52,6 +52,7 @@ describe('TasksManager', () => {
         completed: true,
         successful: true,
         metadata: testMetadata,
+        relativePath: `test/1/${ProductType.ORTHOPHOTO_HISTORY}`,
       });
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
@@ -81,9 +82,10 @@ describe('TasksManager', () => {
 
       const expectedPublishTocCatalogReqFirst = { ...catalogReqData };
       expectedPublishTocCatalogReqFirst.metadata.productType = ProductType.ORTHOPHOTO;
+      const relativePath = `test/1/${ProductType.ORTHOPHOTO_HISTORY}`;
       expect(publishToCatalogMock).toHaveBeenCalledWith(catalogReqData);
       expect(publishToCatalogMock).toHaveBeenCalledWith(expectedPublishTocCatalogReqFirst);
-      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD);
+      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD, relativePath);
     });
 
     it('publish layer to catalog once if all tasks are done for RASTER_MAP', async function () {
@@ -97,6 +99,7 @@ describe('TasksManager', () => {
         completed: true,
         successful: true,
         metadata: rasterMapTestData,
+        relativePath: `test/1/${ProductType.RASTER_MAP}`,
       });
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
@@ -119,13 +122,20 @@ describe('TasksManager', () => {
 
       expect(triggerSyncMock).toHaveBeenCalledTimes(1);
       const mapPublishReqForRasterMap = { ...mapPublishReq };
-      mapPublishReqForRasterMap.name = `test-1-${ProductType.RASTER_MAP}`;
+      mapPublishReqForRasterMap.name = `test-1-${rasterMapTestData.productType}`;
+      mapPublishReqForRasterMap.tilesPath = `test/1/${rasterMapTestData.productType}`;
       expect(publishLayerMock).toHaveBeenCalledWith(mapPublishReqForRasterMap);
 
       const expectedPublishTocCatalogReq = { ...catalogReqData };
       expectedPublishTocCatalogReq.metadata.productType = ProductType.RASTER_MAP;
       expect(publishToCatalogMock).toHaveBeenCalledWith(expectedPublishTocCatalogReq);
-      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD);
+      expect(triggerSyncMock).toHaveBeenCalledWith(
+        'test',
+        '1',
+        SyncTypeEnum.NEW_DISCRETE,
+        OperationTypeEnum.ADD,
+        mapPublishReqForRasterMap.tilesPath
+      );
     });
 
     it('do nothing if some tasks are not done', async function () {
