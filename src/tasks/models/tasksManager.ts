@@ -109,6 +109,7 @@ export class TasksManager {
   private async publishToMappingServer(jobId: string, metadata: LayerMetadata, layerName: string): Promise<void> {
     const id = metadata.productId as string;
     const version = metadata.productVersion as string;
+    const productType = metadata.productType as string;
     try {
       this.logger.log('info', `[TasksManager][publishToMappingServer] layer ${id} version  ${version}`);
       const maxZoom = this.zoomLevelCalculateor.getZoomByResolution(metadata.resolution as number);
@@ -116,7 +117,7 @@ export class TasksManager {
         name: `${layerName}`,
         description: metadata.description as string,
         maxZoomLevel: maxZoom,
-        tilesPath: `${id}/${version}`,
+        tilesPath: `${id}/${version}/${productType}`,
         cacheType: this.cacheType,
       };
       await this.mapPublisher.publishLayer(publishReq);

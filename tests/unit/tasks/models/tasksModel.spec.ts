@@ -34,8 +34,8 @@ describe('TasksManager', () => {
     const mapPublishReq = {
       description: 'test desc',
       maxZoomLevel: 18,
-      name: `test-1-${ProductType.ORTHOPHOTO_HISTORY}`,
-      tilesPath: 'test/1',
+      name: `test-1-${testMetadata.productType}`,
+      tilesPath: `test/1/${testMetadata.productType}`,
       cacheType: 'file',
     };
 
@@ -119,7 +119,8 @@ describe('TasksManager', () => {
 
       expect(triggerSyncMock).toHaveBeenCalledTimes(1);
       const mapPublishReqForRasterMap = { ...mapPublishReq };
-      mapPublishReqForRasterMap.name = `test-1-${ProductType.RASTER_MAP}`;
+      mapPublishReqForRasterMap.name = `test-1-${rasterMapTestData.productType}`;
+      mapPublishReqForRasterMap.tilesPath = `test/1/${rasterMapTestData.productType}`;
       expect(publishLayerMock).toHaveBeenCalledWith(mapPublishReqForRasterMap);
 
       const expectedPublishTocCatalogReq = { ...catalogReqData };
