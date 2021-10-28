@@ -9,6 +9,7 @@ export interface ISyncClientRequest {
   version: string;
   operation: OperationTypeEnum;
   sourceType?: SyncTypeEnum;
+  layerRelativePath: string;
 }
 
 export enum SyncTypeEnum {
@@ -33,13 +34,20 @@ export class SyncClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('syncServiceURL');
   }
 
-  public async triggerSync(resourceId: string, version: string, syncType: SyncTypeEnum, operation: OperationTypeEnum): Promise<void> {
+  public async triggerSync(
+    resourceId: string,
+    version: string,
+    syncType: SyncTypeEnum,
+    operation: OperationTypeEnum,
+    layerRelativePath: string
+  ): Promise<void> {
     this.logger.log('info', `[SyncClient][triggerSync] resourceId=${resourceId}, version=${version}, syncType=${syncType}`);
     const createSyncRequest: ISyncClientRequest = {
       resourceId: resourceId,
       version: version,
       sourceType: syncType,
       operation: operation,
+      layerRelativePath,
     };
     await this.post(`/synchronize/trigger`, createSyncRequest);
   }

@@ -67,7 +67,8 @@ export class TasksManager {
               res.metadata.productId as string,
               res.metadata.productVersion as string,
               SyncTypeEnum.NEW_DISCRETE,
-              OperationTypeEnum.ADD
+              OperationTypeEnum.ADD,
+              res.relativePath
             );
           } catch (err) {
             this.logger.log(

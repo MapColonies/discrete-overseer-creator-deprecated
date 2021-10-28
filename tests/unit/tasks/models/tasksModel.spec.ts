@@ -82,9 +82,10 @@ describe('TasksManager', () => {
 
       const expectedPublishTocCatalogReqFirst = { ...catalogReqData };
       expectedPublishTocCatalogReqFirst.metadata.productType = ProductType.ORTHOPHOTO;
+      const relativePath = `test/1/${ProductType.ORTHOPHOTO_HISTORY}`;
       expect(publishToCatalogMock).toHaveBeenCalledWith(catalogReqData);
       expect(publishToCatalogMock).toHaveBeenCalledWith(expectedPublishTocCatalogReqFirst);
-      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD);
+      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD, relativePath);
     });
 
     it('publish layer to catalog once if all tasks are done for RASTER_MAP', async function () {
@@ -128,7 +129,13 @@ describe('TasksManager', () => {
       const expectedPublishTocCatalogReq = { ...catalogReqData };
       expectedPublishTocCatalogReq.metadata.productType = ProductType.RASTER_MAP;
       expect(publishToCatalogMock).toHaveBeenCalledWith(expectedPublishTocCatalogReq);
-      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD);
+      expect(triggerSyncMock).toHaveBeenCalledWith(
+        'test',
+        '1',
+        SyncTypeEnum.NEW_DISCRETE,
+        OperationTypeEnum.ADD,
+        mapPublishReqForRasterMap.tilesPath
+      );
     });
 
     it('do nothing if some tasks are not done', async function () {
