@@ -76,6 +76,7 @@ export class StorageClient extends HttpClient {
   public async createLayerTasks(data: IngestionParams, zoomRanges: ITaskZoomRange[]): Promise<void> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
+    const productType = data.metadata.productType;
     const fileNames = data.fileNames;
     const originDirectory = data.originDirectory;
     const createLayerTasksUrl = `/jobs`;
@@ -95,6 +96,7 @@ export class StorageClient extends HttpClient {
             originDirectory: originDirectory,
             minZoom: range.minZoom,
             maxZoom: range.maxZoom,
+            productType: productType,
           },
         };
       }),
