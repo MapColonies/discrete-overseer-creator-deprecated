@@ -52,6 +52,7 @@ describe('TasksManager', () => {
         completed: true,
         successful: true,
         metadata: testMetadata,
+        relativePath: `test/1/${ProductType.ORTHOPHOTO_HISTORY}`,
       });
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
@@ -97,6 +98,7 @@ describe('TasksManager', () => {
         completed: true,
         successful: true,
         metadata: rasterMapTestData,
+        relativePath: `test/1/${ProductType.RASTER_MAP}`,
       });
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);

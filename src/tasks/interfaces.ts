@@ -4,6 +4,7 @@ export interface ICompletedTasks {
   completed: boolean;
   successful: boolean;
   metadata: LayerMetadata;
+  relativePath: string;
 }
 
 export interface ITaskZoomRange {

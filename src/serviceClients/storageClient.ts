@@ -1,6 +1,6 @@
 import config, { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
-import { IngestionParams } from '@map-colonies/mc-model-types';
+import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
@@ -76,16 +76,17 @@ export class StorageClient extends HttpClient {
   public async createLayerTasks(data: IngestionParams, zoomRanges: ITaskZoomRange[]): Promise<void> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
-    const productType = data.metadata.productType;
+    const productType = data.metadata.productType as ProductType;
     const fileNames = data.fileNames;
     const originDirectory = data.originDirectory;
     const createLayerTasksUrl = `/jobs`;
+    const layerRelativePath = `${resourceId}/${version}/${productType}`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
       version: version,
       type: jobType,
       status: OperationStatus.IN_PROGRESS,
-      parameters: data as unknown as Record<string, unknown>,
+      parameters: { ...data, layerRelativePath } as unknown as Record<string, unknown>,
       tasks: zoomRanges.map((range) => {
         return {
           type: taskType,
@@ -96,7 +97,7 @@ export class StorageClient extends HttpClient {
             originDirectory: originDirectory,
             minZoom: range.minZoom,
             maxZoom: range.maxZoom,
-            productType: productType,
+            layerRelativePath: layerRelativePath,
           },
         };
       }),
@@ -125,6 +126,7 @@ export class StorageClient extends HttpClient {
       completed: completedCounter + failedCounter == (res.tasks?.length ?? 0),
       successful: failedCounter === 0,
       metadata: (res.parameters as unknown as IngestionParams).metadata,
+      relativePath: (res.parameters as unknown as { layerRelativePath: string }).layerRelativePath,
     };
   }
 

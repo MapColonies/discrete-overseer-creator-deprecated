@@ -42,7 +42,7 @@ export class TasksManager {
           res.metadata.productVersion as string,
           res.metadata.productType as ProductType
         );
-        await this.publishToMappingServer(jobId, res.metadata, layerName);
+        await this.publishToMappingServer(jobId, res.metadata, layerName, res.relativePath);
         await this.publishToCatalog(jobId, res.metadata, layerName);
 
         // todo: In update scenario need to change the logic to support history and update unified files
@@ -54,7 +54,7 @@ export class TasksManager {
             clonedLayer.productVersion as string,
             clonedLayer.productType
           );
-          await this.publishToMappingServer(jobId, res.metadata, unifiedLayerName);
+          await this.publishToMappingServer(jobId, res.metadata, unifiedLayerName, res.relativePath);
           await this.publishToCatalog(jobId, clonedLayer, unifiedLayerName);
         }
         await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
@@ -106,10 +106,9 @@ export class TasksManager {
     }
   }
 
-  private async publishToMappingServer(jobId: string, metadata: LayerMetadata, layerName: string): Promise<void> {
+  private async publishToMappingServer(jobId: string, metadata: LayerMetadata, layerName: string, relativePath: string): Promise<void> {
     const id = metadata.productId as string;
     const version = metadata.productVersion as string;
-    const productType = metadata.productType as string;
     try {
       this.logger.log('info', `[TasksManager][publishToMappingServer] layer ${id} version  ${version}`);
       const maxZoom = this.zoomLevelCalculateor.getZoomByResolution(metadata.resolution as number);
@@ -117,7 +116,7 @@ export class TasksManager {
         name: `${layerName}`,
         description: metadata.description as string,
         maxZoomLevel: maxZoom,
-        tilesPath: `${id}/${version}/${productType}`,
+        tilesPath: relativePath,
         cacheType: this.cacheType,
       };
       await this.mapPublisher.publishLayer(publishReq);
