@@ -68,8 +68,8 @@ paths:
                   type: string
                 operation:
                   $ref: '#/components/schemas/operation'
-                sourceType:
-                  $ref: '#/components/schemas/sourceType'
+                productType:
+                  $ref: '#/components/schemas/productType'
               required:
                 - productId
                 - productVersion
@@ -92,21 +92,14 @@ components:
           type: object
           properties:
             productType:
-              type: string
-              enum:
-                - Orthophoto
-                - OrthophotoHistory
-                - RasterMap
-                - RasterAid
-                - RasterVector
-              description: valid product types for ingestion
+              $ref: '#/components/schemas/productType'
     tocResponse:
       type: object
       properties:
         operation:
           $ref: '#/components/schemas/operation'
-        sourceType:
-          $ref: '#/components/schemas/sourceType'
+        productType:
+          $ref: '#/components/schemas/productType'
         metadata:
           type: object
           properties:
@@ -123,8 +116,12 @@ components:
         - ADD
         - UPDATE
         - REMOVE
-    sourceType:
+    productType:
       type: string
       enum:
-        - DISCRETE
-        - BSETMOSAIC
+        - Orthophoto
+        - OrthophotoHistory
+        - RasterMap
+        - RasterAid
+        - RasterVector
+      description: valid product types for ingestion

@@ -8,7 +8,7 @@ import { configMock, init as initMockConfig, setValue } from '../../../mocks/con
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
 import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
-import { OperationTypeEnum, SyncTypeEnum } from '../../../../src/serviceClients/syncClient';
+import { OperationTypeEnum } from '../../../../src/serviceClients/syncClient';
 
 let tasksManager: TasksManager;
 
@@ -85,7 +85,7 @@ describe('TasksManager', () => {
       const relativePath = `test/1/${ProductType.ORTHOPHOTO_HISTORY}`;
       expect(publishToCatalogMock).toHaveBeenCalledWith(catalogReqData);
       expect(publishToCatalogMock).toHaveBeenCalledWith(expectedPublishTocCatalogReqFirst);
-      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', SyncTypeEnum.NEW_DISCRETE, OperationTypeEnum.ADD, relativePath);
+      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', ProductType.ORTHOPHOTO_HISTORY, OperationTypeEnum.ADD, relativePath);
     });
 
     it('publish layer to catalog once if all tasks are done for RASTER_MAP', async function () {
@@ -132,7 +132,7 @@ describe('TasksManager', () => {
       expect(triggerSyncMock).toHaveBeenCalledWith(
         'test',
         '1',
-        SyncTypeEnum.NEW_DISCRETE,
+        ProductType.ORTHOPHOTO_HISTORY,
         OperationTypeEnum.ADD,
         mapPublishReqForRasterMap.tilesPath
       );

@@ -27,11 +27,12 @@ export class CatalogClient extends HttpClient {
     return res.length > 0;
   }
 
-  public async getMetadata(productId: string, productVersion: string): Promise<LayerMetadata | undefined> {
+  public async getMetadata(productId: string, productVersion: string, productType: string): Promise<LayerMetadata | undefined> {
     const req = {
       metadata: {
         productId,
         productVersion,
+        productType,
       },
     };
 

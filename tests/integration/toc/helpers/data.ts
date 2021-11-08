@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { LayerMetadata, ProductType, RecordType, SensorType } from '@map-colonies/mc-model-types';
 import xmlbuilder from 'xmlbuilder';
-import { ITocParams, TocOperation, TocSourceType } from '../../../../src/toc/interfaces';
+import { ITocParams, TocOperation } from '../../../../src/toc/interfaces';
 
 export const validTestImageMetadata: LayerMetadata = {
   productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
@@ -47,14 +47,14 @@ export const validTestImageMetadata: LayerMetadata = {
 
 export const validTestData: ITocParams = {
   operation: TocOperation.ADD,
-  sourceType: TocSourceType.BSETMOSAIC,
+  productType: ProductType.ORTHOPHOTO_HISTORY,
   productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   productVersion: '1.23',
 };
 
 export const validTestResponseData = {
   operation: TocOperation.ADD,
-  sourceType: TocSourceType.BSETMOSAIC,
+  productType: ProductType.ORTHOPHOTO_HISTORY,
   metadata: validTestImageMetadata,
 };
 

@@ -9,7 +9,7 @@ import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { StorageClient } from '../../serviceClients/storageClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
-import { OperationTypeEnum, SyncClient, SyncTypeEnum } from '../../serviceClients/syncClient';
+import { OperationTypeEnum, SyncClient } from '../../serviceClients/syncClient';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 
 @injectable()
@@ -66,7 +66,7 @@ export class TasksManager {
             await this.syncClient.triggerSync(
               res.metadata.productId as string,
               res.metadata.productVersion as string,
-              SyncTypeEnum.NEW_DISCRETE,
+              res.metadata.productType as ProductType,
               OperationTypeEnum.ADD,
               res.relativePath
             );

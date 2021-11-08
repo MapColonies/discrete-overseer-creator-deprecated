@@ -31,9 +31,11 @@ export class TocManager {
 
     if (params.operation != TocOperation.REMOVE) {
       // Get metadata
-      const data = await this.client.getMetadata(params.productId, params.productVersion);
+      const data = await this.client.getMetadata(params.productId, params.productVersion, params.productType);
       if (data === undefined) {
-        throw new NotFoundError(`Wanted ${params.sourceType} does not exist. id: ${params.productId}, version: ${params.productVersion}`);
+        throw new NotFoundError(
+          `Wanted productType: ${params.productType} does not exist. id: ${params.productId}, version: ${params.productVersion}`
+        );
       }
       metadata = data;
     } else {
@@ -45,7 +47,7 @@ export class TocManager {
 
     return {
       operation: params.operation,
-      sourceType: params.sourceType,
+      productType: params.productType,
       metadata,
     };
   }
