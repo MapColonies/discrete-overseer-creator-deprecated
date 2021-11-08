@@ -129,13 +129,7 @@ describe('TasksManager', () => {
       const expectedPublishTocCatalogReq = { ...catalogReqData };
       expectedPublishTocCatalogReq.metadata.productType = ProductType.RASTER_MAP;
       expect(publishToCatalogMock).toHaveBeenCalledWith(expectedPublishTocCatalogReq);
-      expect(triggerSyncMock).toHaveBeenCalledWith(
-        'test',
-        '1',
-        ProductType.RASTER_MAP,
-        OperationTypeEnum.ADD,
-        mapPublishReqForRasterMap.tilesPath
-      );
+      expect(triggerSyncMock).toHaveBeenCalledWith('test', '1', ProductType.RASTER_MAP, OperationTypeEnum.ADD, mapPublishReqForRasterMap.tilesPath);
     });
 
     it('do nothing if some tasks are not done', async function () {
