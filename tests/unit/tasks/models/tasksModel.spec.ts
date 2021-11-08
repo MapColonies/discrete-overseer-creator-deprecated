@@ -132,7 +132,7 @@ describe('TasksManager', () => {
       expect(triggerSyncMock).toHaveBeenCalledWith(
         'test',
         '1',
-        ProductType.ORTHOPHOTO_HISTORY,
+        ProductType.RASTER_MAP,
         OperationTypeEnum.ADD,
         mapPublishReqForRasterMap.tilesPath
       );
