@@ -63,7 +63,6 @@ paths:
               properties:
                 productId:
                   type: string
-                  format: uuid
                 productVersion:
                   type: string
                 operation:
@@ -101,15 +100,14 @@ components:
         productType:
           $ref: '#/components/schemas/productType'
         metadata:
-          type: object
-          properties:
-            productId:
-              type: string
-              format: uuid
-            productVersion:
-              type: string
-            data:
-              $ref: './Schema/updateLayerMetadata.yaml#/components/schemas/updateLayerMetadata'
+          oneOf:
+            - $ref: './Schema/updateLayerMetadata.yaml#/components/schemas/updateLayerMetadata'
+            - type: object
+              properties:
+                productId:
+                  type: string
+                productVersion:
+                  type: string
     operation:
       type: string
       enum:
