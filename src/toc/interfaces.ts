@@ -1,14 +1,9 @@
-import { LayerMetadata } from '@map-colonies/mc-model-types';
+import { LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 
 export enum TocOperation {
   ADD = 'ADD',
   UPDATE = 'UPDATE',
   REMOVE = 'REMOVE',
-}
-
-export enum TocSourceType {
-  DISCRETE = 'DISCRETE',
-  BSETMOSAIC = 'BSETMOSAIC',
 }
 
 export enum SchemaType {
@@ -18,13 +13,13 @@ export enum SchemaType {
 
 export interface ITocParams {
   operation: TocOperation;
-  sourceType: TocSourceType;
+  productType: ProductType;
   productId: string;
   productVersion: string;
 }
 
 export interface ITocResponse {
   operation: TocOperation;
-  sourceType: TocSourceType;
+  productType: ProductType;
   metadata: LayerMetadata;
 }

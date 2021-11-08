@@ -1,5 +1,6 @@
 import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
+import { ProductType } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
@@ -8,13 +9,8 @@ export interface ISyncClientRequest {
   resourceId: string;
   version: string;
   operation: OperationTypeEnum;
-  sourceType?: SyncTypeEnum;
+  productType: ProductType;
   layerRelativePath: string;
-}
-
-export enum SyncTypeEnum {
-  NEW_DISCRETE = 'NEW_DISCRETE',
-  UPDATED_DISCRETE = 'UPDATED_DISCRETE',
 }
 
 export enum OperationTypeEnum {
@@ -37,16 +33,16 @@ export class SyncClient extends HttpClient {
   public async triggerSync(
     resourceId: string,
     version: string,
-    syncType: SyncTypeEnum,
+    productType: ProductType,
     operation: OperationTypeEnum,
     layerRelativePath: string
   ): Promise<void> {
-    this.logger.log('info', `[SyncClient][triggerSync] resourceId=${resourceId}, version=${version}, syncType=${syncType}`);
+    this.logger.log('info', `[SyncClient][triggerSync] resourceId=${resourceId}, version=${version}, productType=${productType}`);
     const createSyncRequest: ISyncClientRequest = {
-      resourceId: resourceId,
-      version: version,
-      sourceType: syncType,
-      operation: operation,
+      resourceId,
+      version,
+      productType,
+      operation,
       layerRelativePath,
     };
     await this.post(`/synchronize/trigger`, createSyncRequest);

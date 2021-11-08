@@ -63,13 +63,12 @@ paths:
               properties:
                 productId:
                   type: string
-                  format: uuid
                 productVersion:
                   type: string
                 operation:
                   $ref: '#/components/schemas/operation'
-                sourceType:
-                  $ref: '#/components/schemas/sourceType'
+                productType:
+                  $ref: '#/components/schemas/productType'
               required:
                 - productId
                 - productVersion
@@ -92,39 +91,35 @@ components:
           type: object
           properties:
             productType:
-              type: string
-              enum:
-                - Orthophoto
-                - OrthophotoHistory
-                - RasterMap
-                - RasterAid
-                - RasterVector
-              description: valid product types for ingestion
+              $ref: '#/components/schemas/productType'
     tocResponse:
       type: object
       properties:
         operation:
           $ref: '#/components/schemas/operation'
-        sourceType:
-          $ref: '#/components/schemas/sourceType'
+        productType:
+          $ref: '#/components/schemas/productType'
         metadata:
-          type: object
-          properties:
-            productId:
-              type: string
-              format: uuid
-            productVersion:
-              type: string
-            data:
-              $ref: './Schema/updateLayerMetadata.yaml#/components/schemas/updateLayerMetadata'
+          oneOf:
+            - $ref: './Schema/updateLayerMetadata.yaml#/components/schemas/updateLayerMetadata'
+            - type: object
+              properties:
+                productId:
+                  type: string
+                productVersion:
+                  type: string
     operation:
       type: string
       enum:
         - ADD
         - UPDATE
         - REMOVE
-    sourceType:
+    productType:
       type: string
       enum:
-        - DISCRETE
-        - BSETMOSAIC
+        - Orthophoto
+        - OrthophotoHistory
+        - RasterMap
+        - RasterAid
+        - RasterVector
+      description: valid product types for ingestion
