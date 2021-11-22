@@ -115,7 +115,6 @@ export class TasksManager {
       const maxZoom = this.zoomLevelCalculateor.getZoomByResolution(metadata.resolution as number);
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
-        description: metadata.description as string,
         maxZoomLevel: maxZoom,
         tilesPath: relativePath,
         cacheType: this.cacheType,
