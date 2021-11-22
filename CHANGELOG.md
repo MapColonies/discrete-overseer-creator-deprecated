@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.5.3...v1.6.0) (2021-11-22)
+
+
+### Features
+
+* update sync and ToC API ([#87](https://github.com/MapColonies/discrete-overseer-creator/issues/87)) ([0ccc722](https://github.com/MapColonies/discrete-overseer-creator/commit/0ccc7226ec1f42e62087f9d80de51ab9df0b8c1e))
+
+
+### Bug Fixes
+
+* removed unnecessary desc field ([#88](https://github.com/MapColonies/discrete-overseer-creator/issues/88)) ([3db74e7](https://github.com/MapColonies/discrete-overseer-creator/commit/3db74e7f7b2b8faa6e67662a25ba1755bd9e734c))
+
 ### [1.5.3](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.5.2...v1.5.3) (2021-11-07)
 
 ### [1.5.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.5.1...v1.5.2) (2021-10-26)

@@ -1,6 +1,6 @@
 {
   "name": "discrete-overseer-creator",
-  "version": "1.5.3",
+  "version": "1.6.0",
   "description": "This is template for map colonies typescript service",
   "main": "./src/index.ts",
   "scripts": {
