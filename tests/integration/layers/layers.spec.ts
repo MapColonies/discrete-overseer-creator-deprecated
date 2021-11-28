@@ -86,6 +86,9 @@ describe('layers', function () {
       const response = await requestSender.createLayer(validTestData);
 
       expect(response.status).toBe(httpStatusCodes.OK);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -94,15 +97,20 @@ describe('layers', function () {
     it('should return 400 status code for invalid Test Data', async function () {
       const response = await requestSender.createLayer(invalidTestData);
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 400 status code for id field', async function () {
-      findJobsMock.mockResolvedValue([]);
       let invalidTestMetaDataHasId = { ...validTestData.metadata } as Record<string, unknown>;
       invalidTestMetaDataHasId = { ...invalidTestMetaDataHasId, id: 'test id' };
       const invalidTestData = { ...validTestData, metadata: invalidTestMetaDataHasId };
       const response = await requestSender.createLayer(invalidTestData);
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 400 status code for invalid product type', async function () {
@@ -111,6 +119,9 @@ describe('layers', function () {
       const invalidTestDataForProductType = { ...validTestData, metadata: invalidTestMetaDataProductType };
       const response = await requestSender.createLayer(invalidTestDataForProductType);
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -122,6 +133,9 @@ describe('layers', function () {
 
       const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 500 status code on db error', async function () {
@@ -130,6 +144,9 @@ describe('layers', function () {
       });
       const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 409 status code when layer exists in map server', async function () {
@@ -137,6 +154,9 @@ describe('layers', function () {
       mapExistsMock.mockResolvedValue(true);
       const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
     });
 
     it('should return 409 status code when layer exists in catalog', async function () {
@@ -144,6 +164,9 @@ describe('layers', function () {
       catalogExistsMock.mockResolvedValue(true);
       const response = await requestSender.createLayer(validTestData);
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
     });
   });
 });
