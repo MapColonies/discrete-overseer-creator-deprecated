@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.6.0...v1.7.0) (2021-11-28)
+
+
+### Features
+
+* added payload limit configuration ([#89](https://github.com/MapColonies/discrete-overseer-creator/issues/89)) ([83557be](https://github.com/MapColonies/discrete-overseer-creator/commit/83557bef363021ae67d5990db8b14b64cb3d1cd4))
+
 ## [1.6.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.5.3...v1.6.0) (2021-11-22)
 
 
