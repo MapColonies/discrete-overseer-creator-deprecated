@@ -26,7 +26,7 @@ export class LayersManager {
   ) {}
 
   public async createLayer(data: IngestionParams): Promise<void> {
-    const convertedData: Record<string, unknown> = (data.metadata as unknown) as Record<string, unknown>;
+    const convertedData: Record<string, unknown> = data.metadata as unknown as Record<string, unknown>;
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }

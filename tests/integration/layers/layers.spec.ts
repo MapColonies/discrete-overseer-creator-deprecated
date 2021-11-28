@@ -1,4 +1,4 @@
-import { IngestionParams, LayerMetadata, ProductType, SensorType } from '@map-colonies/mc-model-types';
+import { LayerMetadata, ProductType, SensorType } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
@@ -99,8 +99,8 @@ describe('layers', function () {
     it('should return 400 status code for id field', async function () {
       findJobsMock.mockResolvedValue([]);
       let invalidTestMetaDataHasId = { ...validTestData.metadata } as Record<string, unknown>;
-      invalidTestMetaDataHasId = { ...invalidTestMetaDataHasId, id: "test id" };
-      const invalidTestData = {...validTestData, metadata: invalidTestMetaDataHasId };
+      invalidTestMetaDataHasId = { ...invalidTestMetaDataHasId, id: 'test id' };
+      const invalidTestData = { ...validTestData, metadata: invalidTestMetaDataHasId };
       const response = await requestSender.createLayer(invalidTestData);
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });

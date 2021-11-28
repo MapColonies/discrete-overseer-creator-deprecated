@@ -1,7 +1,6 @@
 import * as supertest from 'supertest';
 import { Application } from 'express';
 import { container } from 'tsyringe';
-import { IngestionParams } from '@map-colonies/mc-model-types';
 import { ServerBuilder } from '../../../../src/serverBuilder';
 
 let app: Application | null = null;
