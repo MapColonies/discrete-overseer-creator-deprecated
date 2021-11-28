@@ -11,6 +11,6 @@ export function init(): void {
   app = builder.build();
 }
 
-export async function createLayer(body: IngestionParams): Promise<supertest.Response> {
+export async function createLayer(body: Record<string, unknown>): Promise<supertest.Response> {
   return supertest.agent(app).post('/layers').set('Content-Type', 'application/json').send(body);
 }
