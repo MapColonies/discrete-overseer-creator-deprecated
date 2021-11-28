@@ -6,7 +6,12 @@
     "level": "LOG_LEVEL"
   },
   "server": {
-    "port": "SERVER_PORT"
+    "port": "SERVER_PORT",
+    "request": {
+      "payload": {
+        "limit": "REQUEST_PAYLOAD_LIMIT"
+      }
+    }
   },
   "LayerSourceDir": "LAYER_SOURCE_DIR",
   "StorageProvider": "STORAGE_PROVIDER",

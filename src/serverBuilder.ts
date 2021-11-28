@@ -40,7 +40,7 @@ export class ServerBuilder {
   }
 
   private registerPreRoutesMiddleware(): void {
-    this.serverInstance.use(bodyParser.json());
+    this.serverInstance.use(bodyParser.json(this.config.get<bodyParser.Options>('server.request.payload')));
     this.serverInstance.use(this.requestLogger.getLoggerMiddleware());
     const ignorePathRegex = new RegExp(`^${this.config.get<string>('openapiConfig.basePath')}/.*`, 'i');
     const apiSpecPath = this.config.get<string>('openapiConfig.filePath');
