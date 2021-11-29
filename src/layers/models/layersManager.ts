@@ -26,6 +26,11 @@ export class LayersManager {
   ) {}
 
   public async createLayer(data: IngestionParams): Promise<void> {
+    const convertedData: Record<string, unknown> = data.metadata as unknown as Record<string, unknown>;
+    if (convertedData.id !== undefined) {
+      throw new BadRequestError(`received invalid field id`);
+    }
+
     if (data.metadata.productType === ProductType.ORTHOPHOTO) {
       data.metadata.productType = ProductType.ORTHOPHOTO_HISTORY;
     }
