@@ -34,7 +34,7 @@ export class TocManager {
       const data = await this.client.getMetadata(params.productId, params.productVersion, params.productType);
       if (data === undefined) {
         throw new NotFoundError(
-          `Wanted productType: ${params.productType} does not exist. id: ${params.productId}, version: ${params.productVersion}`
+          `record not found in catalog with params: productType: ${params.productType}, productId: ${params.productId}, productVersion: ${params.productVersion}`
         );
       }
       metadata = data;
