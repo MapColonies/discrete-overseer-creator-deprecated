@@ -1,6 +1,6 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
-import { getCompletedZoomLevelsMock } from '../../mocks/clients/storageClient';
+import { getCompletedZoomLevelsMock } from '../../mocks/clients/jobManagerClient';
 import { publishLayerMock } from '../../mocks/clients/mapPublisherClient';
 import { publishToCatalogMock } from '../../mocks/clients/catalogClient';
 import { registerTestValues } from '../testContainerConfig';

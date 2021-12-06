@@ -9,7 +9,7 @@ import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { ILogger } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
-import { StorageClient } from '../../serviceClients/storageClient';
+import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { FileValidator } from './fileValidator';
@@ -19,7 +19,7 @@ export class LayersManager {
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
     private readonly zoomLevelCalculator: ZoomLevelCalculator,
-    private readonly db: StorageClient,
+    private readonly db: JobManagerClient,
     private readonly catalog: CatalogClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator

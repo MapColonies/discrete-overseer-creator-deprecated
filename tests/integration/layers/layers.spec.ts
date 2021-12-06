@@ -3,7 +3,7 @@ import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
 import { registerTestValues } from '../testContainerConfig';
-import { createLayerTasksMock, findJobsMock, mockCreateLayerTasks } from '../../mocks/clients/storageClient';
+import { createLayerTasksMock, findJobsMock, mockCreateLayerTasks } from '../../mocks/clients/jobManagerClient';
 import { mapExistsMock } from '../../mocks/clients/mapPublisherClient';
 import { catalogExistsMock } from '../../mocks/clients/catalogClient';
 import { OperationStatus } from '../../../src/common/enums';

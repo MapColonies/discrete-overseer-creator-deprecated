@@ -1,5 +1,5 @@
 import { LayerMetadata } from '@map-colonies/mc-model-types';
-import { StorageClient } from '../../../src/serviceClients/storageClient';
+import { JobManagerClient } from '../../../src/serviceClients/jobManagerClient';
 import { ITaskZoomRange } from '../../../src/tasks/interfaces';
 
 const createLayerTasksMock = jest.fn();
@@ -7,12 +7,12 @@ const getCompletedZoomLevelsMock = jest.fn();
 const updateJobStatusMock = jest.fn();
 const findJobsMock = jest.fn();
 
-const dbClientMock = {
+const jobManagerClientMock = {
   createLayerTasks: createLayerTasksMock,
   getCompletedZoomLevels: getCompletedZoomLevelsMock,
   updateJobStatus: updateJobStatusMock,
   findJobs: findJobsMock,
-} as unknown as StorageClient;
+} as unknown as JobManagerClient;
 
 function mockCreateLayerTasks(): void {
   const idBuilder = {
@@ -37,4 +37,4 @@ function mockCreateLayerTasks(): void {
   });
 }
 
-export { updateJobStatusMock, getCompletedZoomLevelsMock, createLayerTasksMock, findJobsMock, dbClientMock, mockCreateLayerTasks };
+export { updateJobStatusMock, getCompletedZoomLevelsMock, createLayerTasksMock, findJobsMock, jobManagerClientMock, mockCreateLayerTasks };

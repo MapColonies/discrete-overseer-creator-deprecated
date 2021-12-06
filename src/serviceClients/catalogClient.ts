@@ -4,6 +4,11 @@ import { Services } from '../common/constants';
 import { FindRecordResponse, IConfig, ILogger } from '../common/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
+interface ICreateRecordResponse {
+  id: string;
+  taskIds: string[];
+}
+
 @injectable()
 export class CatalogClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -48,7 +53,8 @@ export class CatalogClient extends HttpClient {
     return res[0].metadata;
   }
 
-  public async publish(record: IRasterCatalogUpsertRequestBody): Promise<void> {
-    await this.post('/records', record);
+  public async publish(record: IRasterCatalogUpsertRequestBody): Promise<string> {
+    const res = await this.post<ICreateRecordResponse>('/records', record);
+    return res.id;
   }
 }
