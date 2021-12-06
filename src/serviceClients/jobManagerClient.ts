@@ -25,6 +25,10 @@ interface ICreateJobBody {
   status?: OperationStatus;
   reason?: string;
   tasks?: ICreateTaskBody[];
+  internalId?: string;
+  producerName?: string;
+  productName?: string;
+  productType?: string;
 }
 
 interface ICreateJobResponse {
@@ -58,12 +62,22 @@ interface IGetJobResponse {
   status?: OperationStatus;
   percentage?: number;
   isCleaned: boolean;
+  internalId?: string;
+  producerName?: string;
+  productName?: string;
+  productType?: string;
+  taskCount: number;
+  completedTasks: number;
+  failedTasks: number;
+  expiredTasks: number;
+  pendingTasks: number;
+  inProgressTasks: number;
 }
 
 const jobType = config.get<string>('jobType');
 const taskType = config.get<string>('taskType');
 @injectable()
-export class StorageClient extends HttpClient {
+export class JobManagerClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, @inject(Services.CONFIG) config: IConfig) {
@@ -87,6 +101,9 @@ export class StorageClient extends HttpClient {
       type: jobType,
       status: OperationStatus.IN_PROGRESS,
       parameters: { ...data, layerRelativePath } as unknown as Record<string, unknown>,
+      producerName: data.metadata.producerName,
+      productName: data.metadata.productName,
+      productType: data.metadata.productType,
       tasks: zoomRanges.map((range) => {
         return {
           type: taskType,
@@ -108,33 +125,24 @@ export class StorageClient extends HttpClient {
 
   public async getCompletedZoomLevels(jobId: string): Promise<ICompletedTasks> {
     const getJobUrl = `/jobs/${jobId}`;
-    const res = await this.get<IGetJobResponse>(getJobUrl);
-    let completedCounter = 0;
-    let failedCounter = 0;
-    res.tasks?.forEach((task) => {
-      switch (task.status) {
-        case OperationStatus.COMPLETED:
-          completedCounter++;
-          break;
-        case OperationStatus.FAILED:
-          failedCounter++;
-          break;
-        default:
-      }
-    });
+    const query = {
+      shouldReturnTasks: false,
+    };
+    const res = await this.get<IGetJobResponse>(getJobUrl, query);
     return {
-      completed: completedCounter + failedCounter == (res.tasks?.length ?? 0),
-      successful: failedCounter === 0,
+      completed: res.completedTasks + res.failedTasks + res.expiredTasks == res.taskCount,
+      successful: res.completedTasks === res.taskCount,
       metadata: (res.parameters as unknown as IngestionParams).metadata,
       relativePath: (res.parameters as unknown as { layerRelativePath: string }).layerRelativePath,
     };
   }
 
-  public async updateJobStatus(jobId: string, status: OperationStatus, reason?: string): Promise<void> {
+  public async updateJobStatus(jobId: string, status: OperationStatus, reason?: string, catalogId?: string): Promise<void> {
     const updateTaskUrl = `/jobs/${jobId}`;
     await this.put(updateTaskUrl, {
       status: status,
       reason: reason,
+      internalId: catalogId,
     });
   }
 

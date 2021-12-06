@@ -1,7 +1,7 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { registerTestValues } from '../testContainerConfig';
-import { mockCreateLayerTasks } from '../../mocks/clients/storageClient';
+import { mockCreateLayerTasks } from '../../mocks/clients/jobManagerClient';
 import { getMetadataFromCatalogMock } from '../../mocks/clients/catalogClient';
 import { NotFoundError } from '../../../src/common/exceptions/http/notFoundError';
 import { InternalServerError } from '../../../src/common/exceptions/http/internalServerError';

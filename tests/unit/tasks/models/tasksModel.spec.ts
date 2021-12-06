@@ -1,6 +1,6 @@
 import { ProductType } from '@map-colonies/mc-model-types';
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
-import { dbClientMock, getCompletedZoomLevelsMock } from '../../../mocks/clients/storageClient';
+import { jobManagerClientMock, getCompletedZoomLevelsMock } from '../../../mocks/clients/jobManagerClient';
 import { mapPublisherClientMock, publishLayerMock } from '../../../mocks/clients/mapPublisherClient';
 import { catalogClientMock, publishToCatalogMock } from '../../../mocks/clients/catalogClient';
 import { syncClientMock, triggerSyncMock } from '../../../mocks/clients/syncClient';
@@ -60,7 +60,7 @@ describe('TasksManager', () => {
         configMock,
         syncClientMock,
         zoomLevelCalculator,
-        dbClientMock,
+        jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
         linkBuilderMock
@@ -107,7 +107,7 @@ describe('TasksManager', () => {
         configMock,
         syncClientMock,
         zoomLevelCalculator,
-        dbClientMock,
+        jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
         linkBuilderMock
@@ -145,7 +145,7 @@ describe('TasksManager', () => {
         configMock,
         syncClientMock,
         zoomLevelCalculator,
-        dbClientMock,
+        jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
         linkBuilderMock

@@ -6,7 +6,7 @@ import { IConfig, ILogger } from '../../common/interfaces';
 import { IPublishMapLayerRequest, PublishedMapLayerCacheType } from '../../layers/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
-import { StorageClient } from '../../serviceClients/storageClient';
+import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { OperationTypeEnum, SyncClient } from '../../serviceClients/syncClient';
@@ -21,8 +21,8 @@ export class TasksManager {
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig,
     @inject(SyncClient) private readonly syncClient: SyncClient,
-    private readonly zoomLevelCalculateor: ZoomLevelCalculator,
-    private readonly db: StorageClient,
+    private readonly zoomLevelCalculator: ZoomLevelCalculator,
+    private readonly jobManager: JobManagerClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly catalogClient: CatalogClient,
     private readonly linkBuilder: LinkBuilder
@@ -34,16 +34,17 @@ export class TasksManager {
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
     this.logger.log('info', `[TasksManager][taskComplete] checking tiling status of job ${jobId} task  ${taskId}`);
-    const res = await this.db.getCompletedZoomLevels(jobId);
+    const res = await this.jobManager.getCompletedZoomLevels(jobId);
     if (res.completed) {
       if (res.successful) {
+        let catalogId: string;
         const layerName = getMapServingLayerName(
           res.metadata.productId as string,
           res.metadata.productVersion as string,
           res.metadata.productType as ProductType
         );
         await this.publishToMappingServer(jobId, res.metadata, layerName, res.relativePath);
-        await this.publishToCatalog(jobId, res.metadata, layerName);
+        catalogId = await this.publishToCatalog(jobId, res.metadata, layerName);
 
         // todo: In update scenario need to change the logic to support history and update unified files
         if (res.metadata.productType === ProductType.ORTHOPHOTO_HISTORY) {
@@ -55,9 +56,9 @@ export class TasksManager {
             clonedLayer.productType
           );
           await this.publishToMappingServer(jobId, res.metadata, unifiedLayerName, res.relativePath);
-          await this.publishToCatalog(jobId, clonedLayer, unifiedLayerName);
+          catalogId = await this.publishToCatalog(jobId, clonedLayer, unifiedLayerName);
         }
-        await this.db.updateJobStatus(jobId, OperationStatus.COMPLETED);
+        await this.jobManager.updateJobStatus(jobId, OperationStatus.COMPLETED, catalogId);
 
         const shouldSync = this.config.get<boolean>('shouldSync');
 
@@ -84,12 +85,12 @@ export class TasksManager {
           'error',
           `[TasksManager][taskComplete] failed to generate tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`
         );
-        await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to generate tiles');
+        await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to generate tiles');
       }
     }
   }
 
-  private async publishToCatalog(jobId: string, metadata: LayerMetadata, layerName: string): Promise<void> {
+  private async publishToCatalog(jobId: string, metadata: LayerMetadata, layerName: string): Promise<string> {
     try {
       this.logger.log('info', `[TasksManager][publishToCatalog] layer ${metadata.productId as string} version ${metadata.productVersion as string}`);
       const linkData: ILinkBuilderData = {
@@ -100,9 +101,9 @@ export class TasksManager {
         metadata: metadata,
         links: this.linkBuilder.createLinks(linkData),
       };
-      await this.catalogClient.publish(publishModel);
+      return await this.catalogClient.publish(publishModel);
     } catch (err) {
-      await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer to catalog');
+      await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer to catalog');
       throw err;
     }
   }
@@ -112,7 +113,7 @@ export class TasksManager {
     const version = metadata.productVersion as string;
     try {
       this.logger.log('info', `[TasksManager][publishToMappingServer] layer ${id} version  ${version}`);
-      const maxZoom = this.zoomLevelCalculateor.getZoomByResolution(metadata.resolution as number);
+      const maxZoom = this.zoomLevelCalculator.getZoomByResolution(metadata.resolution as number);
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
         maxZoomLevel: maxZoom,
@@ -121,7 +122,7 @@ export class TasksManager {
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
-      await this.db.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer');
+      await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer');
       throw err;
     }
   }
