@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.7.0...v1.8.0) (2021-12-06)
+
+
+### Features
+
+* updated to new jpb manager api ([#93](https://github.com/MapColonies/discrete-overseer-creator/issues/93)) ([f4ac9a4](https://github.com/MapColonies/discrete-overseer-creator/commit/f4ac9a4494753d1e0aaddd43dec632983e41bf38))
+
+
+### Bug Fixes
+
+* prevent getting id in swagger ([#90](https://github.com/MapColonies/discrete-overseer-creator/issues/90)) ([3e89b5b](https://github.com/MapColonies/discrete-overseer-creator/commit/3e89b5b4aaca00d0bc9bf100393455492da77232))
+
 ## [1.7.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.6.0...v1.7.0) (2021-11-28)
 
 
