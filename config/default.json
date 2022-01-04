@@ -36,5 +36,5 @@
   "linkTemplatesPath": "config/linkTemplates.template",
   "jobType": "Discrete-Tiling",
   "taskType": "Discrete-Tiling",
-  "bboxSizeTiles" : 10000
+  "bboxSizeTiles": 10000
 }

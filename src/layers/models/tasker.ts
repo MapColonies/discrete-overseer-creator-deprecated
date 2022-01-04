@@ -20,10 +20,8 @@ export class Tasker {
     const taskParams: ITaskParameters[] = [];
     for (const zoomRange of zoomRanges) {
       const zoom = this.getZoom(zoomRange.maxZoom);
-      console.log(zoom);
       const tileGen = ranger.generateTiles(data.metadata.footprint as Polygon, zoom);
       for (const tile of tileGen) {
-        console.log(tile);
         taskParams.push({
           discreteId: data.metadata.productId as string,
           version: data.metadata.productVersion as string,
