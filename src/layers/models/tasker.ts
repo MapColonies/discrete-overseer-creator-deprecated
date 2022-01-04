@@ -39,6 +39,12 @@ export class Tasker {
     return taskParams;
   }
 
+  /**
+   * this function calculate the zoom level where tile contains the maximum amount of tiles
+   * in "maxRequestedZoom" that is smaller or equels to the configured value "bboxSizeTiles"
+   * @param maxRequestedZoom task maximum tile`s zoom
+   * @returns optimized zoom level for bbox equivalent tile
+   */
   private getZoom(maxRequestedZoom: number): number {
     /* eslint-disable @typescript-eslint/no-magic-numbers */
     const diff = Math.max(0, Math.floor(Math.log2(this.bboxSizeTiles >> 1) >> 1));
