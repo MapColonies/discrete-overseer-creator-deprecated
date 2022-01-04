@@ -4,12 +4,13 @@ import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
-import { ICompletedTasks, ITaskZoomRange } from '../tasks/interfaces';
+import { ICompletedTasks } from '../tasks/interfaces';
+import { ITaskParameters } from '../layers/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
 interface ICreateTaskBody {
   description?: string;
-  parameters: Record<string, unknown>;
+  parameters: ITaskParameters;
   reason?: string;
   type?: string;
   status?: OperationStatus;
@@ -87,12 +88,10 @@ export class JobManagerClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async createLayerTasks(data: IngestionParams, zoomRanges: ITaskZoomRange[]): Promise<void> {
+  public async createLayerTasks(data: IngestionParams, taskParams: ITaskParameters[]): Promise<void> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
-    const fileNames = data.fileNames;
-    const originDirectory = data.originDirectory;
     const createLayerTasksUrl = `/jobs`;
     const layerRelativePath = `${resourceId}/${version}/${productType}`;
     const createJobRequest: ICreateJobBody = {
@@ -104,18 +103,10 @@ export class JobManagerClient extends HttpClient {
       producerName: data.metadata.producerName,
       productName: data.metadata.productName,
       productType: data.metadata.productType,
-      tasks: zoomRanges.map((range) => {
+      tasks: taskParams.map((params) => {
         return {
           type: taskType,
-          parameters: {
-            discreteId: resourceId,
-            version: version,
-            fileNames: fileNames,
-            originDirectory: originDirectory,
-            minZoom: range.minZoom,
-            maxZoom: range.maxZoom,
-            layerRelativePath: layerRelativePath,
-          },
+          parameters: params,
         };
       }),
     };

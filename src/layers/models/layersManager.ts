@@ -13,6 +13,7 @@ import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { FileValidator } from './fileValidator';
+import { Tasker } from './tasker';
 
 @injectable()
 export class LayersManager {
@@ -22,7 +23,8 @@ export class LayersManager {
     private readonly db: JobManagerClient,
     private readonly catalog: CatalogClient,
     private readonly mapPublisher: MapPublisherClient,
-    private readonly fileValidator: FileValidator
+    private readonly fileValidator: FileValidator,
+    private readonly tasker: Tasker
   ) {}
 
   public async createLayer(data: IngestionParams): Promise<void> {
@@ -40,7 +42,8 @@ export class LayersManager {
     data.metadata.productBoundingBox = this.createBBox(data.metadata.footprint as GeoJSON);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.resolution as number);
-    await this.db.createLayerTasks(data, layerZoomRanges);
+    const taskParams = this.tasker.generateTasksParameters(data, layerZoomRanges);
+    await this.db.createLayerTasks(data, taskParams);
   }
 
   private async validateRunConditions(data: IngestionParams): Promise<void> {

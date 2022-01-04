@@ -40,5 +40,9 @@
   },
   "linkTemplatesPath": "LINKS_TEMPLATE_PATH",
   "jobType": "DISCRETE_JOB_TYPE",
-  "taskType": "DISCRETE_TASK_TYPE"
+  "taskType": "DISCRETE_TASK_TYPE",
+  "bboxSizeTiles": {
+    "__name": "BBOX_SIZE_TILES",
+    "__format": "number"
+  }
 }

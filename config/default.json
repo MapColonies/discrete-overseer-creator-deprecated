@@ -35,5 +35,6 @@
   "shouldSync": true,
   "linkTemplatesPath": "config/linkTemplates.template",
   "jobType": "Discrete-Tiling",
-  "taskType": "Discrete-Tiling"
+  "taskType": "Discrete-Tiling",
+  "bboxSizeTiles" : 10000
 }
