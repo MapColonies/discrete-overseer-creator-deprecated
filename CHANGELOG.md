@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.8.0...v1.9.0) (2022-01-05)
+
+
+### Features
+
+* added task bboxs ([#95](https://github.com/MapColonies/discrete-overseer-creator/issues/95)) ([69e4b0d](https://github.com/MapColonies/discrete-overseer-creator/commit/69e4b0d4818537100f7dc80074ad990d99cec1ff))
+
 ## [1.8.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.7.0...v1.8.0) (2021-12-06)
 
 
