@@ -55,7 +55,7 @@ const testImageMetadata: LayerMetadata = {
   productBoundingBox: undefined,
   rawProductData: undefined,
 };
-
+const layerRelativePath = 'test/1.22/OrthophotoHistory';
 const testData: IngestionParams = {
   fileNames: [],
   metadata: testImageMetadata,
@@ -104,7 +104,7 @@ describe('LayersManager', () => {
           originDirectory: 'test1-dir',
           minZoom: 1,
           maxZoom: 1,
-          layerRelativePath: 'test1layer',
+          layerRelativePath: layerRelativePath,
           bbox: [0, 0, 90, 90],
         },
         {
@@ -114,7 +114,7 @@ describe('LayersManager', () => {
           originDirectory: 'test1-dir',
           minZoom: 2,
           maxZoom: 3,
-          layerRelativePath: 'test1layer',
+          layerRelativePath: layerRelativePath,
           bbox: [0, 0, 90, 90],
         },
         {
@@ -124,7 +124,7 @@ describe('LayersManager', () => {
           originDirectory: 'test1-dir',
           minZoom: 2,
           maxZoom: 3,
-          layerRelativePath: 'test1layer',
+          layerRelativePath: layerRelativePath,
           bbox: [90, 0, 90, 180],
         },
       ];
@@ -152,12 +152,12 @@ describe('LayersManager', () => {
       await layersManager.createLayer(testData);
 
       expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
-      expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, [
+      expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
         { minZoom: 1, maxZoom: 1 },
         { minZoom: 2, maxZoom: 3 },
       ]);
       expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
-      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, taskParams);
+      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParams);
     });
 
     it('split the tasks based on configuration', async function () {
@@ -204,7 +204,7 @@ describe('LayersManager', () => {
           originDirectory: 'test1-dir',
           minZoom: 1,
           maxZoom: 1,
-          layerRelativePath: 'test1layer',
+          layerRelativePath: layerRelativePath,
           bbox: [0, 0, 90, 90],
         },
         {
@@ -214,7 +214,7 @@ describe('LayersManager', () => {
           originDirectory: 'test1-dir',
           minZoom: 2,
           maxZoom: 2,
-          layerRelativePath: 'test1layer',
+          layerRelativePath: layerRelativePath,
           bbox: [0, 0, 90, 90],
         },
         {
@@ -224,7 +224,7 @@ describe('LayersManager', () => {
           originDirectory: 'test1-dir',
           minZoom: 5,
           maxZoom: 8,
-          layerRelativePath: 'test1layer',
+          layerRelativePath: layerRelativePath,
           bbox: [0, 0, 90, 90],
         },
         {
@@ -234,7 +234,7 @@ describe('LayersManager', () => {
           originDirectory: 'test1-dir',
           minZoom: 5,
           maxZoom: 8,
-          layerRelativePath: 'test1layer',
+          layerRelativePath: layerRelativePath,
           bbox: [90, 0, 90, 180],
         },
       ];
@@ -262,13 +262,13 @@ describe('LayersManager', () => {
       await layersManager.createLayer(testData);
 
       expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
-      expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, [
+      expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
         { minZoom: 1, maxZoom: 1 },
         { minZoom: 5, maxZoom: 8 },
         { minZoom: 2, maxZoom: 2 },
       ]);
       expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
-      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, taskParms);
+      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParms);
     });
 
     it('fail if layer status is pending', async function () {

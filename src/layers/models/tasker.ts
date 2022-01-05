@@ -14,8 +14,7 @@ export class Tasker {
     this.bboxSizeTiles = config.get<number>('bboxSizeTiles');
   }
 
-  public generateTasksParameters(data: IngestionParams, zoomRanges: ITaskZoomRange[]): ITaskParameters[] {
-    const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productVersion as string}/${data.metadata.productType as string}`;
+  public generateTasksParameters(data: IngestionParams, layerRelativePath: string, zoomRanges: ITaskZoomRange[]): ITaskParameters[] {
     const ranger = new TileRanger();
     const taskParams: ITaskParameters[] = [];
     for (const zoomRange of zoomRanges) {

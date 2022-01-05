@@ -41,9 +41,10 @@ export class LayersManager {
     data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
     data.metadata.productBoundingBox = this.createBBox(data.metadata.footprint as GeoJSON);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
+    const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productVersion as string}/${data.metadata.productType as string}`;
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.resolution as number);
-    const taskParams = this.tasker.generateTasksParameters(data, layerZoomRanges);
-    await this.db.createLayerTasks(data, taskParams);
+    const taskParams = this.tasker.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
+    await this.db.createLayerTasks(data, layerRelativePath, taskParams);
   }
 
   private async validateRunConditions(data: IngestionParams): Promise<void> {

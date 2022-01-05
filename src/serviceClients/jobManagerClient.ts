@@ -1,6 +1,6 @@
 import config, { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
-import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
+import { IngestionParams } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
@@ -88,12 +88,10 @@ export class JobManagerClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async createLayerTasks(data: IngestionParams, taskParams: ITaskParameters[]): Promise<void> {
+  public async createLayerTasks(data: IngestionParams, layerRelativePath: string, taskParams: ITaskParameters[]): Promise<void> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
-    const productType = data.metadata.productType as ProductType;
     const createLayerTasksUrl = `/jobs`;
-    const layerRelativePath = `${resourceId}/${version}/${productType}`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
       version: version,

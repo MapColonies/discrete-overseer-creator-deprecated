@@ -52,13 +52,13 @@ describe('Tasker', () => {
     metadata: testImageMetadata,
     originDirectory: '/here',
   };
-
+  const layerRelativePath = `test/1.22/OrthophotoHistory`;
   const paramTemplate = {
     discreteId: 'test',
     version: '1.22',
     fileNames: ['file.test'],
     originDirectory: '/here',
-    layerRelativePath: `test/1.22/OrthophotoHistory`,
+    layerRelativePath: layerRelativePath,
   };
 
   beforeEach(() => {
@@ -75,7 +75,7 @@ describe('Tasker', () => {
       ];
       tasker = new Tasker(configMock);
 
-      const params = tasker.generateTasksParameters(testData, zoomRanges);
+      const params = tasker.generateTasksParameters(testData, layerRelativePath, zoomRanges);
 
       const expectedTasks = [
         { ...paramTemplate, minZoom: 1, maxZoom: 1, bbox: [0, -90, 180, 90] },
