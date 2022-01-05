@@ -10,6 +10,7 @@ import { ConflictError } from '../../../../src/common/exceptions/http/conflictEr
 import { BadRequestError } from '../../../../src/common/exceptions/http/badRequestError';
 import { OperationStatus } from '../../../../src/common/enums';
 import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
+import { generateTasksParametersMock, taskerMock } from '../../../mocks/tasker';
 
 let layersManager: LayersManager;
 
@@ -54,7 +55,7 @@ const testImageMetadata: LayerMetadata = {
   productBoundingBox: undefined,
   rawProductData: undefined,
 };
-
+const layerRelativePath = 'test/1.22/OrthophotoHistory';
 const testData: IngestionParams = {
   fileNames: [],
   metadata: testImageMetadata,
@@ -95,6 +96,38 @@ describe('LayersManager', () => {
           max_zoom_level: 3,
         },
       ];
+      const taskParams = [
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 1,
+          maxZoom: 1,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 2,
+          maxZoom: 3,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 2,
+          maxZoom: 3,
+          layerRelativePath: layerRelativePath,
+          bbox: [90, 0, 90, 180],
+        },
+      ];
 
       createLayerTasksMock.mockImplementation(async () => {
         return Promise.resolve(tillingReqs);
@@ -103,6 +136,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
+      generateTasksParametersMock.mockReturnValue(taskParams);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       layersManager = new LayersManager(
@@ -111,16 +145,19 @@ describe('LayersManager', () => {
         jobManagerClientMock,
         catalogClientMock,
         mapPublisherClientMock,
-        fileValidatorMock
+        fileValidatorMock,
+        taskerMock
       );
 
       await layersManager.createLayer(testData);
 
-      expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
-      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, [
+      expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
+      expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
         { minZoom: 1, maxZoom: 1 },
         { minZoom: 2, maxZoom: 3 },
       ]);
+      expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
+      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParams);
     });
 
     it('split the tasks based on configuration', async function () {
@@ -159,6 +196,48 @@ describe('LayersManager', () => {
           max_zoom_level: 2,
         },
       ];
+      const taskParms = [
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 1,
+          maxZoom: 1,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 2,
+          maxZoom: 2,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 5,
+          maxZoom: 8,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 5,
+          maxZoom: 8,
+          layerRelativePath: layerRelativePath,
+          bbox: [90, 0, 90, 180],
+        },
+      ];
       createLayerTasksMock.mockResolvedValue(tillingReqs);
 
       setValue({ 'tiling.zoomGroups': '1,8-5,2' });
@@ -167,6 +246,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
+      generateTasksParametersMock.mockReturnValue(taskParms);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       layersManager = new LayersManager(
@@ -175,16 +255,20 @@ describe('LayersManager', () => {
         jobManagerClientMock,
         catalogClientMock,
         mapPublisherClientMock,
-        fileValidatorMock
+        fileValidatorMock,
+        taskerMock
       );
 
       await layersManager.createLayer(testData);
 
-      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, [
+      expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
+      expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
         { minZoom: 1, maxZoom: 1 },
         { minZoom: 5, maxZoom: 8 },
         { minZoom: 2, maxZoom: 2 },
       ]);
+      expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
+      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParms);
     });
 
     it('fail if layer status is pending', async function () {
@@ -216,7 +300,8 @@ describe('LayersManager', () => {
         jobManagerClientMock,
         catalogClientMock,
         mapPublisherClientMock,
-        fileValidatorMock
+        fileValidatorMock,
+        taskerMock
       );
 
       const action = async () => {
@@ -253,7 +338,8 @@ describe('LayersManager', () => {
         jobManagerClientMock,
         catalogClientMock,
         mapPublisherClientMock,
-        fileValidatorMock
+        fileValidatorMock,
+        taskerMock
       );
 
       const action = async () => {
@@ -290,7 +376,8 @@ describe('LayersManager', () => {
         jobManagerClientMock,
         catalogClientMock,
         mapPublisherClientMock,
-        fileValidatorMock
+        fileValidatorMock,
+        taskerMock
       );
 
       const action = async () => {
@@ -327,7 +414,8 @@ describe('LayersManager', () => {
         jobManagerClientMock,
         catalogClientMock,
         mapPublisherClientMock,
-        fileValidatorMock
+        fileValidatorMock,
+        taskerMock
       );
 
       const action = async () => {
@@ -364,7 +452,8 @@ describe('LayersManager', () => {
         jobManagerClientMock,
         catalogClientMock,
         mapPublisherClientMock,
-        fileValidatorMock
+        fileValidatorMock,
+        taskerMock
       );
 
       const action = async () => {
@@ -401,7 +490,8 @@ describe('LayersManager', () => {
         jobManagerClientMock,
         catalogClientMock,
         mapPublisherClientMock,
-        fileValidatorMock
+        fileValidatorMock,
+        taskerMock
       );
 
       const action = async () => {
@@ -438,7 +528,8 @@ describe('LayersManager', () => {
         jobManagerClientMock,
         catalogClientMock,
         mapPublisherClientMock,
-        fileValidatorMock
+        fileValidatorMock,
+        taskerMock
       );
 
       const action = async () => {
