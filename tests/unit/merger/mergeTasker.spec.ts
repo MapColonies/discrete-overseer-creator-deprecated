@@ -3,6 +3,7 @@ import { bboxPolygon, polygon } from '@turf/turf';
 import { IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
 import { MergeTasker } from '../../../src/merger/mergeTasker';
 import { configMock, init as initConfig, setValue as setConfigValue, clear as clearConfig } from '../../mocks/config';
+import { logger } from '../../mocks/logger';
 
 describe('mergeTasker', () => {
   let mergeTasker: MergeTasker;
@@ -10,7 +11,7 @@ describe('mergeTasker', () => {
   beforeEach(() => {
     initConfig();
     setConfigValue('mergeBatchSize', 1);
-    mergeTasker = new MergeTasker(configMock);
+    mergeTasker = new MergeTasker(configMock, logger);
   });
 
   afterEach(() => {
@@ -196,7 +197,7 @@ describe('mergeTasker', () => {
       expect(tasks).toEqual(expect.arrayContaining(expectedTasks));
     });
 
-    fit('same footprint', () => {
+    it('same footprint', () => {
       const layers = [
         {
           id: 'test1',
