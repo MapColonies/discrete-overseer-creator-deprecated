@@ -195,5 +195,62 @@ describe('mergeTasker', () => {
       expect(tasks).toHaveLength(expectedTasks.length);
       expect(tasks).toEqual(expect.arrayContaining(expectedTasks));
     });
+
+    fit('same footprint', () => {
+      const layers = [
+        {
+          id: 'test1',
+          tilesPath: 'test/tile1',
+          footprint: bboxPolygon([-180, -90, 0, 90]),
+        },
+        {
+          id: 'test2',
+          tilesPath: 'test/tile2',
+          footprint: bboxPolygon([-180, -90, 0, 90]),
+        },
+      ];
+      const params: IMergeParameters = {
+        layers: layers,
+        destPath: 'test/dest',
+        maxZoom: 1,
+      };
+
+      const taskGen = mergeTasker.createBatchedTasks(params);
+      const tasks: IMergeTaskParams[] = [];
+      for (const task of taskGen) {
+        tasks.push(task);
+      }
+
+      const expectedTasks: IMergeTaskParams[] = [
+        {
+          sourcePaths: ['test/tile1', 'test/tile2'],
+          destPath: 'test/dest',
+          batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
+        },
+        {
+          sourcePaths: ['test/tile1', 'test/tile2'],
+          destPath: 'test/dest',
+          batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
+        },
+        {
+          sourcePaths: ['test/tile1', 'test/tile2'],
+          destPath: 'test/dest',
+          batch: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
+        },
+        {
+          sourcePaths: ['test/tile1', 'test/tile2'],
+          destPath: 'test/dest',
+          batch: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
+        },
+        {
+          sourcePaths: ['test/tile1', 'test/tile2'],
+          destPath: 'test/dest',
+          batch: [{ minX: 1, maxX: 2, minY: 1, maxY: 2, zoom: 1 }],
+        },
+      ];
+
+      expect(tasks).toHaveLength(expectedTasks.length);
+      expect(tasks).toEqual(expect.arrayContaining(expectedTasks));
+    });
   });
 });

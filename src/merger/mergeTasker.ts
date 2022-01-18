@@ -2,14 +2,14 @@ import { subGroupsGen, multiIntersect, Footprint, tileBatchGenerator, TileRanger
 import { difference, union, bbox as toBbox, bboxPolygon, Feature, Polygon } from '@turf/turf';
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../common/constants';
-import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams } from '../common/interfaces';
+import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams, ILogger } from '../common/interfaces';
 
 @singleton()
 export class MergeTasker {
   private readonly tileRanger: TileRanger;
   private readonly batchSize: number;
 
-  public constructor(@inject(Services.CONFIG) config: IConfig) {
+  public constructor(@inject(Services.CONFIG) config: IConfig, @inject(Services.LOGGER) private readonly logger: ILogger) {
     this.batchSize = config.get('mergeBatchSize');
     this.tileRanger = new TileRanger();
   }
@@ -18,25 +18,32 @@ export class MergeTasker {
     let totalIntersection = undefined;
     const subGroups = subGroupsGen(layers, layers.length);
     for (const subGroup of subGroups) {
-      const permutationFootprints = subGroup.map((layer) => layer.footprint as Footprint);
-      let intersection = multiIntersect(permutationFootprints);
-      if (intersection === null) {
-        continue;
-      }
-      if (totalIntersection === undefined) {
-        totalIntersection = intersection;
-      } else {
-        intersection = difference(intersection, totalIntersection as Footprint);
+      const subGroupFootprints = subGroup.map((layer) => layer.footprint as Footprint);
+      try {
+        let intersection = multiIntersect(subGroupFootprints);
         if (intersection === null) {
           continue;
         }
-        totalIntersection = union(totalIntersection as Footprint, intersection);
+        if (totalIntersection === undefined) {
+          totalIntersection = intersection;
+        } else {
+          intersection = difference(intersection, totalIntersection as Footprint);
+          if (intersection === null) {
+            continue;
+          }
+          totalIntersection = union(totalIntersection as Footprint, intersection);
+        }
+        const task: IMergeOverlaps = {
+          intersection,
+          layers: subGroup,
+        };
+        yield task;
+      } catch (err) {
+        const error = err as Error;
+        this.logger.log('error', `failed to calculate overlaps: ${error.message}`);
+        this.logger.log('debug', `failing footprints: ${JSON.stringify(subGroupFootprints)}`);
+        throw err;
       }
-      const task: IMergeOverlaps = {
-        intersection,
-        layers: subGroup,
-      };
-      yield task;
     }
   }
 
