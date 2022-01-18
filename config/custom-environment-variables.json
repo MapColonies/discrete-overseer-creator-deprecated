@@ -44,5 +44,9 @@
   "bboxSizeTiles": {
     "__name": "BBOX_SIZE_TILES",
     "__format": "number"
+  },
+  "mergeBatchSize": {
+    "__name": "MERGE_BATCH_SIZE",
+    "__format": "number"
   }
 }

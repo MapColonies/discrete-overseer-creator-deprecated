@@ -1,4 +1,6 @@
 import { IRasterCatalogUpsertRequestBody } from '@map-colonies/mc-model-types';
+import { ITileRange } from '@map-colonies/mc-utils';
+import { GeoJSON } from 'geojson';
 
 export interface ILogger {
   log: (level: string, message: string) => void;
@@ -21,3 +23,25 @@ export interface IFindResponseRecord extends IRasterCatalogUpsertRequestBody {
 }
 
 export type FindRecordResponse = IFindResponseRecord[];
+
+export interface ILayerMergeData {
+  id: string;
+  tilesPath: string;
+  footprint?: GeoJSON;
+}
+
+export interface IMergeParameters {
+  layers: ILayerMergeData[];
+  destPath: string;
+  maxZoom: number;
+}
+export interface IMergeOverlaps {
+  layers: ILayerMergeData[];
+  intersection: GeoJSON;
+}
+
+export interface IMergeTaskParams {
+  sourcePaths: string[];
+  destPath: string;
+  batch: ITileRange[];
+}
