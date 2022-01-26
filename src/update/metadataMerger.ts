@@ -24,7 +24,6 @@ export class MetadataMerger {
       footprint: union(oldMetadata.footprint as Footprint, updateMetadata.footprint as Footprint) as GeoJSON,
       region: this.mergeRegions(oldMetadata.region, updateMetadata.region),
       rawProductData: undefined,
-      ingestionDate: undefined,
     };
     newMetadata.productBoundingBox = createBBoxString(newMetadata.footprint as Footprint);
     return newMetadata;

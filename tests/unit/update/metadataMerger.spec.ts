@@ -144,7 +144,7 @@ describe('MetadataMerger', () => {
     description: 'test',
     footprint: expectedFootprint,
     includedInBests: [],
-    ingestionDate: undefined,
+    ingestionDate: new Date(1, 1, 5),
     layerPolygonParts: expectedPolygonParts,
     maxResolutionMeter: 777,
     producerName: 'tester',
