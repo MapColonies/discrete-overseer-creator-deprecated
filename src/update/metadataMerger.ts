@@ -12,7 +12,12 @@ export class MetadataMerger {
       ...oldMetadata,
       productVersion: updateMetadata.productVersion,
       updateDate: updateMetadata.updateDate,
-      sourceDateEnd: updateMetadata.sourceDateEnd,
+      sourceDateStart:
+        (oldMetadata.sourceDateStart as Date) <= (updateMetadata.sourceDateStart as Date)
+          ? oldMetadata.sourceDateStart
+          : updateMetadata.sourceDateStart,
+      sourceDateEnd:
+        (oldMetadata.sourceDateEnd as Date) >= (updateMetadata.sourceDateEnd as Date) ? oldMetadata.sourceDateEnd : updateMetadata.sourceDateEnd,
       accuracyCE90: Math.max(oldMetadata.accuracyCE90 ?? 0, updateMetadata.accuracyCE90 ?? 0),
       sensorType: this.mergeUniqueArrays(oldMetadata.sensorType, updateMetadata.sensorType),
       layerPolygonParts: this.mergeLayerPolygonParts(oldMetadata.layerPolygonParts, updateMetadata.layerPolygonParts, updateMetadata.footprint),
