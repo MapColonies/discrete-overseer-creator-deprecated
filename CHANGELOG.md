@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.10.0...v1.11.0) (2022-01-27)
+
+
+### Features
+
+* added metadata merger ([#101](https://github.com/MapColonies/discrete-overseer-creator/issues/101)) ([41fdcc4](https://github.com/MapColonies/discrete-overseer-creator/commit/41fdcc4778770fc41e4b5465e944e9a0db219003))
+
 ## [1.10.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.9.0...v1.10.0) (2022-01-18)
 
 ## [1.9.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.8.0...v1.9.0) (2022-01-05)

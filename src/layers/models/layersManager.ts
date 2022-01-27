@@ -1,6 +1,5 @@
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
-import bbox from '@turf/bbox';
 import { GeoJSON } from 'geojson';
 import { Services } from '../../common/constants';
 import { OperationStatus } from '../../common/enums';
@@ -12,6 +11,7 @@ import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
+import { createBBoxString } from '../../utils/bbox';
 import { FileValidator } from './fileValidator';
 import { Tasker } from './tasker';
 
@@ -39,7 +39,7 @@ export class LayersManager {
     await this.validateRunConditions(data);
     data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
     data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
-    data.metadata.productBoundingBox = this.createBBox(data.metadata.footprint as GeoJSON);
+    data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productVersion as string}/${data.metadata.productType as string}`;
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.resolution as number);
@@ -92,11 +92,5 @@ export class LayersManager {
     if (existsInCatalog) {
       throw new ConflictError(`layer id: ${resourceId} version: ${version as string}, already exists in catalog`);
     }
-  }
-
-  private createBBox(footprint: GeoJSON): string {
-    const bboxCords = bbox(footprint);
-    //format: "minX,minY : maxX,maxY"
-    return `${bboxCords[0]},${bboxCords[1]},${bboxCords[2]},${bboxCords[3]}`;
   }
 }
