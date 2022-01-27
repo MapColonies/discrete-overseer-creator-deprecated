@@ -58,7 +58,7 @@ export class TasksManager {
           await this.publishToMappingServer(jobId, res.metadata, unifiedLayerName, res.relativePath);
           catalogId = await this.publishToCatalog(jobId, clonedLayer, unifiedLayerName);
         }
-        await this.jobManager.updateJobStatus(jobId, OperationStatus.COMPLETED, catalogId);
+        await this.jobManager.updateJobStatus(jobId, OperationStatus.COMPLETED, undefined, catalogId);
 
         const shouldSync = this.config.get<boolean>('shouldSync');
 
