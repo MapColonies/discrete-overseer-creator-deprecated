@@ -122,7 +122,7 @@ export class TasksManager {
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
-      await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer');
+      await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer to mapping server');
       throw err;
     }
   }
