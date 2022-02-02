@@ -31,7 +31,7 @@ describe('toc', function () {
       });
 
       const response = await requestSender.getMetadata(validTestData);
-      // todo: check oneOf bug
+      // TODO: remove the test comment when the following issue will be solved: https://github.com/openapi-library/OpenAPIValidators/issues/257
       // expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.OK);
@@ -44,6 +44,7 @@ describe('toc', function () {
       });
 
       const response = await requestSender.getMetadata(validTestData, 'application/xml');
+      // TODO: remove the test comment when the following issue will be solved: https://github.com/openapi-library/OpenAPIValidators/issues/257
       // expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.OK);
