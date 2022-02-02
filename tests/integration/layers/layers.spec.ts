@@ -177,7 +177,7 @@ describe('layers', function () {
       catalogExistsMock.mockResolvedValue(true);
       const response = await requestSender.createLayer(validTestData);
       expect(response).toSatisfyApiSpec();
-      
+
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);

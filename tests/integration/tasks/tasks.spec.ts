@@ -29,7 +29,7 @@ describe('layers', function () {
       });
       const response = await requestSender.completeTask(jobId, taskId);
       expect(response).toSatisfyApiSpec();
-      
+
       expect(response.status).toBe(httpStatusCodes.OK);
     });
 
@@ -76,7 +76,7 @@ describe('layers', function () {
       });
       const response = await requestSender.completeTask(jobId, taskId);
       expect(response).toSatisfyApiSpec();
-      
+
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
   });
