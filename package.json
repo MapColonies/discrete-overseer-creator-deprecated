@@ -83,6 +83,7 @@
     "jest": "^27.2.5",
     "jest-create-mock-instance": "^1.1.0",
     "jest-html-reporters": "^2.0.3",
+    "jest-openapi": "^0.14.2",
     "nodemon": "^2.0.6",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",

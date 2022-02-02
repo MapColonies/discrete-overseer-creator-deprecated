@@ -8,7 +8,7 @@ import { InternalServerError } from '../../../src/common/exceptions/http/interna
 import * as requestSender from './helpers/requestSender';
 import { invalidTestData, validTestData, validTestImageMetadata, validTestJsonResponseData, validTestXmlResponseData } from './helpers/data';
 
-describe('layers', function () {
+describe('toc', function () {
   beforeAll(function () {
     registerTestValues();
     requestSender.init();
@@ -31,6 +31,9 @@ describe('layers', function () {
       });
 
       const response = await requestSender.getMetadata(validTestData);
+      // TODO: remove the test comment when the following issue will be solved: https://github.com/openapi-library/OpenAPIValidators/issues/257
+      // expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(response.body).toEqual(validTestJsonResponseData);
     });
@@ -41,6 +44,9 @@ describe('layers', function () {
       });
 
       const response = await requestSender.getMetadata(validTestData, 'application/xml');
+      // TODO: remove the test comment when the following issue will be solved: https://github.com/openapi-library/OpenAPIValidators/issues/257
+      // expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(response.text).toEqual(validTestXmlResponseData);
     });
@@ -50,6 +56,8 @@ describe('layers', function () {
     // All requests with status code of 400
     it('should return 400 status code', async function () {
       const response = await requestSender.getMetadata(invalidTestData);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
   });
@@ -62,6 +70,8 @@ describe('layers', function () {
       });
 
       const response = await requestSender.getMetadata(validTestData);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
     });
 
@@ -70,6 +80,8 @@ describe('layers', function () {
         throw new InternalServerError('test error');
       });
       const response = await requestSender.getMetadata(validTestData);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
   });
