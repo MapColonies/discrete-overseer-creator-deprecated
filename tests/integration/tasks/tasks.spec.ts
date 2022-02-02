@@ -28,6 +28,8 @@ describe('layers', function () {
         allCompleted: true,
       });
       const response = await requestSender.completeTask(jobId, taskId);
+      expect(response).toSatisfyApiSpec();
+      
       expect(response.status).toBe(httpStatusCodes.OK);
     });
 
@@ -36,6 +38,8 @@ describe('layers', function () {
         allCompleted: false,
       });
       const response = await requestSender.completeTask(jobId, taskId);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.OK);
     });
   });
@@ -51,6 +55,8 @@ describe('layers', function () {
         throw new Error('test error');
       });
       const response = await requestSender.completeTask(jobId, taskId);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
 
@@ -59,6 +65,8 @@ describe('layers', function () {
         throw new Error('test error');
       });
       const response = await requestSender.completeTask(jobId, taskId);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
 
@@ -67,6 +75,8 @@ describe('layers', function () {
         throw new Error('test error');
       });
       const response = await requestSender.completeTask(jobId, taskId);
+      expect(response).toSatisfyApiSpec();
+      
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
     });
   });

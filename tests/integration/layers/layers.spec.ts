@@ -84,6 +84,7 @@ describe('layers', function () {
       findJobsMock.mockResolvedValue([]);
 
       const response = await requestSender.createLayer(validTestData);
+      expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
@@ -96,6 +97,8 @@ describe('layers', function () {
     // All requests with status code of 400
     it('should return 400 status code for invalid Test Data', async function () {
       const response = await requestSender.createLayer(invalidTestData);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
       expect(findJobsMock).toHaveBeenCalledTimes(0);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
@@ -107,6 +110,8 @@ describe('layers', function () {
       invalidTestMetaDataHasId = { ...invalidTestMetaDataHasId, id: 'test id' };
       const invalidTestData = { ...validTestData, metadata: invalidTestMetaDataHasId };
       const response = await requestSender.createLayer(invalidTestData);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
       expect(findJobsMock).toHaveBeenCalledTimes(0);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
@@ -118,6 +123,8 @@ describe('layers', function () {
       invalidTestMetaDataProductType.productType = ProductType.PHOTO_REALISTIC_3D;
       const invalidTestDataForProductType = { ...validTestData, metadata: invalidTestMetaDataProductType };
       const response = await requestSender.createLayer(invalidTestDataForProductType);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
       expect(findJobsMock).toHaveBeenCalledTimes(0);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
@@ -132,6 +139,8 @@ describe('layers', function () {
       findJobsMock.mockResolvedValue(jobs);
 
       const response = await requestSender.createLayer(validTestData);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
@@ -143,6 +152,8 @@ describe('layers', function () {
         throw new Error('test error');
       });
       const response = await requestSender.createLayer(validTestData);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
@@ -153,6 +164,8 @@ describe('layers', function () {
       findJobsMock.mockResolvedValue([]);
       mapExistsMock.mockResolvedValue(true);
       const response = await requestSender.createLayer(validTestData);
+      expect(response).toSatisfyApiSpec();
+
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(1);
@@ -163,6 +176,8 @@ describe('layers', function () {
       findJobsMock.mockResolvedValue([]);
       catalogExistsMock.mockResolvedValue(true);
       const response = await requestSender.createLayer(validTestData);
+      expect(response).toSatisfyApiSpec();
+      
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);

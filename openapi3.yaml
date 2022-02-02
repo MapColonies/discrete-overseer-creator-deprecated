@@ -23,6 +23,29 @@ paths:
       responses:
         200:
           description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        409:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        500:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
   /tasks/{jobId}/{taskId}/completed:
     post:
       operationId: completeTask
@@ -47,6 +70,29 @@ paths:
       responses:
         200:
           description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        404:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        500:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
   /toc:
     post:
       operationId: getToc
@@ -82,8 +128,35 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/tocResponse'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        404:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
+        500:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMessage'
 components:
   schemas:
+    errorMessage:
+      type: object
+      properties:
+        message::
+          type: string
+        stacktrace:
+          type: string
+      required:
+        - message
     IngestionParams:
       type: object
       properties:
