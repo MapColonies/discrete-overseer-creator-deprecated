@@ -35,7 +35,7 @@ export class TasksManager {
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
     this.logger.log('info', `[TasksManager][taskComplete] checking tiling status of job ${jobId} task  ${taskId}`);
     const res = await this.jobManager.getCompletedZoomLevels(jobId);
-    if (res.completed) {
+    if (res.status != OperationStatus.FAILED && res.completed) {
       if (res.successful) {
         let catalogId: string;
         const layerName = getMapServingLayerName(

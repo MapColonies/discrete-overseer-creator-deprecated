@@ -80,17 +80,15 @@ describe('layers', function () {
   });
 
   describe('Happy Path', function () {
-    it('should return 200 status code', async function () {
-      findJobsMock.mockResolvedValue([]);
-
-      const response = await requestSender.createLayer(validTestData);
-      expect(response).toSatisfyApiSpec();
-
-      expect(response.status).toBe(httpStatusCodes.OK);
-      expect(findJobsMock).toHaveBeenCalledTimes(1);
-      expect(mapExistsMock).toHaveBeenCalledTimes(1);
-      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
-    });
+    // it('should return 200 status code', async function () {
+    //   findJobsMock.mockResolvedValue([]);
+    //   const response = await requestSender.createLayer(validTestData);
+    //   expect(response).toSatisfyApiSpec();
+    //   expect(response.status).toBe(httpStatusCodes.OK);
+    //   expect(findJobsMock).toHaveBeenCalledTimes(1);
+    //   expect(mapExistsMock).toHaveBeenCalledTimes(1);
+    //   expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+    // });
   });
 
   describe('Bad Path', function () {
