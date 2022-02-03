@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.11.1...v1.12.0) (2022-02-03)
+
+
+### Features
+
+* Add OpenAPI tests ([#107](https://github.com/MapColonies/discrete-overseer-creator/issues/107)) ([8a5d5f1](https://github.com/MapColonies/discrete-overseer-creator/commit/8a5d5f1205a209ad8ed9181cf920a8a1b8727903))
+
+
+### Bug Fixes
+
+* hot fix - batched tasks creation ([#108](https://github.com/MapColonies/discrete-overseer-creator/issues/108)) ([4c198b1](https://github.com/MapColonies/discrete-overseer-creator/commit/4c198b1d4d5f00b214e3006ff9599a9879e4695e))
+
 ### [1.11.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.11.0...v1.11.1) (2022-01-30)
 
 
