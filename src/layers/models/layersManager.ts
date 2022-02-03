@@ -68,6 +68,7 @@ export class LayersManager {
             await this.db.createTasks(jobId, taskBatch);
           } catch (err) {
             //TODO: properly handle errors
+            await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
             throw err;
           }
         }
@@ -83,6 +84,7 @@ export class LayersManager {
           await this.db.createTasks(jobId, taskBatch);
         } catch (err) {
           //TODO: properly handle errors
+          await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
           throw err;
         }
       }
