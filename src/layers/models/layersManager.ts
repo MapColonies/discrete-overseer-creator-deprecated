@@ -5,27 +5,34 @@ import { Services } from '../../common/constants';
 import { OperationStatus } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
-import { ILogger } from '../../common/interfaces';
+import { IConfig, ILogger } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { createBBoxString } from '../../utils/bbox';
+import { ITaskZoomRange } from '../../tasks/interfaces';
+import { ITaskParameters } from '../interfaces';
 import { FileValidator } from './fileValidator';
 import { Tasker } from './tasker';
 
 @injectable()
 export class LayersManager {
+  private readonly tasksBatchSize: number;
+
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
+    @inject(Services.CONFIG) config: IConfig,
     private readonly zoomLevelCalculator: ZoomLevelCalculator,
     private readonly db: JobManagerClient,
     private readonly catalog: CatalogClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator,
     private readonly tasker: Tasker
-  ) {}
+  ) {
+    this.tasksBatchSize = config.get<number>('tasksBatchSize');
+  }
 
   public async createLayer(data: IngestionParams): Promise<void> {
     const convertedData: Record<string, unknown> = data.metadata as unknown as Record<string, unknown>;
@@ -43,8 +50,43 @@ export class LayersManager {
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productVersion as string}/${data.metadata.productType as string}`;
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.resolution as number);
+    await this.createTasks(data, layerRelativePath, layerZoomRanges);
+  }
+
+  private async createTasks(data: IngestionParams, layerRelativePath: string, layerZoomRanges: ITaskZoomRange[]): Promise<void> {
     const taskParams = this.tasker.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
-    await this.db.createLayerTasks(data, layerRelativePath, taskParams);
+    let taskBatch: ITaskParameters[] = [];
+    let jobId: string | undefined = undefined;
+    for (const task of taskParams) {
+      taskBatch.push(task);
+      if (taskBatch.length === this.tasksBatchSize) {
+        if (jobId === undefined) {
+          jobId = await this.db.createLayerJob(data, layerRelativePath, taskBatch);
+        } else {
+          // eslint-disable-next-line no-useless-catch
+          try {
+            await this.db.createTasks(jobId, taskBatch);
+          } catch (err) {
+            //TODO: properly handle errors
+            throw err;
+          }
+        }
+        taskBatch = [];
+      }
+    }
+    if (taskBatch.length !== 0) {
+      if (jobId === undefined) {
+        jobId = await this.db.createLayerJob(data, layerRelativePath, taskBatch);
+      } else {
+        // eslint-disable-next-line no-useless-catch
+        try {
+          await this.db.createTasks(jobId, taskBatch);
+        } catch (err) {
+          //TODO: properly handle errors
+          throw err;
+        }
+      }
+    }
   }
 
   private async validateRunConditions(data: IngestionParams): Promise<void> {

@@ -75,7 +75,11 @@ describe('Tasker', () => {
       ];
       tasker = new Tasker(configMock);
 
-      const params = tasker.generateTasksParameters(testData, layerRelativePath, zoomRanges);
+      const gen = tasker.generateTasksParameters(testData, layerRelativePath, zoomRanges);
+      const params = [];
+      for( const param of gen){
+        params.push(param);
+      }
 
       const expectedTasks = [
         { ...paramTemplate, minZoom: 1, maxZoom: 1, bbox: [0, -90, 180, 90] },

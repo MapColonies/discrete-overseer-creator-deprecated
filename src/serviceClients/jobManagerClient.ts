@@ -88,7 +88,7 @@ export class JobManagerClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async createLayerTasks(data: IngestionParams, layerRelativePath: string, taskParams: ITaskParameters[]): Promise<void> {
+  public async createLayerJob(data: IngestionParams, layerRelativePath: string, taskParams?: ITaskParameters[]): Promise<string> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const createLayerTasksUrl = `/jobs`;
@@ -101,7 +101,7 @@ export class JobManagerClient extends HttpClient {
       producerName: data.metadata.producerName,
       productName: data.metadata.productName,
       productType: data.metadata.productType,
-      tasks: taskParams.map((params) => {
+      tasks: taskParams?.map((params) => {
         return {
           type: taskType,
           parameters: params,
@@ -109,7 +109,19 @@ export class JobManagerClient extends HttpClient {
       }),
     };
 
-    await this.post<ICreateJobResponse>(createLayerTasksUrl, createJobRequest);
+    const res = await this.post<ICreateJobResponse>(createLayerTasksUrl, createJobRequest);
+    return res.id;
+  }
+
+  public async createTasks(jobId: string, taskParams: ITaskParameters[]): Promise<void> {
+    const createTasksUrl = `/jobs/${jobId}/tasks`;
+    const req = taskParams.map((params) => {
+      return {
+        type: taskType,
+        parameters: params,
+      };
+    });
+    await this.post(createTasksUrl, req);
   }
 
   public async getCompletedZoomLevels(jobId: string): Promise<ICompletedTasks> {
@@ -119,6 +131,7 @@ export class JobManagerClient extends HttpClient {
     };
     const res = await this.get<IGetJobResponse>(getJobUrl, query);
     return {
+      status: res.status as OperationStatus,
       completed: res.completedTasks + res.failedTasks + res.expiredTasks == res.taskCount,
       successful: res.completedTasks === res.taskCount,
       metadata: (res.parameters as unknown as IngestionParams).metadata,

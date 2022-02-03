@@ -14,14 +14,14 @@ export class Tasker {
     this.bboxSizeTiles = config.get<number>('bboxSizeTiles');
   }
 
-  public generateTasksParameters(data: IngestionParams, layerRelativePath: string, zoomRanges: ITaskZoomRange[]): ITaskParameters[] {
+  public *generateTasksParameters(data: IngestionParams, layerRelativePath: string, zoomRanges: ITaskZoomRange[]): Generator<ITaskParameters> {
     const ranger = new TileRanger();
     const taskParams: ITaskParameters[] = [];
     for (const zoomRange of zoomRanges) {
       const zoom = this.getZoom(zoomRange.maxZoom);
       const tileGen = ranger.generateTiles(data.metadata.footprint as Polygon, zoom);
       for (const tile of tileGen) {
-        taskParams.push({
+        yield {
           discreteId: data.metadata.productId as string,
           version: data.metadata.productVersion as string,
           fileNames: data.fileNames,
@@ -30,7 +30,7 @@ export class Tasker {
           maxZoom: zoomRange.maxZoom,
           layerRelativePath: layerRelativePath,
           bbox: tileToBbox(tile),
-        });
+        };
       }
     }
     return taskParams;
