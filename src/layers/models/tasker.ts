@@ -16,7 +16,6 @@ export class Tasker {
 
   public *generateTasksParameters(data: IngestionParams, layerRelativePath: string, zoomRanges: ITaskZoomRange[]): Generator<ITaskParameters> {
     const ranger = new TileRanger();
-    const taskParams: ITaskParameters[] = [];
     for (const zoomRange of zoomRanges) {
       const zoom = this.getZoom(zoomRange.maxZoom);
       const tileGen = ranger.generateTiles(data.metadata.footprint as Polygon, zoom);
@@ -33,7 +32,6 @@ export class Tasker {
         };
       }
     }
-    return taskParams;
   }
 
   /**
