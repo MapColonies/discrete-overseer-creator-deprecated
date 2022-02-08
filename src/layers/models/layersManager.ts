@@ -99,10 +99,10 @@ export class LayersManager {
 
     // todo: version 1.0 condition defines only one material with the same ID, no history parts are allowed
     if (data.metadata.productType === ProductType.ORTHOPHOTO_HISTORY) {
-      await this.validateNotExistsInCatalog(resourceId, undefined, productType);
-    } else {
-      await this.validateNotExistsInCatalog(resourceId, version, productType);
+      await this.validateNotExistsInCatalog(resourceId, undefined, ProductType.ORTHOPHOTO);
     }
+    await this.validateNotExistsInCatalog(resourceId, version, productType);
+    
     await this.validateNotExistsInMapServer(resourceId, version, productType);
     await this.validateFiles(data);
   }
