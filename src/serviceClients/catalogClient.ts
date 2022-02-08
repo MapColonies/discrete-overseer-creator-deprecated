@@ -20,11 +20,12 @@ export class CatalogClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('catalogPublishingServiceURL');
   }
 
-  public async exists(productId: string, productVersion?: string): Promise<boolean> {
+  public async exists(productId: string, productVersion?: string, productType?: string): Promise<boolean> {
     const req = {
       metadata: {
         productId,
         productVersion,
+        productType,
       },
     };
     const res = await this.post<FindRecordResponse>('/records/find', req);

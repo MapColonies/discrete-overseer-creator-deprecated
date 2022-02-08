@@ -99,9 +99,9 @@ export class LayersManager {
 
     // todo: version 1.0 condition defines only one material with the same ID, no history parts are allowed
     if (data.metadata.productType === ProductType.ORTHOPHOTO_HISTORY) {
-      await this.validateNotExistsInCatalog(resourceId);
+      await this.validateNotExistsInCatalog(resourceId, undefined, productType);
     } else {
-      await this.validateNotExistsInCatalog(resourceId, version);
+      await this.validateNotExistsInCatalog(resourceId, version, productType);
     }
     await this.validateNotExistsInMapServer(resourceId, version, productType);
     await this.validateFiles(data);
@@ -131,8 +131,8 @@ export class LayersManager {
     });
   }
 
-  private async validateNotExistsInCatalog(resourceId: string, version?: string): Promise<void> {
-    const existsInCatalog = await this.catalog.exists(resourceId, version);
+  private async validateNotExistsInCatalog(resourceId: string, version?: string, productType?: string): Promise<void> {
+    const existsInCatalog = await this.catalog.exists(resourceId, version, productType);
     if (existsInCatalog) {
       throw new ConflictError(`layer id: ${resourceId} version: ${version as string}, already exists in catalog`);
     }

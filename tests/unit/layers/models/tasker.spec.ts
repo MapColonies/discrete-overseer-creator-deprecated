@@ -77,7 +77,7 @@ describe('Tasker', () => {
 
       const gen = tasker.generateTasksParameters(testData, layerRelativePath, zoomRanges);
       const params = [];
-      for( const param of gen){
+      for (const param of gen) {
         params.push(param);
       }
 
