@@ -102,7 +102,7 @@ export class LayersManager {
       await this.validateNotExistsInCatalog(resourceId, undefined, ProductType.ORTHOPHOTO);
     }
     await this.validateNotExistsInCatalog(resourceId, version, productType);
-    
+
     await this.validateNotExistsInMapServer(resourceId, version, productType);
     await this.validateFiles(data);
   }
