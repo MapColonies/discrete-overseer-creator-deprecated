@@ -167,7 +167,7 @@ describe('layers', function () {
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(1);
-      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(2);
     });
 
     it('should return 409 status code when layer exists in catalog', async function () {
