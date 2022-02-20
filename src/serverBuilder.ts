@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import { container, inject, injectable } from 'tsyringe';
 import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
-import getStorageExplorerMiddleware,{ IFile } from '@map-colonies/storage-explorer-middleware';
+import getStorageExplorerMiddleware, { IFile } from '@map-colonies/storage-explorer-middleware';
 import './tasks/models/linksBuilder';
 import { RequestLogger } from './common/middlewares/RequestLogger';
 import { Services } from './common/constants';
@@ -51,12 +51,12 @@ export class ServerBuilder {
     const mountDirs = [
       {
         physical: physicalDirPath,
-        displayName: displayNameDir
-      }
+        displayName: displayNameDir,
+      },
     ];
     this.serverInstance.use(getStorageExplorerMiddleware(mountDirs, this.logger as unknown as Record<string, unknown>));
   }
-  
+
   private registerPostRoutesMiddleware(): void {
     this.serverInstance.use(getErrorHandlerMiddleware((message) => this.logger.log('error', message)));
   }
