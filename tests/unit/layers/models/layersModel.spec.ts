@@ -70,96 +70,96 @@ describe('LayersManager', () => {
   });
 
   describe('createLayer', () => {
-    // it('saves metadata before queueing tasks', async function () {
-    //   setValue({ 'tiling.zoomGroups': '1,2-3' });
-    //   const tillingReqs = [
-    //     {
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       discrete_id: testImageMetadata.productId,
-    //       version: testImageMetadata.productVersion,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       task_id: '1',
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       min_zoom_level: 1,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       max_zoom_level: 1,
-    //     },
-    //     {
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       discrete_id: testImageMetadata.productId,
-    //       version: testImageMetadata.productVersion,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       task_id: '1',
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       min_zoom_level: 2,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       max_zoom_level: 3,
-    //     },
-    //   ];
-    //   const taskParams = [
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 1,
-    //       maxZoom: 1,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [0, 0, 90, 90],
-    //     },
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 2,
-    //       maxZoom: 3,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [0, 0, 90, 90],
-    //     },
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 2,
-    //       maxZoom: 3,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [90, 0, 90, 180],
-    //     },
-    //   ];
+    it('saves metadata before queueing tasks', async function () {
+      setValue({ 'tiling.zoomGroups': '1,2-3' });
+      const tillingReqs = [
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 1,
+        },
+        {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          discrete_id: testImageMetadata.productId,
+          version: testImageMetadata.productVersion,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          task_id: '1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          min_zoom_level: 2,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          max_zoom_level: 3,
+        },
+      ];
+      const taskParams = [
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 1,
+          maxZoom: 1,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 2,
+          maxZoom: 3,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 2,
+          maxZoom: 3,
+          layerRelativePath: layerRelativePath,
+          bbox: [90, 0, 90, 180],
+        },
+      ];
 
-    //   createLayerTasksMock.mockImplementation(async () => {
-    //     return Promise.resolve(tillingReqs);
-    //   });
-    //   mapExistsMock.mockResolvedValue(false);
-    //   catalogExistsMock.mockResolvedValue(false);
-    //   fileValidatorValidateExistsMock.mockResolvedValue(true);
-    //   findJobsMock.mockResolvedValue([]);
-    //   generateTasksParametersMock.mockReturnValue(taskParams);
+      createLayerTasksMock.mockImplementation(async () => {
+        return Promise.resolve(tillingReqs);
+      });
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      findJobsMock.mockResolvedValue([]);
+      generateTasksParametersMock.mockReturnValue(taskParams);
 
-    //   const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
-    //   layersManager = new LayersManager(
-    //     logger,
-    //     configMock,
-    //     zoomLevelCalculator,
-    //     jobManagerClientMock,
-    //     catalogClientMock,
-    //     mapPublisherClientMock,
-    //     fileValidatorMock,
-    //     taskerMock
-    //   );
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        zoomLevelCalculator,
+        jobManagerClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock,
+        taskerMock
+      );
 
-    //   await layersManager.createLayer(testData);
+      await layersManager.createLayer(testData);
 
-    //   expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
-    //   expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
-    //     { minZoom: 1, maxZoom: 1 },
-    //     { minZoom: 2, maxZoom: 3 },
-    //   ]);
-    //   expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
-    //   expect(createLayerTasksMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParams);
-    // });
+      expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
+      expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
+        { minZoom: 1, maxZoom: 1 },
+        { minZoom: 2, maxZoom: 3 },
+      ]);
+      expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
+      expect(createLayerTasksMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParams);
+    });
 
     // it('split the tasks based on configuration', async function () {
     //   const tillingReqs = [
