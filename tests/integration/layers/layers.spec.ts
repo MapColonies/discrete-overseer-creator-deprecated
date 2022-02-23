@@ -3,7 +3,7 @@ import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
 import { registerTestValues } from '../testContainerConfig';
-import { createLayerTasksMock, findJobsMock, mockCreateLayerTasks } from '../../mocks/clients/jobManagerClient';
+import { findJobsMock } from '../../mocks/clients/jobManagerClient';
 import { mapExistsMock } from '../../mocks/clients/mapPublisherClient';
 import { catalogExistsMock } from '../../mocks/clients/catalogClient';
 import { OperationStatus } from '../../../src/common/enums';
@@ -72,7 +72,6 @@ describe('layers', function () {
   });
   beforeEach(function () {
     console.warn = jest.fn();
-    mockCreateLayerTasks();
   });
   afterEach(function () {
     jest.resetAllMocks();
@@ -80,15 +79,15 @@ describe('layers', function () {
   });
 
   describe('Happy Path', function () {
-    // it('should return 200 status code', async function () {
-    //   findJobsMock.mockResolvedValue([]);
-    //   const response = await requestSender.createLayer(validTestData);
-    //   expect(response).toSatisfyApiSpec();
-    //   expect(response.status).toBe(httpStatusCodes.OK);
-    //   expect(findJobsMock).toHaveBeenCalledTimes(1);
-    //   expect(mapExistsMock).toHaveBeenCalledTimes(1);
-    //   expect(catalogExistsMock).toHaveBeenCalledTimes(1);
-    // });
+    it('should return 200 status code', async function () {
+      findJobsMock.mockResolvedValue([]);
+      const response = await requestSender.createLayer(validTestData);
+      expect(response).toSatisfyApiSpec();
+      expect(response.status).toBe(httpStatusCodes.OK);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('Bad Path', function () {
@@ -146,9 +145,9 @@ describe('layers', function () {
     });
 
     it('should return 500 status code on db error', async function () {
-      createLayerTasksMock.mockImplementation(() => {
-        throw new Error('test error');
-      });
+      // createLayerTasksMock.mockImplementation(() => {
+      //   throw new Error('test error');
+      // });
       const response = await requestSender.createLayer(validTestData);
       expect(response).toSatisfyApiSpec();
 
