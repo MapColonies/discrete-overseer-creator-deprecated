@@ -7,7 +7,6 @@ global:
 rasterCommon:
   serviceUrls:
     syncManager: http://localhost:8081
-    mapproxy: http://localhost:8085
     mapproxyApi: http://localhost:8082
     catalogManager: http://localhost:8083
     jobManager: http://localhost:8084
@@ -55,6 +54,7 @@ env:
   mapServerCacheType: 'FS'
   layerSourceDir: '/layerSources'
   displayNameDir: "\\layerSources"
+  mapServerPublicDNS:   http://localhost:8086
   bboxSizeTiles: 10000
   mergeBatchSize: 10000
   tasksBatchSize: 100

@@ -14,7 +14,7 @@ data:
   STORAGE_SERVICE_URL: {{ .Values.rasterCommon.serviceUrls.jobManager | quote }}
   SYNC_SERVICE_URL: {{ .Values.rasterCommon.serviceUrls.syncManager | quote }}
   MAP_PUBLISHING_SERVICE_URL: {{ .Values.rasterCommon.serviceUrls.mapproxyApi | quote }}
-  PUBLIC_MAP_SERVER_URL: {{ .Values.rasterCommon.serviceUrls.mapproxy | quote }}
+  PUBLIC_MAP_SERVER_URL: {{ .Values.env.mapServerPublicDNS | quote }}
   CATALOG_PUBLISHING_SERVICE_URL: {{ .Values.rasterCommon.serviceUrls.catalogManager | quote }}
   MAP_SERVER_CACHE_TYPE: {{ .Values.env.mapServerCacheType | quote }}
   DISPLAY_NAME_DIR: {{ .Values.env.displayNameDir | quote }}
