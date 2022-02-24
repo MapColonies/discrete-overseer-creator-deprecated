@@ -53,6 +53,7 @@ env:
   tilingZoomGroups: '0-5,6,7,8,9,10,11,12,13,14'
   shouldSync: true
   mapServerCacheType: 'FS'
+  displayNameDir: "\\layerSources"
   bboxSizeTiles: 10000
   mergeBatchSize: 10000
   tasksBatchSize: 100
