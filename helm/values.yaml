@@ -4,6 +4,24 @@ global:
   metrics: {}
   environment: {}
 
+rasterCommon:
+  serviceUrls:
+    syncManager: http://localhost:8081
+    mapproxy: http://localhost:8085
+    mapproxyApi: http://localhost:8082
+    catalogManager: http://localhost:8083
+    jobManager: http://localhost:8084
+  jobManagement:
+    ingestion:
+      jobType: Ingestion
+      tillingTaskType: splitTiles
+  storage:
+    fs:
+      ingestionSourcePvc:
+        enabled: true
+        name: ingestion-source-pvc
+        subPath: ingestion-source
+
 enabled: true
 environment: development
 replicaCount: 1
@@ -25,13 +43,26 @@ image:
   tag: 'latest'
 
 env:
-  port: 8080
+  port: 80
   targetPort: 8080
   protocol: TCP
   logLevel: info
   logPrettyPrintEnabled: false
   responseCompressionEnabled: true
   requestPayloadLimit: 1mb
+  tilingZoomGroups: '0-5,6,7,8,9,10,11,12,13,14'
+  shouldSync: true
+  mapServerCacheType: 'FS'
+  bboxSizeTiles: 10000
+  mergeBatchSize: 10000
+  tasksBatchSize: 100
+  httpRetry:
+    attempts: 5
+    delay: exponential
+    resetTimeout: true
+  linksTemplate:
+    mountPath: /usr/app/config
+    fileName: linkTemplates.template
   tracing:
     enabled: false
     url: http://localhost:55681/v1/trace

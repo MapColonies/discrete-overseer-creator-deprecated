@@ -14,7 +14,7 @@
     }
   },
   "LayerSourceDir": "LAYER_SOURCE_DIR",
-  "StorageProvider": "STORAGE_PROVIDER",
+  "mapServerCacheType": "MAP_SERVER_CACHE_TYPE",
   "storageServiceURL": "STORAGE_SERVICE_URL",
   "syncServiceURL": "SYNC_SERVICE_URL",
   "mapPublishingServiceURL": "MAP_PUBLISHING_SERVICE_URL",

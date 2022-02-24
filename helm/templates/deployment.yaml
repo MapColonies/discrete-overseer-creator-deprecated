@@ -45,6 +45,13 @@ spec:
           image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ $imageTag }}
           {{- end }}
           volumeMounts:
+          {{- if .Values.rasterCommon.storage.fs.ingestionSourcePvc.enabled }}
+            - name: ingestion-storage
+              mountPath: /layerSources
+          {{- end }}
+            - name: link-templates
+              mountPath: {{ .Values.env.linksTemplate.mountPath }}/{{ .Values.env.linksTemplate.fileName }}
+              subPath: {{ .Values.env.linksTemplate.fileName }}
             {{- if .Values.caSecretName }}
             - mountPath: {{ printf "%s/%s" .Values.caPath .Values.caKey | quote }}
               name: root-ca
@@ -81,4 +88,15 @@ spec:
           secret:
             secretName: {{ .Values.caSecretName }}
         {{- end }}
+        {{- if .Values.rasterCommon.storage.fs.ingestionSourcePvc.enabled }}
+        - name: ingestion-storage
+          persistentVolumeClaim:
+            claimName: {{ quote .Values.rasterCommon.storage.fs.ingestionSourcePvc.name }}
+        {{- end }}
+        - name: link-templates
+          configMap:
+            name: {{ $releaseName }}-{{ $chartName }}-configmap
+            items:
+              - key: LINK_TEMPLATE
+                path: {{ .Values.env.linksTemplate.fileName }}
 {{- end -}}

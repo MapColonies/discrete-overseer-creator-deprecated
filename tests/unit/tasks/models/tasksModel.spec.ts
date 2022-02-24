@@ -45,7 +45,7 @@ describe('TasksManager', () => {
 
     it('publish layer to catalog twice if all tasks are done for ORTHOPHOTO_HISTORY', async function () {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      setValue({ StorageProvider: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
+      setValue({ mapServerCacheType: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
 
       getCompletedZoomLevelsMock.mockReturnValue({
         completed: true,
@@ -89,7 +89,7 @@ describe('TasksManager', () => {
 
     it('publish layer to catalog once if all tasks are done for RASTER_MAP', async function () {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      setValue({ StorageProvider: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
+      setValue({ mapServerCacheType: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
 
       const rasterMapTestData = { ...testMetadata };
       rasterMapTestData.productType = ProductType.RASTER_MAP;
@@ -133,7 +133,7 @@ describe('TasksManager', () => {
 
     it('do nothing if some tasks are not done', async function () {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      setValue({ StorageProvider: 'fs', 'tiling.zoomGroups': '' });
+      setValue({ mapServerCacheType: 'fs', 'tiling.zoomGroups': '' });
 
       getCompletedZoomLevelsMock.mockReturnValue({
         allCompleted: false,
