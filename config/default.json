@@ -18,6 +18,7 @@
   },
   "LayerSourceDir": "/layerSources",
   "mapServerCacheType": "FS",
+  "displayNameDir": "\\layerSources",
   "storageServiceURL": "http://localhost:8081",
   "syncServiceURL": "http://localhost:8082",
   "mapPublishingServiceURL": "http://localhost:8083",

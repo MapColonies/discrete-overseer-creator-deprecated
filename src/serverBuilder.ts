@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import { container, inject, injectable } from 'tsyringe';
 import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
+import getStorageExplorerMiddleware from '@map-colonies/storage-explorer-middleware';
 import './tasks/models/linksBuilder';
 import { RequestLogger } from './common/middlewares/RequestLogger';
 import { Services } from './common/constants';
@@ -42,9 +43,18 @@ export class ServerBuilder {
   private registerPreRoutesMiddleware(): void {
     this.serverInstance.use(bodyParser.json(this.config.get<bodyParser.Options>('server.request.payload')));
     this.serverInstance.use(this.requestLogger.getLoggerMiddleware());
-    const ignorePathRegex = new RegExp(`^${this.config.get<string>('openapiConfig.basePath')}/.*`, 'i');
+    const ignorePathRegex = new RegExp(`^(${this.config.get<string>('openapiConfig.basePath')})|(explorer)/.*`, 'i');
     const apiSpecPath = this.config.get<string>('openapiConfig.filePath');
     this.serverInstance.use(OpenApiMiddleware({ apiSpec: apiSpecPath, validateRequests: true, ignorePaths: ignorePathRegex }));
+    const physicalDirPath = this.config.get<string>('LayerSourceDir');
+    const displayNameDir = this.config.get<string>('displayNameDir');
+    const mountDirs = [
+      {
+        physical: physicalDirPath,
+        displayName: displayNameDir,
+      },
+    ];
+    this.serverInstance.use(getStorageExplorerMiddleware(mountDirs, this.logger as unknown as Record<string, unknown>));
   }
 
   private registerPostRoutesMiddleware(): void {
