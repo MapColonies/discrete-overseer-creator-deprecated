@@ -1,0 +1,98 @@
+global:
+  cloudProvider: {}
+  tracing: {}
+  metrics: {}
+  environment: {}
+
+rasterCommon:
+  serviceUrls:
+    syncManager: http://localhost:8081
+    mapproxyApi: http://localhost:8082
+    catalogManager: http://localhost:8083
+    jobManager: http://localhost:8084
+  jobManagement:
+    ingestion:
+      jobType: Ingestion
+      tillingTaskType: splitTiles
+  storage:
+    fs:
+      ingestionSourcePvc:
+        enabled: true
+        name: ingestion-source-pvc
+        subPath: ingestion-source
+
+enabled: true
+environment: development
+replicaCount: 1
+initialDelaySeconds: 60
+nodePort: 30030 #for minikube deployment only
+resetOnConfigChange: true
+
+cloudProvider:
+  dockerRegistryUrl: my-registry-url.io
+  imagePullSecretName: 'my-registry-secret'
+  flavor: openshift
+
+caSecretName: ''
+caPath: '/usr/local/share/ca-certificates'
+caKey: 'ca.crt'
+
+image:
+  repository: discrete-overseer-creator
+  tag: 'latest'
+
+env:
+  port: 80
+  targetPort: 8080
+  protocol: TCP
+  logLevel: info
+  logPrettyPrintEnabled: false
+  responseCompressionEnabled: true
+  requestPayloadLimit: 1mb
+  tilingZoomGroups: '0-12,13,14,15,16,17,18,19,20,21,22,23'
+  shouldSync: true
+  mapServerCacheType: 'FS'
+  layerSourceDir: '/layerSources'
+  displayNameDir: "\\layerSources"
+  mapServerPublicDNS: 'http://mapproxy-dev-map-proxy-map-proxy-route-raster-dev.apps.v0h0bdx6.eastus.aroapp.io'
+  bboxSizeTiles: 10000
+  mergeBatchSize: 10000
+  tasksBatchSize: 100
+  httpRetry:
+    attempts: 5
+    delay: exponential
+    resetTimeout: true
+  linksTemplate:
+    mountPath: /usr/app/config
+    fileName: linkTemplates.template
+  tracing:
+    enabled: false
+    url: http://localhost:55681/v1/trace
+  metrics:
+    enabled: false
+    url: http://localhost:55681/v1/metrics
+
+resources:
+  enabled: true
+  value:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+route:
+  enabled: false
+  path: /
+  timeout:
+    enabled: false # defaults to 30s by openshift
+    duration: 60s # supported units (us, ms, s, m, h, d)
+
+ingress:
+  enabled: false
+  path: /
+  host: 'localhost'
+  cors:
+    enabled: true
+    origin: '*'

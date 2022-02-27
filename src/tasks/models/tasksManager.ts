@@ -1,7 +1,7 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
-import { OperationStatus, StorageProvider } from '../../common/enums';
+import { OperationStatus, MapServerCacheType } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
 import { IPublishMapLayerRequest, PublishedMapLayerCacheType } from '../../layers/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
@@ -28,8 +28,8 @@ export class TasksManager {
     private readonly linkBuilder: LinkBuilder
   ) {
     this.mapServerUrl = config.get<string>('publicMapServerURL');
-    const storageProviderConfig = config.get<string>('StorageProvider');
-    this.cacheType = this.getCacheType(storageProviderConfig);
+    const mapServerCacheType = config.get<string>('mapServerCacheType');
+    this.cacheType = this.getCacheType(mapServerCacheType);
   }
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
@@ -127,19 +127,19 @@ export class TasksManager {
     }
   }
 
-  private getCacheType(storageProvider: string): PublishedMapLayerCacheType {
+  private getCacheType(mapServerCacheType: string): PublishedMapLayerCacheType {
     let cacheType: PublishedMapLayerCacheType;
-    switch (storageProvider.toLowerCase()) {
-      case StorageProvider.S3.toLowerCase(): {
+    switch (mapServerCacheType.toLowerCase()) {
+      case MapServerCacheType.S3.toLowerCase(): {
         cacheType = PublishedMapLayerCacheType.S3;
         break;
       }
-      case StorageProvider.FS.toLowerCase(): {
+      case MapServerCacheType.FS.toLowerCase(): {
         cacheType = PublishedMapLayerCacheType.FS;
         break;
       }
       default: {
-        throw new Error(`Unsupported storageProvider configuration ${storageProvider}`);
+        throw new Error(`Unsupported storageProvider configuration ${mapServerCacheType}`);
       }
     }
     return cacheType;

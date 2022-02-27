@@ -6,7 +6,7 @@ export enum OperationStatus {
   FAILED = 'Failed',
 }
 
-export enum StorageProvider {
+export enum MapServerCacheType {
   FS = 'FS',
   S3 = 'S3',
 }
