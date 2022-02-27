@@ -3,9 +3,10 @@ import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
 import { registerTestValues } from '../testContainerConfig';
-import { createLayerTasksMock, findJobsMock, mockCreateLayerTasks } from '../../mocks/clients/jobManagerClient';
+import { findJobsMock, createLayerJobMock, createTasksMock } from '../../mocks/clients/jobManagerClient';
 import { mapExistsMock } from '../../mocks/clients/mapPublisherClient';
 import { catalogExistsMock } from '../../mocks/clients/catalogClient';
+import { setValue, clear as clearConfig } from '../../mocks/config';
 import { OperationStatus } from '../../../src/common/enums';
 import * as requestSender from './helpers/requestSender';
 
@@ -66,29 +67,33 @@ const invalidTestData = {
 };
 
 describe('layers', function () {
-  beforeAll(function () {
-    registerTestValues();
-    requestSender.init();
-  });
   beforeEach(function () {
     console.warn = jest.fn();
-    mockCreateLayerTasks();
+    setValue('tiling.zoomGroups', '0,1,2,3,4,5,6,7,8,9,10');
+    setValue('tasksBatchSize', 2);
+    registerTestValues();
+    requestSender.init();
+    createLayerJobMock.mockResolvedValue('jobId');
   });
   afterEach(function () {
+    clearConfig();
     jest.resetAllMocks();
     container.clearInstances();
   });
 
   describe('Happy Path', function () {
-    // it('should return 200 status code', async function () {
-    //   findJobsMock.mockResolvedValue([]);
-    //   const response = await requestSender.createLayer(validTestData);
-    //   expect(response).toSatisfyApiSpec();
-    //   expect(response.status).toBe(httpStatusCodes.OK);
-    //   expect(findJobsMock).toHaveBeenCalledTimes(1);
-    //   expect(mapExistsMock).toHaveBeenCalledTimes(1);
-    //   expect(catalogExistsMock).toHaveBeenCalledTimes(1);
-    // });
+    it('should return 200 status code', async function () {
+      findJobsMock.mockResolvedValue([]);
+      const response = await requestSender.createLayer(validTestData);
+      expect(response).toSatisfyApiSpec();
+      expect(response.status).toBe(httpStatusCodes.OK);
+
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(2);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+      expect(createTasksMock).toHaveBeenCalledTimes(3);
+    });
   });
 
   describe('Bad Path', function () {
@@ -101,6 +106,8 @@ describe('layers', function () {
       expect(findJobsMock).toHaveBeenCalledTimes(0);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
       expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 400 status code for id field', async function () {
@@ -114,6 +121,8 @@ describe('layers', function () {
       expect(findJobsMock).toHaveBeenCalledTimes(0);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
       expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 400 status code for invalid product type', async function () {
@@ -127,6 +136,8 @@ describe('layers', function () {
       expect(findJobsMock).toHaveBeenCalledTimes(0);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
       expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -143,12 +154,13 @@ describe('layers', function () {
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
       expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 500 status code on db error', async function () {
-      createLayerTasksMock.mockImplementation(() => {
-        throw new Error('test error');
-      });
+      findJobsMock.mockRejectedValue(new Error('db fail test'));
+
       const response = await requestSender.createLayer(validTestData);
       expect(response).toSatisfyApiSpec();
 
@@ -156,6 +168,8 @@ describe('layers', function () {
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
       expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 409 status code when layer exists in map server', async function () {
@@ -168,6 +182,8 @@ describe('layers', function () {
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(1);
       expect(catalogExistsMock).toHaveBeenCalledTimes(2);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
     });
 
     it('should return 409 status code when layer exists in catalog', async function () {
@@ -180,6 +196,8 @@ describe('layers', function () {
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
       expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
     });
   });
 });

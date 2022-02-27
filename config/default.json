@@ -39,5 +39,5 @@
   "taskType": "Discrete-Tiling",
   "bboxSizeTiles": 10000,
   "mergeBatchSize": 10000,
-  "tasksBatchSize": 100
+  "tasksBatchSize": 5
 }

@@ -1,6 +1,6 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType, SensorType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
-import { createLayerTasksMock, findJobsMock, jobManagerClientMock } from '../../../mocks/clients/jobManagerClient';
+import { createLayerJobMock, findJobsMock, jobManagerClientMock, createTasksMock } from '../../../mocks/clients/jobManagerClient';
 import { catalogExistsMock, catalogClientMock } from '../../../mocks/clients/catalogClient';
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../../mocks/config';
@@ -70,227 +70,154 @@ describe('LayersManager', () => {
   });
 
   describe('createLayer', () => {
-    // it('saves metadata before queueing tasks', async function () {
-    //   setValue({ 'tiling.zoomGroups': '1,2-3' });
-    //   const tillingReqs = [
-    //     {
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       discrete_id: testImageMetadata.productId,
-    //       version: testImageMetadata.productVersion,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       task_id: '1',
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       min_zoom_level: 1,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       max_zoom_level: 1,
-    //     },
-    //     {
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       discrete_id: testImageMetadata.productId,
-    //       version: testImageMetadata.productVersion,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       task_id: '1',
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       min_zoom_level: 2,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       max_zoom_level: 3,
-    //     },
-    //   ];
-    //   const taskParams = [
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 1,
-    //       maxZoom: 1,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [0, 0, 90, 90],
-    //     },
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 2,
-    //       maxZoom: 3,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [0, 0, 90, 90],
-    //     },
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 2,
-    //       maxZoom: 3,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [90, 0, 90, 180],
-    //     },
-    //   ];
+    it('saves metadata before queueing tasks', async function () {
+      setValue({ 'tiling.zoomGroups': '1,2-3' });
+      setValue('tasksBatchSize', 2);
+      const taskParams = [
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 1,
+          maxZoom: 1,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 2,
+          maxZoom: 3,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+      ];
+      const taskParams2 = [
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 2,
+          maxZoom: 3,
+          layerRelativePath: layerRelativePath,
+          bbox: [90, 0, 90, 180],
+        },
+      ];
 
-    //   createLayerTasksMock.mockImplementation(async () => {
-    //     return Promise.resolve(tillingReqs);
-    //   });
-    //   mapExistsMock.mockResolvedValue(false);
-    //   catalogExistsMock.mockResolvedValue(false);
-    //   fileValidatorValidateExistsMock.mockResolvedValue(true);
-    //   findJobsMock.mockResolvedValue([]);
-    //   generateTasksParametersMock.mockReturnValue(taskParams);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      findJobsMock.mockResolvedValue([]);
+      generateTasksParametersMock.mockReturnValue([...taskParams, ...taskParams2]);
+      createLayerJobMock.mockResolvedValue('testJobId');
 
-    //   const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
-    //   layersManager = new LayersManager(
-    //     logger,
-    //     configMock,
-    //     zoomLevelCalculator,
-    //     jobManagerClientMock,
-    //     catalogClientMock,
-    //     mapPublisherClientMock,
-    //     fileValidatorMock,
-    //     taskerMock
-    //   );
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        zoomLevelCalculator,
+        jobManagerClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock,
+        taskerMock
+      );
 
-    //   await layersManager.createLayer(testData);
+      await layersManager.createLayer(testData);
 
-    //   expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
-    //   expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
-    //     { minZoom: 1, maxZoom: 1 },
-    //     { minZoom: 2, maxZoom: 3 },
-    //   ]);
-    //   expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
-    //   expect(createLayerTasksMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParams);
-    // });
+      expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
+      expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
+        { minZoom: 1, maxZoom: 1 },
+        { minZoom: 2, maxZoom: 3 },
+      ]);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParams);
+      expect(createTasksMock).toHaveBeenCalledTimes(1);
+      expect(createTasksMock).toHaveBeenCalledWith('testJobId', taskParams2);
+    });
 
-    // it('split the tasks based on configuration', async function () {
-    //   const tillingReqs = [
-    //     {
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       discrete_id: testImageMetadata.productId,
-    //       version: testImageMetadata.productVersion,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       task_id: '1',
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       min_zoom_level: 1,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       max_zoom_level: 1,
-    //     },
-    //     {
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       discrete_id: testImageMetadata.productId,
-    //       version: testImageMetadata.productVersion,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       task_id: '2',
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       min_zoom_level: 5,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       max_zoom_level: 8,
-    //     },
-    //     {
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       discrete_id: testImageMetadata.productId,
-    //       version: testImageMetadata.productVersion,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       task_id: '3',
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       min_zoom_level: 2,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       max_zoom_level: 2,
-    //     },
-    //   ];
-    //   const taskParms = [
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 1,
-    //       maxZoom: 1,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [0, 0, 90, 90],
-    //     },
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 2,
-    //       maxZoom: 2,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [0, 0, 90, 90],
-    //     },
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 5,
-    //       maxZoom: 8,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [0, 0, 90, 90],
-    //     },
-    //     {
-    //       discreteId: 'testid1',
-    //       version: '1.0',
-    //       fileNames: ['file1.test1'],
-    //       originDirectory: 'test1-dir',
-    //       minZoom: 5,
-    //       maxZoom: 8,
-    //       layerRelativePath: layerRelativePath,
-    //       bbox: [90, 0, 90, 180],
-    //     },
-    //   ];
-    //   createLayerTasksMock.mockResolvedValue(tillingReqs);
+    it('split the tasks based on configuration', async function () {
+      const taskParms = [
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 1,
+          maxZoom: 1,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 2,
+          maxZoom: 2,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 5,
+          maxZoom: 8,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 5,
+          maxZoom: 8,
+          layerRelativePath: layerRelativePath,
+          bbox: [90, 0, 90, 180],
+        },
+      ];
 
-    //   setValue({ 'tiling.zoomGroups': '1,8-5,2' });
+      setValue({ 'tiling.zoomGroups': '1,8-5,2' });
 
-    //   mapExistsMock.mockResolvedValue(false);
-    //   catalogExistsMock.mockResolvedValue(false);
-    //   fileValidatorValidateExistsMock.mockResolvedValue(true);
-    //   findJobsMock.mockResolvedValue([]);
-    //   generateTasksParametersMock.mockReturnValue(taskParms);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      findJobsMock.mockResolvedValue([]);
+      generateTasksParametersMock.mockReturnValue(taskParms);
 
-    //   const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
-    //   layersManager = new LayersManager(
-    //     logger,
-    //     configMock,
-    //     zoomLevelCalculator,
-    //     jobManagerClientMock,
-    //     catalogClientMock,
-    //     mapPublisherClientMock,
-    //     fileValidatorMock,
-    //     taskerMock
-    //   );
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        zoomLevelCalculator,
+        jobManagerClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock,
+        taskerMock
+      );
 
-    //   await layersManager.createLayer(testData);
+      await layersManager.createLayer(testData);
 
-    //   expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
-    //   expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
-    //     { minZoom: 1, maxZoom: 1 },
-    //     { minZoom: 5, maxZoom: 8 },
-    //     { minZoom: 2, maxZoom: 2 },
-    //   ]);
-    //   expect(createLayerTasksMock).toHaveBeenCalledTimes(1);
-    //   expect(createLayerTasksMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParms);
-    // });
+      expect(generateTasksParametersMock).toHaveBeenCalledTimes(1);
+      expect(generateTasksParametersMock).toHaveBeenCalledWith(testData, layerRelativePath, [
+        { minZoom: 1, maxZoom: 1 },
+        { minZoom: 5, maxZoom: 8 },
+        { minZoom: 2, maxZoom: 2 },
+      ]);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParms);
+    });
 
     it('fail if layer status is pending', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-
-      const tillingReqs = [
-        {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.productId,
-          version: testImageMetadata.productVersion,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          task_id: '1',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          min_zoom_level: 1,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_zoom_level: 1,
-        },
-      ];
-      createLayerTasksMock.mockResolvedValue(tillingReqs);
-      mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.PENDING }]);
@@ -315,20 +242,6 @@ describe('LayersManager', () => {
 
     it('fail if layer status is inProgress', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      const tillingReqs = [
-        {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.productId,
-          version: testImageMetadata.productVersion,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          task_id: '1',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          min_zoom_level: 1,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_zoom_level: 1,
-        },
-      ];
-      createLayerTasksMock.mockResolvedValue(tillingReqs);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -352,100 +265,84 @@ describe('LayersManager', () => {
       await expect(action).rejects.toThrow(ConflictError);
     });
 
-    // it('pass if layer status is completed', async function () {
-    //   setValue({ 'tiling.zoomGroups': '1' });
-    //   const tillingReqs = [
-    //     {
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       discrete_id: testImageMetadata.productId,
-    //       version: testImageMetadata.productVersion,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       task_id: '1',
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       min_zoom_level: 1,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       max_zoom_level: 1,
-    //     },
-    //   ];
-    //   createLayerTasksMock.mockResolvedValue(tillingReqs);
-    //   mapExistsMock.mockResolvedValue(false);
-    //   catalogExistsMock.mockResolvedValue(false);
-    //   fileValidatorValidateExistsMock.mockResolvedValue(true);
-    //   findJobsMock.mockResolvedValue([{ status: OperationStatus.COMPLETED }]);
+    it('pass if layer status is completed', async function () {
+      const taskParams = [
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 1,
+          maxZoom: 1,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+      ];
 
-    //   const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
-    //   layersManager = new LayersManager(
-    //     logger,
-    //     configMock,
-    //     zoomLevelCalculator,
-    //     jobManagerClientMock,
-    //     catalogClientMock,
-    //     mapPublisherClientMock,
-    //     fileValidatorMock,
-    //     taskerMock
-    //   );
+      setValue({ 'tiling.zoomGroups': '1' });
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      findJobsMock.mockResolvedValue([{ status: OperationStatus.COMPLETED }]);
+      generateTasksParametersMock.mockReturnValue(taskParams);
 
-    //   const action = async () => {
-    //     await layersManager.createLayer(testData);
-    //   };
-    //   await expect(action()).resolves.not.toThrow();
-    // });
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        zoomLevelCalculator,
+        jobManagerClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock,
+        taskerMock
+      );
 
-    // it('pass if layer status is failed', async function () {
-    //   setValue({ 'tiling.zoomGroups': '1' });
-    //   const tillingReqs = [
-    //     {
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       discrete_id: testImageMetadata.productId,
-    //       version: testImageMetadata.productVersion,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       task_id: '1',
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       min_zoom_level: 1,
-    //       // eslint-disable-next-line @typescript-eslint/naming-convention
-    //       max_zoom_level: 1,
-    //     },
-    //   ];
-    //   createLayerTasksMock.mockResolvedValue(tillingReqs);
-    //   mapExistsMock.mockResolvedValue(false);
-    //   catalogExistsMock.mockResolvedValue(false);
-    //   fileValidatorValidateExistsMock.mockResolvedValue(true);
-    //   findJobsMock.mockResolvedValue([{ status: OperationStatus.FAILED }]);
+      const action = async () => {
+        await layersManager.createLayer(testData);
+      };
+      await expect(action()).resolves.not.toThrow();
+    });
 
-    //   const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
-    //   layersManager = new LayersManager(
-    //     logger,
-    //     configMock,
-    //     zoomLevelCalculator,
-    //     jobManagerClientMock,
-    //     catalogClientMock,
-    //     mapPublisherClientMock,
-    //     fileValidatorMock,
-    //     taskerMock
-    //   );
+    it('pass if layer status is failed', async function () {
+      const taskParams = [
+        {
+          discreteId: 'testid1',
+          version: '1.0',
+          fileNames: ['file1.test1'],
+          originDirectory: 'test1-dir',
+          minZoom: 1,
+          maxZoom: 1,
+          layerRelativePath: layerRelativePath,
+          bbox: [0, 0, 90, 90],
+        },
+      ];
+      setValue({ 'tiling.zoomGroups': '1' });
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      findJobsMock.mockResolvedValue([{ status: OperationStatus.FAILED }]);
+      generateTasksParametersMock.mockReturnValue(taskParams);
 
-    //   const action = async () => {
-    //     await layersManager.createLayer(testData);
-    //   };
-    //   await expect(action()).resolves.not.toThrow();
-    // });
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(
+        logger,
+        configMock,
+        zoomLevelCalculator,
+        jobManagerClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock,
+        taskerMock
+      );
+
+      const action = async () => {
+        await layersManager.createLayer(testData);
+      };
+      await expect(action()).resolves.not.toThrow();
+    });
 
     it('fail if layer exists in mapping server', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      const tillingReqs = [
-        {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.productId,
-          version: testImageMetadata.productVersion,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          task_id: '1',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          min_zoom_level: 1,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_zoom_level: 1,
-        },
-      ];
-      createLayerTasksMock.mockResolvedValue(tillingReqs);
       mapExistsMock.mockResolvedValue(true);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -471,20 +368,6 @@ describe('LayersManager', () => {
 
     it('fail if layer exists in catalog', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      const tillingReqs = [
-        {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.productId,
-          version: testImageMetadata.productVersion,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          task_id: '1',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          min_zoom_level: 1,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_zoom_level: 1,
-        },
-      ];
-      createLayerTasksMock.mockResolvedValue(tillingReqs);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(true);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -510,20 +393,6 @@ describe('LayersManager', () => {
 
     it('fail if files are missing', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      const tillingReqs = [
-        {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          discrete_id: testImageMetadata.productId,
-          version: testImageMetadata.productVersion,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          task_id: '1',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          min_zoom_level: 1,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          max_zoom_level: 1,
-        },
-      ];
-      createLayerTasksMock.mockResolvedValue(tillingReqs);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(false);
