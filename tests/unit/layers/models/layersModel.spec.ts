@@ -1,6 +1,6 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType, SensorType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
-import { createLayerJobMock, findJobsMock, jobManagerClientMock } from '../../../mocks/clients/jobManagerClient';
+import { createLayerJobMock, findJobsMock, jobManagerClientMock, createTasksMock } from '../../../mocks/clients/jobManagerClient';
 import { catalogExistsMock, catalogClientMock } from '../../../mocks/clients/catalogClient';
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../../mocks/config';
@@ -72,6 +72,7 @@ describe('LayersManager', () => {
   describe('createLayer', () => {
     it('saves metadata before queueing tasks', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
+      setValue('tasksBatchSize', 2);
       const taskParams = [
         {
           discreteId: 'testid1',
@@ -93,6 +94,8 @@ describe('LayersManager', () => {
           layerRelativePath: layerRelativePath,
           bbox: [0, 0, 90, 90],
         },
+      ];
+      const taskParams2 = [
         {
           discreteId: 'testid1',
           version: '1.0',
@@ -109,7 +112,8 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
-      generateTasksParametersMock.mockReturnValue(taskParams);
+      generateTasksParametersMock.mockReturnValue([...taskParams, ...taskParams2]);
+      createLayerJobMock.mockResolvedValue('testJobId');
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       layersManager = new LayersManager(
@@ -132,6 +136,8 @@ describe('LayersManager', () => {
       ]);
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
       expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParams);
+      expect(createTasksMock).toHaveBeenCalledTimes(1);
+      expect(createTasksMock).toHaveBeenCalledWith('testJobId', taskParams2);
     });
 
     it('split the tasks based on configuration', async function () {
