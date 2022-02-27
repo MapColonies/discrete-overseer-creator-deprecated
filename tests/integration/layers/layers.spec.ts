@@ -6,7 +6,7 @@ import { registerTestValues } from '../testContainerConfig';
 import { findJobsMock, createLayerJobMock, createTasksMock } from '../../mocks/clients/jobManagerClient';
 import { mapExistsMock } from '../../mocks/clients/mapPublisherClient';
 import { catalogExistsMock } from '../../mocks/clients/catalogClient';
-import { setValue } from '../../mocks/config';
+import { setValue, clear as clearConfig } from '../../mocks/config';
 import { OperationStatus } from '../../../src/common/enums';
 import * as requestSender from './helpers/requestSender';
 
@@ -76,6 +76,7 @@ describe('layers', function () {
     createLayerJobMock.mockResolvedValue('jobId');
   });
   afterEach(function () {
+    clearConfig();
     jest.resetAllMocks();
     container.clearInstances();
   });
@@ -158,9 +159,8 @@ describe('layers', function () {
     });
 
     it('should return 500 status code on db error', async function () {
-      // createLayerTasksMock.mockImplementation(() => {
-      //   throw new Error('test error');
-      // });
+      findJobsMock.mockRejectedValue(new Error('db fail test'));
+
       const response = await requestSender.createLayer(validTestData);
       expect(response).toSatisfyApiSpec();
 
