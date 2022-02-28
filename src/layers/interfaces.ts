@@ -16,7 +16,6 @@ export enum PublishedMapLayerCacheType {
 export interface ITaskParameters {
   discreteId: string;
   version: string;
-  fileNames: string[];
   originDirectory: string;
   minZoom: number;
   maxZoom: number;
