@@ -56,7 +56,6 @@ describe('Tasker', () => {
   const paramTemplate = {
     discreteId: 'test',
     version: '1.22',
-    fileNames: ['file.test'],
     originDirectory: '/here',
     layerRelativePath: layerRelativePath,
   };
