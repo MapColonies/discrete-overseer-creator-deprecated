@@ -23,7 +23,6 @@ export class Tasker {
         yield {
           discreteId: data.metadata.productId as string,
           version: data.metadata.productVersion as string,
-          fileNames: data.fileNames,
           originDirectory: data.originDirectory,
           minZoom: zoomRange.minZoom,
           maxZoom: zoomRange.maxZoom,
