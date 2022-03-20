@@ -49,7 +49,7 @@ export class LayersManager {
     data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productVersion as string}/${data.metadata.productType as string}`;
-    const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.resolution as number);
+    const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
     await this.createTasks(data, layerRelativePath, layerZoomRanges);
   }
 

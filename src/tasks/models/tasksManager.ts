@@ -113,7 +113,7 @@ export class TasksManager {
     const version = metadata.productVersion as string;
     try {
       this.logger.log('info', `[TasksManager][publishToMappingServer] layer ${id} version  ${version}`);
-      const maxZoom = this.zoomLevelCalculator.getZoomByResolution(metadata.resolution as number);
+      const maxZoom = this.zoomLevelCalculator.getZoomByResolution(metadata.maxResolutionDeg as number);
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
         maxZoomLevel: maxZoom,

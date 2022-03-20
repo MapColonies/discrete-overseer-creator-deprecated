@@ -18,11 +18,11 @@ export class MetadataMerger {
           : updateMetadata.sourceDateStart,
       sourceDateEnd:
         (oldMetadata.sourceDateEnd as Date) >= (updateMetadata.sourceDateEnd as Date) ? oldMetadata.sourceDateEnd : updateMetadata.sourceDateEnd,
-      accuracyCE90: Math.max(oldMetadata.accuracyCE90 ?? 0, updateMetadata.accuracyCE90 ?? 0),
-      sensorType: this.mergeUniqueArrays(oldMetadata.sensorType, updateMetadata.sensorType),
+      minHorizontalAccuracyCE90: Math.max(oldMetadata.minHorizontalAccuracyCE90 ?? 0, updateMetadata.minHorizontalAccuracyCE90 ?? 0),
+      sensors: this.mergeUniqueArrays(oldMetadata.sensors, updateMetadata.sensors),
       layerPolygonParts: this.mergeLayerPolygonParts(oldMetadata.layerPolygonParts, updateMetadata.layerPolygonParts, updateMetadata.footprint),
       footprint: union(oldMetadata.footprint as Footprint, updateMetadata.footprint as Footprint) as GeoJSON,
-      region: this.mergeRegions(oldMetadata.region, updateMetadata.region),
+      region: this.mergeUniqueArrays(oldMetadata.region, updateMetadata.region),
       rawProductData: undefined,
     };
     newMetadata.productBoundingBox = createBBoxString(newMetadata.footprint as Footprint);
