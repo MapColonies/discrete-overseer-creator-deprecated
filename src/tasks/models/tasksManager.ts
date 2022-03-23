@@ -8,7 +8,6 @@ import { IPublishMapLayerRequest, PublishedMapLayerCacheType } from '../../layer
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { JobManagerClient } from '../../serviceClients/jobManagerClient';
-import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { OperationTypeEnum, SyncClient } from '../../serviceClients/syncClient';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
