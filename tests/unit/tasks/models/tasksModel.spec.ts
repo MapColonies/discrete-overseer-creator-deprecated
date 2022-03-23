@@ -55,12 +55,10 @@ describe('TasksManager', () => {
         relativePath: `test/1/${ProductType.ORTHOPHOTO_HISTORY}`,
       });
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       tasksManager = new TasksManager(
         logger,
         configMock,
         syncClientMock,
-        zoomLevelCalculator,
         jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
@@ -103,12 +101,10 @@ describe('TasksManager', () => {
         relativePath: `test/1/${ProductType.RASTER_MAP}`,
       });
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       tasksManager = new TasksManager(
         logger,
         configMock,
         syncClientMock,
-        zoomLevelCalculator,
         jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
@@ -141,12 +137,10 @@ describe('TasksManager', () => {
         allCompleted: false,
       });
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       tasksManager = new TasksManager(
         logger,
         configMock,
         syncClientMock,
-        zoomLevelCalculator,
         jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,

@@ -1,0 +1,103 @@
+global:
+  cloudProvider: {}
+  tracing: {}
+  metrics: {}
+  environment: {}
+
+rasterCommon:
+  serviceUrls:
+    syncManager: http://localhost:8081
+    mapproxy: http://mapproxy-map-proxy-map-proxy
+    mapproxyApi: http://mapproxy-map-proxy-map-proxy-api
+    catalogManager: http://catalog-raster-catalog-manager
+    jobManager: http://job-manager-job-manager
+  jobManagement:
+    ingestion:
+      jobType: Ingestion
+      tillingTaskType: splitTiles
+  storage:
+    fs:
+      ingestionSourcePvc:
+        enabled: true
+        name: ingestion-source-pvc
+        subPath: ingestion-source
+
+enabled: true
+environment: development
+replicaCount: 1
+initialDelaySeconds: 60
+nodePort: 30030 #for minikube deployment only
+resetOnConfigChange: true
+
+cloudProvider:
+  dockerRegistryUrl: 10.45.130.11:5000
+  imagePullSecretName: 'my-registry-secret'
+  flavor: openshift
+
+caSecretName: ''
+caPath: '/usr/local/share/ca-certificates'
+caKey: 'ca.crt'
+storage:
+  ingestionSourcePvc:
+    enabled: true
+    name: ingestion-source-pvc
+    subPath: ingestion-source
+
+image:
+  repository: overseer
+  tag: 'reso'
+
+env:
+  port: 80
+  targetPort: 8080
+  protocol: TCP
+  logLevel: info
+  logPrettyPrintEnabled: false
+  responseCompressionEnabled: true
+  requestPayloadLimit: 1mb
+  tilingZoomGroups: '0,1,2,3,4,5,6,7,8,9,10'
+  shouldSync: false
+  mapServerCacheType: 'S3'
+  layerSourceDir: '/layerSources'
+  displayNameDir: "\\layerSources"
+  bboxSizeTiles: 1
+  mergeBatchSize: 10000
+  tasksBatchSize: 100
+  httpRetry:
+    attempts: 5
+    delay: exponential
+    resetTimeout: true
+  linksTemplate:
+    mountPath: /usr/app/config
+    fileName: linkTemplates.template
+  tracing:
+    enabled: false
+    url: http://localhost:55681/v1/trace
+  metrics:
+    enabled: false
+    url: http://localhost:55681/v1/metrics
+
+resources:
+  enabled: false
+  value:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+route:
+  enabled: false
+  path: /
+  timeout:
+    enabled: false # defaults to 30s by openshift
+    duration: 60s # supported units (us, ms, s, m, h, d)
+
+ingress:
+  enabled: false
+  path: /
+  host: 'localhost'
+  cors:
+    enabled: true
+    origin: '*'
