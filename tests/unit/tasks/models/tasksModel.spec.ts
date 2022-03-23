@@ -7,7 +7,6 @@ import { syncClientMock, triggerSyncMock } from '../../../mocks/clients/syncClie
 import { configMock, init as initMockConfig, setValue } from '../../../mocks/config';
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
-import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
 import { OperationTypeEnum } from '../../../../src/serviceClients/syncClient';
 
 let tasksManager: TasksManager;
