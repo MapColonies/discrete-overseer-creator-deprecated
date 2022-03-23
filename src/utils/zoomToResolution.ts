@@ -4,7 +4,6 @@ import { ITaskZoomRange } from '../tasks/interfaces';
 import { Services } from '../common/constants';
 import { IConfig, ILogger } from '../common/interfaces';
 
-
 @singleton()
 export class ZoomLevelCalculator {
   private readonly zoomRanges: ITaskZoomRange[];
@@ -26,7 +25,6 @@ export class ZoomLevelCalculator {
       });
     return layerZoomRanges;
   }
-
 
   private getZoomRanges(batches: string): ITaskZoomRange[] {
     const zoomBatches = batches.split(',');
