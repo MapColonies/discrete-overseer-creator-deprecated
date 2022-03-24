@@ -36,27 +36,13 @@ export class TasksManager {
     const res = await this.jobManager.getCompletedZoomLevels(jobId);
     if (res.status != OperationStatus.FAILED && res.completed) {
       if (res.successful) {
-        let catalogId: string;
         const layerName = getMapServingLayerName(
           res.metadata.productId as string,
-          res.metadata.productVersion as string,
           res.metadata.productType as ProductType
         );
         await this.publishToMappingServer(jobId, res.metadata, layerName, res.relativePath);
-        catalogId = await this.publishToCatalog(jobId, res.metadata, layerName);
+        const catalogId = await this.publishToCatalog(jobId, res.metadata, layerName);
 
-        // todo: In update scenario need to change the logic to support history and update unified files
-        if (res.metadata.productType === ProductType.ORTHOPHOTO_HISTORY) {
-          const clonedLayer = { ...res.metadata };
-          clonedLayer.productType = ProductType.ORTHOPHOTO;
-          const unifiedLayerName = getMapServingLayerName(
-            clonedLayer.productId as string,
-            clonedLayer.productVersion as string,
-            clonedLayer.productType
-          );
-          await this.publishToMappingServer(jobId, res.metadata, unifiedLayerName, res.relativePath);
-          catalogId = await this.publishToCatalog(jobId, clonedLayer, unifiedLayerName);
-        }
         await this.jobManager.updateJobStatus(jobId, OperationStatus.COMPLETED, undefined, catalogId);
 
         const shouldSync = this.config.get<boolean>('shouldSync');
@@ -112,7 +98,7 @@ export class TasksManager {
     const version = metadata.productVersion as string;
     try {
       this.logger.log('info', `[TasksManager][publishToMappingServer] layer ${id} version  ${version}`);
-      const maxZoom = degreesPerPixelToZoomLevel(metadata.resolution as number);
+      const maxZoom = degreesPerPixelToZoomLevel(metadata.maxResolutionDeg as number);
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
         maxZoomLevel: maxZoom,

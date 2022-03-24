@@ -40,15 +40,12 @@ export class LayersManager {
       throw new BadRequestError(`received invalid field id`);
     }
 
-    if (data.metadata.productType === ProductType.ORTHOPHOTO) {
-      data.metadata.productType = ProductType.ORTHOPHOTO_HISTORY;
-    }
     await this.validateRunConditions(data);
     data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
     data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
     data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
-    const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productVersion as string}/${data.metadata.productType as string}`;
+    const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
     await this.createTasks(data, layerRelativePath, layerZoomRanges);
   }
@@ -95,14 +92,9 @@ export class LayersManager {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
+
     await this.validateNotRunning(resourceId, version);
-
-    // todo: version 1.0 condition defines only one material with the same ID, no history parts are allowed
-    if (data.metadata.productType === ProductType.ORTHOPHOTO_HISTORY) {
-      await this.validateNotExistsInCatalog(resourceId, undefined, ProductType.ORTHOPHOTO);
-    }
     await this.validateNotExistsInCatalog(resourceId, version, productType);
-
     await this.validateNotExistsInMapServer(resourceId, version, productType);
     await this.validateFiles(data);
   }
@@ -115,7 +107,7 @@ export class LayersManager {
   }
 
   private async validateNotExistsInMapServer(productId: string, productVersion: string, productType: ProductType): Promise<void> {
-    const layerName = getMapServingLayerName(productId, productVersion, productType);
+    const layerName = getMapServingLayerName(productId, productType);
     const existsInMapServer = await this.mapPublisher.exists(layerName);
     if (existsInMapServer) {
       throw new ConflictError(`layer ${layerName}, already exists on mapProxy`);
