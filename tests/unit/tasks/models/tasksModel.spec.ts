@@ -7,7 +7,6 @@ import { syncClientMock, triggerSyncMock } from '../../../mocks/clients/syncClie
 import { configMock, init as initMockConfig, setValue } from '../../../mocks/config';
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
-import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
 import { OperationTypeEnum } from '../../../../src/serviceClients/syncClient';
 
 let tasksManager: TasksManager;
@@ -55,12 +54,10 @@ describe('TasksManager', () => {
         relativePath: `test/1/${ProductType.ORTHOPHOTO_HISTORY}`,
       });
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       tasksManager = new TasksManager(
         logger,
         configMock,
         syncClientMock,
-        zoomLevelCalculator,
         jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
@@ -103,12 +100,10 @@ describe('TasksManager', () => {
         relativePath: `test/1/${ProductType.RASTER_MAP}`,
       });
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       tasksManager = new TasksManager(
         logger,
         configMock,
         syncClientMock,
-        zoomLevelCalculator,
         jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
@@ -141,12 +136,10 @@ describe('TasksManager', () => {
         allCompleted: false,
       });
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       tasksManager = new TasksManager(
         logger,
         configMock,
         syncClientMock,
-        zoomLevelCalculator,
         jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
