@@ -36,10 +36,7 @@ export class TasksManager {
     const res = await this.jobManager.getCompletedZoomLevels(jobId);
     if (res.status != OperationStatus.FAILED && res.completed) {
       if (res.successful) {
-        const layerName = getMapServingLayerName(
-          res.metadata.productId as string,
-          res.metadata.productType as ProductType
-        );
+        const layerName = getMapServingLayerName(res.metadata.productId as string, res.metadata.productType as ProductType);
         await this.publishToMappingServer(jobId, res.metadata, layerName, res.relativePath);
         const catalogId = await this.publishToCatalog(jobId, res.metadata, layerName);
 

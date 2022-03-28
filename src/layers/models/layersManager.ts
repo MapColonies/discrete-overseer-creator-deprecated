@@ -93,9 +93,9 @@ export class LayersManager {
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
 
-    await this.validateNotRunning(resourceId, version);
+    await this.validateNotRunning(resourceId, version, productType);
     await this.validateNotExistsInCatalog(resourceId, version, productType);
-    await this.validateNotExistsInMapServer(resourceId, version, productType);
+    await this.validateNotExistsInMapServer(resourceId, productType);
     await this.validateFiles(data);
   }
 
@@ -106,7 +106,7 @@ export class LayersManager {
     }
   }
 
-  private async validateNotExistsInMapServer(productId: string, productVersion: string, productType: ProductType): Promise<void> {
+  private async validateNotExistsInMapServer(productId: string, productType: ProductType): Promise<void> {
     const layerName = getMapServingLayerName(productId, productType);
     const existsInMapServer = await this.mapPublisher.exists(layerName);
     if (existsInMapServer) {
@@ -114,11 +114,11 @@ export class LayersManager {
     }
   }
 
-  private async validateNotRunning(resourceId: string, version: string): Promise<void> {
-    const jobs = await this.db.findJobs(resourceId, version);
+  private async validateNotRunning(resourceId: string, version: string, productType: ProductType): Promise<void> {
+    const jobs = await this.db.findJobs(resourceId, version, productType);
     jobs.forEach((job) => {
       if (job.status == OperationStatus.IN_PROGRESS || job.status == OperationStatus.PENDING) {
-        throw new ConflictError(`layer id: ${resourceId} version: ${version}, generation is already running`);
+        throw new ConflictError(`layer id: ${resourceId} version: ${version} product type: ${productType}, generation is already running`);
       }
     });
   }
