@@ -52,7 +52,7 @@ describe('Tasker', () => {
     metadata: testImageMetadata,
     originDirectory: '/here',
   };
-  const layerRelativePath = `test/1.22/OrthophotoHistory`;
+  const layerRelativePath = `test/OrthophotoHistory`;
   const paramTemplate = {
     discreteId: 'test',
     version: '1.22',

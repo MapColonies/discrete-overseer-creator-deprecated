@@ -90,7 +90,7 @@ describe('layers', function () {
 
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(1);
-      expect(catalogExistsMock).toHaveBeenCalledTimes(2);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
       expect(createTasksMock).toHaveBeenCalledTimes(3);
     });
@@ -181,7 +181,7 @@ describe('layers', function () {
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(1);
-      expect(catalogExistsMock).toHaveBeenCalledTimes(2);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
       expect(createLayerJobMock).toHaveBeenCalledTimes(0);
       expect(createTasksMock).toHaveBeenCalledTimes(0);
     });

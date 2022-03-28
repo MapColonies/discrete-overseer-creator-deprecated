@@ -55,7 +55,7 @@ const testImageMetadata: LayerMetadata = {
   productBoundingBox: undefined,
   rawProductData: undefined,
 };
-const layerRelativePath = 'test/1.22/OrthophotoHistory';
+const layerRelativePath = 'test/OrthophotoHistory';
 const testData: IngestionParams = {
   fileNames: [],
   metadata: testImageMetadata,

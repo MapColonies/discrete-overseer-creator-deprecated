@@ -1,6 +1,6 @@
 import config, { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
-import { IngestionParams } from '@map-colonies/mc-model-types';
+import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
@@ -148,9 +148,9 @@ export class JobManagerClient extends HttpClient {
     });
   }
 
-  public async findJobs(resourceId: string, version: string): Promise<IGetJobResponse[]> {
+  public async findJobs(resourceId: string, version: string, productType: ProductType): Promise<IGetJobResponse[]> {
     const getLayerUrl = `/jobs`;
-    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, version, type: jobType });
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, version, type: jobType, productType: productType });
     if (typeof res === 'string' || res.length === 0) {
       return [];
     }
