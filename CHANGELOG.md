@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.11.0...v3.0.0) (2022-04-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* removed file names from tasks (#120)
+
+### Features
+
+* Add OpenAPI tests ([#107](https://github.com/MapColonies/discrete-overseer-creator/issues/107)) ([8a5d5f1](https://github.com/MapColonies/discrete-overseer-creator/commit/8a5d5f1205a209ad8ed9181cf920a8a1b8727903))
+* removed file names from tasks ([#120](https://github.com/MapColonies/discrete-overseer-creator/issues/120)) ([d9e8248](https://github.com/MapColonies/discrete-overseer-creator/commit/d9e824884ba52665a70980db1ed3022ddca8d366))
+* update models ([#124](https://github.com/MapColonies/discrete-overseer-creator/issues/124)) ([250c923](https://github.com/MapColonies/discrete-overseer-creator/commit/250c92375af6066df6da97b0a07df6e922fe0560)), closes [#126](https://github.com/MapColonies/discrete-overseer-creator/issues/126) [#125](https://github.com/MapColonies/discrete-overseer-creator/issues/125)
+
+
+### Bug Fixes
+
+* fix catalog id was saved into job reason bug ([#102](https://github.com/MapColonies/discrete-overseer-creator/issues/102)) ([3949d0e](https://github.com/MapColonies/discrete-overseer-creator/commit/3949d0ed43c7eba2bd2af08ea9226120dd4cebe2))
+* hot fix - batched tasks creation ([#108](https://github.com/MapColonies/discrete-overseer-creator/issues/108)) ([4c198b1](https://github.com/MapColonies/discrete-overseer-creator/commit/4c198b1d4d5f00b214e3006ff9599a9879e4695e))
+* validation fix for exists in catalog ([#110](https://github.com/MapColonies/discrete-overseer-creator/issues/110)) ([38eee0a](https://github.com/MapColonies/discrete-overseer-creator/commit/38eee0a17a00907b7fd4f3bb0271be69bde05146))
+
 ### [2.0.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v2.0.0...v2.0.1) (2022-03-23)
 
 ## [2.0.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.12.2...v2.0.0) (2022-03-06)
