@@ -1,5 +1,5 @@
 import { bboxPolygon, featureCollection, polygon } from '@turf/turf';
-import { LayerMetadata, ProductType, RecordType, SensorType } from '@map-colonies/mc-model-types';
+import { LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { MetadataMerger } from '../../../src/update/metadataMerger';
 
 describe('MetadataMerger', () => {
@@ -29,7 +29,7 @@ describe('MetadataMerger', () => {
   });
   const baseRawProductData = featureCollection([bboxPolygon([0, 0, 5, 5])]);
   const baseMetadata: LayerMetadata = {
-    accuracyCE90: 5,
+    minHorizontalAccuracyCE90: 5,
     classification: '6',
     creationDate: new Date(1, 1, 1),
     description: 'test',
@@ -46,9 +46,9 @@ describe('MetadataMerger', () => {
     productType: ProductType.ORTHOPHOTO,
     productVersion: '1.0',
     rawProductData: baseRawProductData,
-    region: 'r1,r2,r3',
-    resolution: 0.072,
-    sensorType: [SensorType.RGB, SensorType.Pan_Sharpen],
+    region: ['r1', 'r2', 'r3'],
+    maxResolutionDeg: 0.072,
+    sensors: ['RGB', 'Pan_Sharpen'],
     sourceDateEnd: new Date(1, 1, 1),
     sourceDateStart: new Date(1, 1, 1),
     srsId: 'EPSG:4326',
@@ -73,7 +73,7 @@ describe('MetadataMerger', () => {
   });
   const updateRawProductData = featureCollection([bboxPolygon([4, 4, 7, 7])]);
   const updateMetadata: LayerMetadata = {
-    accuracyCE90: 3,
+    minHorizontalAccuracyCE90: 3,
     classification: '6',
     creationDate: new Date(2, 1, 1),
     description: 'test',
@@ -90,9 +90,9 @@ describe('MetadataMerger', () => {
     productType: ProductType.ORTHOPHOTO,
     productVersion: '2.0',
     rawProductData: updateRawProductData,
-    region: 'r1,r4',
-    resolution: 0.072,
-    sensorType: [SensorType.RGB, SensorType.VIS],
+    region: ['r1', 'r4'],
+    maxResolutionDeg: 0.072,
+    sensors: ['RGB', 'VIS'],
     sourceDateEnd: new Date(2, 1, 1),
     sourceDateStart: new Date(2, 1, 1),
     srsId: 'EPSG:4326',
@@ -138,7 +138,7 @@ describe('MetadataMerger', () => {
     delete feat.bbox;
   });
   const expectedMetadata: LayerMetadata = {
-    accuracyCE90: 5,
+    minHorizontalAccuracyCE90: 5,
     classification: '6',
     creationDate: new Date(1, 1, 1),
     description: 'test',
@@ -155,9 +155,9 @@ describe('MetadataMerger', () => {
     productType: ProductType.ORTHOPHOTO,
     productVersion: '2.0',
     rawProductData: undefined,
-    region: 'r1,r2,r3,r4',
-    resolution: 0.072,
-    sensorType: [SensorType.RGB, SensorType.Pan_Sharpen, SensorType.VIS],
+    region: ['r1', 'r2', 'r3', 'r4'],
+    maxResolutionDeg: 0.072,
+    sensors: ['RGB', 'Pan_Sharpen', 'VIS'],
     sourceDateEnd: new Date(2, 1, 1),
     sourceDateStart: new Date(1, 1, 1),
     srsId: 'EPSG:4326',

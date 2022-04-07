@@ -1,4 +1,4 @@
-import { IngestionParams, LayerMetadata, ProductType, RecordType, SensorType } from '@map-colonies/mc-model-types';
+import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { Tasker } from '../../../../src/layers/models/tasker';
 import { configMock, init as initConfig, setValue } from '../../../mocks/config';
 
@@ -10,11 +10,11 @@ describe('Tasker', () => {
     productVersion: '1.22',
     productName: 'test name',
     description: 'test desc',
-    accuracyCE90: 3,
-    resolution: 2.68220901489258e-6,
+    minHorizontalAccuracyCE90: 3,
+    maxResolutionDeg: 2.68220901489258e-6,
     rms: 0.5,
-    scale: '3',
-    sensorType: [SensorType.OTHER],
+    scale: 3,
+    sensors: ['OTHER', 'Test'],
     updateDate: new Date('01/01/2020'),
     footprint: {
       type: 'Polygon',
@@ -34,7 +34,7 @@ describe('Tasker', () => {
     producerName: 'testProducer',
     productType: ProductType.ORTHOPHOTO_HISTORY,
     productSubType: undefined,
-    region: '',
+    region: ['testRegion1', 'testRegion2'],
     sourceDateEnd: new Date('06/01/2020'),
     sourceDateStart: new Date('05/01/2020'),
     srsId: '4326',
@@ -52,7 +52,7 @@ describe('Tasker', () => {
     metadata: testImageMetadata,
     originDirectory: '/here',
   };
-  const layerRelativePath = `test/1.22/OrthophotoHistory`;
+  const layerRelativePath = `test/OrthophotoHistory`;
   const paramTemplate = {
     discreteId: 'test',
     version: '1.22',

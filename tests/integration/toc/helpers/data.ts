@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { LayerMetadata, ProductType, RecordType, SensorType } from '@map-colonies/mc-model-types';
+import { LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import xmlbuilder from 'xmlbuilder';
 import { ITocParams, TocOperation } from '../../../../src/toc/interfaces';
 
@@ -8,7 +8,7 @@ export const validTestImageMetadata: LayerMetadata = {
   productVersion: '1.23',
   productName: 'test layer',
   description: 'test layer desc',
-  accuracyCE90: 0.7,
+  minHorizontalAccuracyCE90: 0.7,
   footprint: {
     type: 'Polygon',
     coordinates: [
@@ -21,10 +21,10 @@ export const validTestImageMetadata: LayerMetadata = {
       ],
     ],
   },
-  scale: '100',
+  scale: 100,
   rms: 2.6,
-  resolution: 0.007,
-  sensorType: [SensorType.RGB],
+  maxResolutionDeg: 0.007,
+  sensors: ['RGB', 'OTHER'],
   classification: 'test',
   type: RecordType.RECORD_RASTER,
   productType: ProductType.ORTHOPHOTO,
@@ -38,7 +38,7 @@ export const validTestImageMetadata: LayerMetadata = {
   sourceDateEnd: new Date('11/16/2017'),
   sourceDateStart: new Date('11/16/2017'),
   layerPolygonParts: undefined,
-  region: '',
+  region: ['testRegion1', 'testRegion2'],
   includedInBests: undefined,
   maxResolutionMeter: 0.2,
   productBoundingBox: undefined,

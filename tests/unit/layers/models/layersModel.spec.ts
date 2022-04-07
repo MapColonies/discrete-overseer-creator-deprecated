@@ -1,4 +1,4 @@
-import { IngestionParams, LayerMetadata, ProductType, RecordType, SensorType } from '@map-colonies/mc-model-types';
+import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
 import { createLayerJobMock, findJobsMock, jobManagerClientMock, createTasksMock } from '../../../mocks/clients/jobManagerClient';
 import { catalogExistsMock, catalogClientMock } from '../../../mocks/clients/catalogClient';
@@ -19,11 +19,11 @@ const testImageMetadata: LayerMetadata = {
   productVersion: '1.22',
   productName: 'test name',
   description: 'test desc',
-  accuracyCE90: 3,
-  resolution: 2.68220901489258e-6,
+  minHorizontalAccuracyCE90: 3,
+  maxResolutionDeg: 2.68220901489258e-6,
   rms: 0.5,
-  scale: '3',
-  sensorType: [SensorType.OTHER],
+  scale: 3,
+  sensors: ['OTHER', 'Test'],
   updateDate: new Date('01/01/2020'),
   footprint: {
     type: 'Polygon',
@@ -43,7 +43,7 @@ const testImageMetadata: LayerMetadata = {
   producerName: 'testProducer',
   productType: ProductType.ORTHOPHOTO_HISTORY,
   productSubType: undefined,
-  region: '',
+  region: ['testRegion1', 'testRegion2'],
   sourceDateEnd: new Date('06/01/2020'),
   sourceDateStart: new Date('05/01/2020'),
   srsId: '4326',
@@ -55,7 +55,7 @@ const testImageMetadata: LayerMetadata = {
   productBoundingBox: undefined,
   rawProductData: undefined,
 };
-const layerRelativePath = 'test/1.22/OrthophotoHistory';
+const layerRelativePath = 'test/OrthophotoHistory';
 const testData: IngestionParams = {
   fileNames: [],
   metadata: testImageMetadata,
