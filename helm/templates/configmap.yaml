@@ -18,6 +18,7 @@ data:
   CATALOG_PUBLISHING_SERVICE_URL: {{ .Values.rasterCommon.serviceUrls.catalogManager | quote }}
   MAP_SERVER_CACHE_TYPE: {{ .Values.env.mapServerCacheType | quote }}
   DISPLAY_NAME_DIR: {{ .Values.env.displayNameDir | quote }}
+  VALID_FILE_EXTENSIONS: {{ .Values.env.validFileExtensions | quote }}
   TILING_ZOOM_GROUPS: {{ .Values.env.tilingZoomGroups | quote }}
   HTTP_RETRY_ATTEMPTS: {{ .Values.env.httpRetry.attempts | quote }}
   HTTP_RETRY_DELAY: {{ .Values.env.httpRetry.delay | quote }}
