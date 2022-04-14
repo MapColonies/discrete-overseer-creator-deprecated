@@ -19,6 +19,7 @@
   "LayerSourceDir": "/layerSources",
   "mapServerCacheType": "FS",
   "displayNameDir": "\\layerSources",
+  "validFileExtensions": "tif,tiff,gpkg,jp2,jpc,j2k,ecw",
   "storageServiceURL": "http://localhost:8081",
   "syncServiceURL": "http://localhost:8082",
   "mapPublishingServiceURL": "http://localhost:8083",

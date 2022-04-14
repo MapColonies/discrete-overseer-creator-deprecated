@@ -73,6 +73,7 @@ interface IGetJobResponse {
   expiredTasks: number;
   pendingTasks: number;
   inProgressTasks: number;
+  abortedTasks: number;
 }
 
 const jobType = config.get<string>('jobType');
@@ -132,7 +133,7 @@ export class JobManagerClient extends HttpClient {
     const res = await this.get<IGetJobResponse>(getJobUrl, query);
     return {
       status: res.status as OperationStatus,
-      completed: res.completedTasks + res.failedTasks + res.expiredTasks == res.taskCount,
+      completed: res.completedTasks + res.failedTasks + res.expiredTasks + res.abortedTasks == res.taskCount,
       successful: res.completedTasks === res.taskCount,
       metadata: (res.parameters as unknown as IngestionParams).metadata,
       relativePath: (res.parameters as unknown as { layerRelativePath: string }).layerRelativePath,
