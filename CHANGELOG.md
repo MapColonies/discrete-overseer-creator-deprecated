@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.0.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.0.0...v3.0.1) (2022-04-24)
+
+
+### Features
+
+* upgrade storage explorer midleware ([d221398](https://github.com/MapColonies/discrete-overseer-creator/commit/d221398789c4fc6f65b1df2c7ffcb871754a49c7))
+
 ## [3.0.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v1.11.0...v3.0.0) (2022-04-07)
 
 
