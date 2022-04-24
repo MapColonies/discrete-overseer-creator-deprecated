@@ -62,7 +62,7 @@ export class TasksManager {
             );
           }
         }
-      } else {
+      } else if (res.status != OperationStatus.ABORTED && res.status != OperationStatus.EXPIRED) {
         this.logger.log(
           'error',
           `[TasksManager][taskComplete] failed to generate tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`
