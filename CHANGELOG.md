@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.0.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.0.1...v3.0.2) (2022-04-25)
+
+
+### Bug Fixes
+
+* updating job status on after abort/expire ([#131](https://github.com/MapColonies/discrete-overseer-creator/issues/131)) ([5ea44c4](https://github.com/MapColonies/discrete-overseer-creator/commit/5ea44c481f3933202df9ec989f2711ae5b525bb4))
+
 ### [3.0.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.0.0...v3.0.1) (2022-04-24)
 
 
