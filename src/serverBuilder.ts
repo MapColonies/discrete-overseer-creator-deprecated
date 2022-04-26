@@ -12,6 +12,7 @@ import { layersRouterFactory } from './layers/routes/layersRouter';
 import { tasksRouterFactory } from './tasks/routes/tasksRouter';
 import { openapiRouterFactory } from './common/routes/openapi';
 import { tocRouterFactory } from './toc/routes/tocRouter';
+import { makeInsensitive } from './utils/stringCapitalizationPermutations';
 
 @injectable()
 export class ServerBuilder {
@@ -52,6 +53,7 @@ export class ServerBuilder {
       {
         physical: physicalDirPath,
         displayName: displayNameDir,
+        includeFilesExt: this.getFileExtensions(),
       },
     ];
     this.serverInstance.use(getStorageExplorerMiddleware(mountDirs, this.logger as unknown as Record<string, unknown>));
@@ -59,5 +61,11 @@ export class ServerBuilder {
 
   private registerPostRoutesMiddleware(): void {
     this.serverInstance.use(getErrorHandlerMiddleware((message) => this.logger.log('error', message)));
+  }
+
+  private getFileExtensions(): string[] {
+    const extensionsStr = this.config.get<string>('validFileExtensions');
+    const extensions = extensionsStr.split(',').map((ext) => ext.trim());
+    return makeInsensitive(...extensions);
   }
 }

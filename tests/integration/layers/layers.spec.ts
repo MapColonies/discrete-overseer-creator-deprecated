@@ -1,4 +1,4 @@
-import { LayerMetadata, ProductType, SensorType } from '@map-colonies/mc-model-types';
+import { LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
@@ -15,7 +15,7 @@ const validTestImageMetadata: LayerMetadata = {
   productVersion: '1.23',
   productName: 'test layer',
   description: 'test layer desc',
-  accuracyCE90: 0.7,
+  minHorizontalAccuracyCE90: 0.7,
   footprint: {
     type: 'Polygon',
     coordinates: [
@@ -28,11 +28,11 @@ const validTestImageMetadata: LayerMetadata = {
       ],
     ],
   },
-  scale: '100',
+  scale: 100,
   rms: 2.6,
   updateDate: new Date('11/16/2017'),
-  resolution: 0.007,
-  sensorType: [SensorType.RGB],
+  maxResolutionDeg: 0.007,
+  sensors: ['RGB'],
   classification: 'test',
   type: RecordType.RECORD_RASTER,
   productType: ProductType.ORTHOPHOTO_HISTORY,
@@ -45,7 +45,7 @@ const validTestImageMetadata: LayerMetadata = {
   sourceDateEnd: new Date('11/16/2017'),
   sourceDateStart: new Date('11/16/2017'),
   layerPolygonParts: undefined,
-  region: '',
+  region: [],
   includedInBests: undefined,
   maxResolutionMeter: 0.2,
   productBoundingBox: undefined,
@@ -90,7 +90,7 @@ describe('layers', function () {
 
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(1);
-      expect(catalogExistsMock).toHaveBeenCalledTimes(2);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
       expect(createTasksMock).toHaveBeenCalledTimes(3);
     });
@@ -181,7 +181,7 @@ describe('layers', function () {
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(1);
-      expect(catalogExistsMock).toHaveBeenCalledTimes(2);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
       expect(createLayerJobMock).toHaveBeenCalledTimes(0);
       expect(createTasksMock).toHaveBeenCalledTimes(0);
     });

@@ -1,6 +1,6 @@
 import config, { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
-import { IngestionParams } from '@map-colonies/mc-model-types';
+import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
@@ -73,6 +73,7 @@ interface IGetJobResponse {
   expiredTasks: number;
   pendingTasks: number;
   inProgressTasks: number;
+  abortedTasks: number;
 }
 
 const jobType = config.get<string>('jobType');
@@ -132,7 +133,7 @@ export class JobManagerClient extends HttpClient {
     const res = await this.get<IGetJobResponse>(getJobUrl, query);
     return {
       status: res.status as OperationStatus,
-      completed: res.completedTasks + res.failedTasks + res.expiredTasks == res.taskCount,
+      completed: res.completedTasks + res.failedTasks + res.expiredTasks + res.abortedTasks == res.taskCount,
       successful: res.completedTasks === res.taskCount,
       metadata: (res.parameters as unknown as IngestionParams).metadata,
       relativePath: (res.parameters as unknown as { layerRelativePath: string }).layerRelativePath,
@@ -148,9 +149,9 @@ export class JobManagerClient extends HttpClient {
     });
   }
 
-  public async findJobs(resourceId: string, version: string): Promise<IGetJobResponse[]> {
+  public async findJobs(resourceId: string, version: string, productType: ProductType): Promise<IGetJobResponse[]> {
     const getLayerUrl = `/jobs`;
-    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, version, type: jobType });
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, version, type: jobType, productType: productType });
     if (typeof res === 'string' || res.length === 0) {
       return [];
     }
