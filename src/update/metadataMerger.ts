@@ -1,9 +1,10 @@
 import { singleton } from 'tsyringe';
-import { GeoJSON, Geometry } from 'geojson';
-import { Feature, FeatureCollection, union, difference, Polygon, MultiPolygon, featureCollection, bbox } from '@turf/turf';
+import { GeoJSON } from 'geojson';
+import { Feature, FeatureCollection, union, difference, Polygon, MultiPolygon, featureCollection } from '@turf/turf';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Footprint } from '@map-colonies/mc-utils';
 import { createBBoxString } from '../utils/bbox';
+import { layerMetadataToPolygonParts } from '../common/utills/polygonPartsBuilder';
 
 @singleton()
 export class MetadataMerger {
@@ -50,7 +51,7 @@ export class MetadataMerger {
     if (!oldPolygonParts) {
       return updatePolygonParts;
     } else if (!updateMetadata.layerPolygonParts) {
-      updatePolygonParts = this.layerMetadataToPolygonParts(updateMetadata);
+      updatePolygonParts = layerMetadataToPolygonParts(updateMetadata);
     }
     const updateFootprint = updateMetadata.footprint as Footprint;
     const oldFeatures = (oldPolygonParts as FeatureCollection).features;
@@ -67,34 +68,6 @@ export class MetadataMerger {
       newFeatures.push(feature as Feature<Polygon | MultiPolygon>);
     });
     return featureCollection(newFeatures);
-  }
-
-  private layerMetadataToPolygonParts(metadata: LayerMetadata): GeoJSON {
-    return {
-      bbox: bbox(metadata.footprint as GeoJSON),
-      type: 'FeatureCollection',
-      features: [
-        {
-          type: 'Feature',
-          geometry: metadata.footprint as Geometry,
-          properties: {
-            /* eslint-disable @typescript-eslint/naming-convention */
-            Dsc: metadata.description,
-            Rms: metadata.rms ?? null,
-            Ep90: metadata.minHorizontalAccuracyCE90 ?? null,
-            Scale: metadata.scale ?? null,
-            Cities: null,
-            Source: `${metadata.productId as string}-${metadata.productVersion as string}`,
-            Countries: metadata.region?.join(',') ?? '',
-            Resolution: metadata.maxResolutionDeg?.toString(),
-            SensorType: metadata.sensors?.join(',') ?? '',
-            SourceName: metadata.productName,
-            UpdateDate: metadata.sourceDateEnd?.toLocaleDateString('en-GB'),
-            /* eslint-enable @typescript-eslint/naming-convention */
-          },
-        },
-      ],
-    };
   }
 
   private polygonPartsToSensors(layerPolygonParts?: FeatureCollection): string[] {
@@ -116,7 +89,7 @@ export class MetadataMerger {
 
   private mergeClassification(oldClassification?: string, newClassification?: string): string {
     //note this requires numeric classification system.
-    const DEFAULT_CLASSIFICATION = '3';
+    const DEFAULT_CLASSIFICATION = '4';
     if (oldClassification != undefined && newClassification != undefined) {
       return Math.min(parseInt(oldClassification), parseInt(newClassification)).toString();
     } else if (oldClassification != undefined) {
