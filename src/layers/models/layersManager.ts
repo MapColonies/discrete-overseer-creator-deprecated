@@ -6,6 +6,7 @@ import { OperationStatus } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { IConfig, ILogger } from '../../common/interfaces';
+import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { JobManagerClient } from '../../serviceClients/jobManagerClient';
@@ -44,6 +45,9 @@ export class LayersManager {
     data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
     data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
     data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
+    if (!data.metadata.layerPolygonParts) {
+      data.metadata.layerPolygonParts = layerMetadataToPolygonParts(data.metadata);
+    }
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);

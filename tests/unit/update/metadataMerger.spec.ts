@@ -11,16 +11,22 @@ describe('MetadataMerger', () => {
     bboxPolygon([0, 0, 4, 5], {
       properties: {
         test: '1',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        SensorType: 'RGB',
       },
     }),
     bboxPolygon([4, 0, 5, 4], {
       properties: {
         test: '2',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        SensorType: 'Pan_Sharpen',
       },
     }),
     bboxPolygon([4, 4, 5, 5], {
       properties: {
         test: '3',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        SensorType: 'excluded',
       },
     }),
   ]);
@@ -30,7 +36,7 @@ describe('MetadataMerger', () => {
   const baseRawProductData = featureCollection([bboxPolygon([0, 0, 5, 5])]);
   const baseMetadata: LayerMetadata = {
     minHorizontalAccuracyCE90: 5,
-    classification: '6',
+    classification: '4',
     creationDate: new Date(1, 1, 1),
     description: 'test',
     footprint: baseFootprint,
@@ -48,7 +54,7 @@ describe('MetadataMerger', () => {
     rawProductData: baseRawProductData,
     region: ['r1', 'r2', 'r3'],
     maxResolutionDeg: 0.072,
-    sensors: ['RGB', 'Pan_Sharpen'],
+    sensors: ['RGB', 'Pan_Sharpen', 'excluded'],
     sourceDateEnd: new Date(1, 1, 1),
     sourceDateStart: new Date(1, 1, 1),
     srsId: 'EPSG:4326',
@@ -65,6 +71,8 @@ describe('MetadataMerger', () => {
     bboxPolygon([4, 4, 7, 7], {
       properties: {
         test: '4',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        SensorType: 'VIS',
       },
     }),
   ]);
@@ -81,7 +89,7 @@ describe('MetadataMerger', () => {
     includedInBests: [],
     ingestionDate: new Date(2, 1, 5),
     layerPolygonParts: updatePolygonParts,
-    maxResolutionMeter: 777,
+    maxResolutionMeter: 500,
     producerName: 'tester',
     productBoundingBox: '4,4,7,7',
     productId: 'testId',
@@ -91,7 +99,7 @@ describe('MetadataMerger', () => {
     productVersion: '2.0',
     rawProductData: updateRawProductData,
     region: ['r1', 'r4'],
-    maxResolutionDeg: 0.072,
+    maxResolutionDeg: 0.0072,
     sensors: ['RGB', 'VIS'],
     sourceDateEnd: new Date(2, 1, 1),
     sourceDateStart: new Date(2, 1, 1),
@@ -121,16 +129,22 @@ describe('MetadataMerger', () => {
     bboxPolygon([0, 0, 4, 5], {
       properties: {
         test: '1',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        SensorType: 'RGB',
       },
     }),
     bboxPolygon([4, 0, 5, 3], {
       properties: {
         test: '2',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        SensorType: 'Pan_Sharpen',
       },
     }),
     bboxPolygon([4, 4, 7, 7], {
       properties: {
         test: '4',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        SensorType: 'VIS',
       },
     }),
   ]);
@@ -139,14 +153,14 @@ describe('MetadataMerger', () => {
   });
   const expectedMetadata: LayerMetadata = {
     minHorizontalAccuracyCE90: 5,
-    classification: '6',
+    classification: '4',
     creationDate: new Date(1, 1, 1),
     description: 'test',
     footprint: expectedFootprint,
     includedInBests: [],
     ingestionDate: new Date(1, 1, 5),
     layerPolygonParts: expectedPolygonParts,
-    maxResolutionMeter: 777,
+    maxResolutionMeter: 500,
     producerName: 'tester',
     productBoundingBox: '0,0,7,7',
     productId: 'testId',
@@ -156,18 +170,21 @@ describe('MetadataMerger', () => {
     productVersion: '2.0',
     rawProductData: undefined,
     region: ['r1', 'r2', 'r3', 'r4'],
-    maxResolutionDeg: 0.072,
+    maxResolutionDeg: 0.0072,
     sensors: ['RGB', 'Pan_Sharpen', 'VIS'],
     sourceDateEnd: new Date(2, 1, 1),
     sourceDateStart: new Date(1, 1, 1),
     srsId: 'EPSG:4326',
     srsName: 'wgs84',
     type: RecordType.RECORD_RASTER,
-    updateDate: new Date(2, 1, 5),
+    updateDate: new Date(3, 2, 1),
     rms: undefined,
     scale: undefined,
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers().setSystemTime(new Date(3, 2, 1));
+  });
   beforeEach(() => {
     merger = new MetadataMerger();
   });

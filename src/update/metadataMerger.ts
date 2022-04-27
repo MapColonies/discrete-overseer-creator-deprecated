@@ -4,6 +4,7 @@ import { Feature, FeatureCollection, union, difference, Polygon, MultiPolygon, f
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Footprint } from '@map-colonies/mc-utils';
 import { createBBoxString } from '../utils/bbox';
+import { layerMetadataToPolygonParts } from '../common/utills/polygonPartsBuilder';
 
 @singleton()
 export class MetadataMerger {
@@ -11,7 +12,7 @@ export class MetadataMerger {
     const newMetadata: LayerMetadata = {
       ...oldMetadata,
       productVersion: updateMetadata.productVersion,
-      updateDate: updateMetadata.updateDate,
+      updateDate: new Date(),
       sourceDateStart:
         (oldMetadata.sourceDateStart as Date) <= (updateMetadata.sourceDateStart as Date)
           ? oldMetadata.sourceDateStart
@@ -19,13 +20,16 @@ export class MetadataMerger {
       sourceDateEnd:
         (oldMetadata.sourceDateEnd as Date) >= (updateMetadata.sourceDateEnd as Date) ? oldMetadata.sourceDateEnd : updateMetadata.sourceDateEnd,
       minHorizontalAccuracyCE90: Math.max(oldMetadata.minHorizontalAccuracyCE90 ?? 0, updateMetadata.minHorizontalAccuracyCE90 ?? 0),
-      sensors: this.mergeUniqueArrays(oldMetadata.sensors, updateMetadata.sensors),
-      layerPolygonParts: this.mergeLayerPolygonParts(oldMetadata.layerPolygonParts, updateMetadata.layerPolygonParts, updateMetadata.footprint),
+      layerPolygonParts: this.mergeLayerPolygonParts(updateMetadata, oldMetadata.layerPolygonParts),
       footprint: union(oldMetadata.footprint as Footprint, updateMetadata.footprint as Footprint) as GeoJSON,
       region: this.mergeUniqueArrays(oldMetadata.region, updateMetadata.region),
       rawProductData: undefined,
+      maxResolutionDeg: Math.min(oldMetadata.maxResolutionDeg as number, updateMetadata.maxResolutionDeg as number),
+      maxResolutionMeter: Math.min(oldMetadata.maxResolutionMeter as number, updateMetadata.maxResolutionMeter as number),
+      classification: this.mergeClassification(oldMetadata.classification, updateMetadata.classification),
     };
     newMetadata.productBoundingBox = createBBoxString(newMetadata.footprint as Footprint);
+    newMetadata.sensors = this.polygonPartsToSensors(newMetadata.layerPolygonParts as FeatureCollection);
     return newMetadata;
   }
 
@@ -42,18 +46,20 @@ export class MetadataMerger {
     return Array.from(merged);
   }
 
-  private mergeLayerPolygonParts(old?: GeoJSON, update?: GeoJSON, updateFootprint?: GeoJSON): GeoJSON | undefined {
-    if (!old) {
-      return update;
-    } else if (!update) {
-      return old;
+  private mergeLayerPolygonParts(updateMetadata: LayerMetadata, oldPolygonParts?: GeoJSON): GeoJSON | undefined {
+    let updatePolygonParts = updateMetadata.layerPolygonParts;
+    if (!oldPolygonParts) {
+      return updatePolygonParts;
+    } else if (!updateMetadata.layerPolygonParts) {
+      updatePolygonParts = layerMetadataToPolygonParts(updateMetadata);
     }
-    const oldFeatures = (old as FeatureCollection).features;
-    const updateFeatures = (update as FeatureCollection).features;
+    const updateFootprint = updateMetadata.footprint as Footprint;
+    const oldFeatures = (oldPolygonParts as FeatureCollection).features;
+    const updateFeatures = (updatePolygonParts as FeatureCollection).features;
     const newFeatures: Feature<Polygon | MultiPolygon>[] = [];
     oldFeatures.forEach((feature) => {
       let updatedFeature: Feature<Polygon | MultiPolygon> | null = { ...(feature as Feature<Polygon | MultiPolygon>) };
-      updatedFeature = difference(updatedFeature, updateFootprint as Footprint);
+      updatedFeature = difference(updatedFeature, updateFootprint);
       if (updatedFeature !== null) {
         newFeatures.push(updatedFeature);
       }
@@ -64,10 +70,34 @@ export class MetadataMerger {
     return featureCollection(newFeatures);
   }
 
-  private mergeRegions(old?: string, update?: string): string {
-    const oldArr = old?.split(',') ?? [];
-    const updateArr = update?.split(',') ?? [];
-    const newArr = this.mergeUniqueArrays(oldArr, updateArr);
-    return newArr.join(',');
+  private polygonPartsToSensors(layerPolygonParts?: FeatureCollection): string[] {
+    if (!layerPolygonParts) {
+      return [];
+    }
+    const sensors = new Set<string>();
+    layerPolygonParts.features.forEach((feature) => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const partSensors = (feature.properties as { SensorType: string }).SensorType.split(',');
+      partSensors.forEach((sensor) => {
+        if (!sensors.has(sensor)) {
+          sensors.add(sensor);
+        }
+      });
+    });
+    return Array.from(sensors);
+  }
+
+  private mergeClassification(oldClassification?: string, newClassification?: string): string {
+    //note this requires numeric classification system.
+    const DEFAULT_CLASSIFICATION = '4';
+    if (oldClassification != undefined && newClassification != undefined) {
+      return Math.min(parseInt(oldClassification), parseInt(newClassification)).toString();
+    } else if (oldClassification != undefined) {
+      return oldClassification;
+    } else if (newClassification != undefined) {
+      return newClassification;
+    } else {
+      return DEFAULT_CLASSIFICATION;
+    }
   }
 }
