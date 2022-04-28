@@ -16,7 +16,7 @@ data:
   MAP_PUBLISHING_SERVICE_URL: {{ .Values.rasterCommon.serviceUrls.mapproxyApi | quote }}
   PUBLIC_MAP_SERVER_URL: {{ .Values.env.mapServerPublicDNS | quote }}
   CATALOG_PUBLISHING_SERVICE_URL: {{ .Values.rasterCommon.serviceUrls.catalogManager | quote }}
-  MAP_SERVER_CACHE_TYPE: {{ .Values.env.mapServerCacheType | quote }}
+  MAP_SERVER_CACHE_TYPE: {{ .Values.rasterCommon.storage.tilesStorageProvider | quote }}
   DISPLAY_NAME_DIR: {{ .Values.env.displayNameDir | quote }}
   VALID_FILE_EXTENSIONS: {{ .Values.env.validFileExtensions | quote }}
   TILING_ZOOM_GROUPS: {{ .Values.env.tilingZoomGroups | quote }}
