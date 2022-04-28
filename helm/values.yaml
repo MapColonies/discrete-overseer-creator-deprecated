@@ -15,7 +15,7 @@ rasterCommon:
       jobType: Ingestion
       tillingTaskType: splitTiles
   storage:
-    tilesStorageProvider: "DB"
+    tilesStorageProvider: "FS"
     fs:
       ingestionSourcePvc:
         enabled: true
