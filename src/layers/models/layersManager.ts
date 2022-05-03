@@ -40,7 +40,7 @@ export class LayersManager {
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }
-
+    await this.checkForUpdate(data);
     await this.validateRunConditions(data);
     data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
     data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
@@ -52,6 +52,25 @@ export class LayersManager {
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
     await this.createTasks(data, layerRelativePath, layerZoomRanges);
+  }
+
+  public async checkForUpdate (data: IngestionParams): Promise<boolean> {
+    const resourceId = data.metadata.productId as string;
+    const version = data.metadata.productVersion as string;
+    const productType = data.metadata.productType as ProductType;
+
+    const recordsMetadata = await this.catalog.getLayerVersions(resourceId, productType);
+    const requestedLayerVersion =  parseFloat(version);
+    if (recordsMetadata) {
+      const existsProductVersions: number[] = [];
+      recordsMetadata.forEach((metadata) => {
+        const productVersion = parseFloat(metadata.productVersion as string)
+        existsProductVersions.push(productVersion);
+      });
+      const highestExistsProductVersion = Math.max(...existsProductVersions);
+      return requestedLayerVersion > highestExistsProductVersion;
+    }
+    return false;
   }
 
   private async createTasks(data: IngestionParams, layerRelativePath: string, layerZoomRanges: ITaskZoomRange[]): Promise<void> {
@@ -134,3 +153,5 @@ export class LayersManager {
     }
   }
 }
+
+

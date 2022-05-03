@@ -54,6 +54,18 @@ export class CatalogClient extends HttpClient {
     return res[0].metadata;
   }
 
+  public async getLayerVersions(productId: string, productType: string): Promise<LayerMetadata[] | undefined> {
+    const req = {
+      metadata: {
+        productId,
+        productType,
+      },
+    };
+    const res = await this.post<FindRecordResponse>('/records/find/versions', req);
+    console.log(res)
+    return res.map((rec) => rec.metadata);
+  }
+
   public async publish(record: IRasterCatalogUpsertRequestBody): Promise<string> {
     const res = await this.post<ICreateRecordResponse>('/records', record);
     return res.id;
