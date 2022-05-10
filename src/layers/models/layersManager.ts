@@ -2,7 +2,7 @@ import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { GeoJSON } from 'geojson';
 import { Services } from '../../common/constants';
-import { OperationStatus } from '../../common/enums';
+import { JobType, OperationStatus, TaskType } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { IConfig, ILogger } from '../../common/interfaces';
@@ -40,8 +40,8 @@ export class LayersManager {
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }
-    await this.checkForUpdate(data);
-    await this.validateRunConditions(data);
+    const isUpdateJob = await this.checkForUpdate(data);
+    await this.validateRunConditions(data, isUpdateJob);
     data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
     data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
     data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
@@ -51,29 +51,36 @@ export class LayersManager {
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
-    await this.createTasks(data, layerRelativePath, layerZoomRanges);
+    await this.createTasks(data, layerRelativePath, layerZoomRanges, isUpdateJob);
   }
 
-  public async checkForUpdate (data: IngestionParams): Promise<boolean> {
+  public async checkForUpdate(data: IngestionParams): Promise<boolean> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
 
-    const recordsMetadata = await this.catalog.getLayerVersions(resourceId, productType);
-    const requestedLayerVersion =  parseFloat(version);
-    if (recordsMetadata) {
-      const existsProductVersions: number[] = [];
-      recordsMetadata.forEach((metadata) => {
-        const productVersion = parseFloat(metadata.productVersion as string)
-        existsProductVersions.push(productVersion);
-      });
-      const highestExistsProductVersion = Math.max(...existsProductVersions);
-      return requestedLayerVersion > highestExistsProductVersion;
+    const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
+    if (existsLayerVersions) {
+      const highestExistsProductVersion = Math.max(...existsLayerVersions);
+      const requestedLayerVersion = parseFloat(version);
+      if (requestedLayerVersion > highestExistsProductVersion) {
+        return true;
+      } else {
+        throw new BadRequestError(`layer id: ${resourceId} version: ${version} product type: ${productType} has already higher version in catalog`);
+      }
     }
     return false;
   }
 
-  private async createTasks(data: IngestionParams, layerRelativePath: string, layerZoomRanges: ITaskZoomRange[]): Promise<void> {
+  private async createTasks(
+    data: IngestionParams,
+    layerRelativePath: string,
+    layerZoomRanges: ITaskZoomRange[],
+    isUpdateJob: boolean
+  ): Promise<void> {
+    if (isUpdateJob) {
+      console.log('creating update task');
+    }
     const taskParams = this.tasker.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
     let taskBatch: ITaskParameters[] = [];
     let jobId: string | undefined = undefined;
@@ -81,11 +88,11 @@ export class LayersManager {
       taskBatch.push(task);
       if (taskBatch.length === this.tasksBatchSize) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, taskBatch);
+          jobId = await this.db.createLayerJob(data, layerRelativePath, isUpdateJob, taskBatch);
         } else {
           // eslint-disable-next-line no-useless-catch
           try {
-            await this.db.createTasks(jobId, taskBatch);
+            await this.db.createTasks(jobId, taskBatch, isUpdateJob);
           } catch (err) {
             //TODO: properly handle errors
             await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
@@ -97,11 +104,11 @@ export class LayersManager {
     }
     if (taskBatch.length !== 0) {
       if (jobId === undefined) {
-        jobId = await this.db.createLayerJob(data, layerRelativePath, taskBatch);
+        jobId = await this.db.createLayerJob(data, layerRelativePath, isUpdateJob, taskBatch);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {
-          await this.db.createTasks(jobId, taskBatch);
+          await this.db.createTasks(jobId, taskBatch, isUpdateJob);
         } catch (err) {
           //TODO: properly handle errors
           await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
@@ -111,21 +118,28 @@ export class LayersManager {
     }
   }
 
-  private async validateRunConditions(data: IngestionParams): Promise<void> {
+  private async validateRunConditions(data: IngestionParams, isUpdateJob: boolean): Promise<void> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
+    const jobType = isUpdateJob ? JobType.UPDATE : JobType.DISCRETE_TILING;
 
-    await this.validateNotRunning(resourceId, version, productType);
+    await this.validateNotRunning(resourceId, version, productType, jobType);
     await this.validateNotExistsInCatalog(resourceId, version, productType);
+    await this.validateFiles(data, isUpdateJob);
     await this.validateNotExistsInMapServer(resourceId, productType);
-    await this.validateFiles(data);
   }
 
-  private async validateFiles(data: IngestionParams): Promise<void> {
-    const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
-    if (!filesExists) {
-      throw new BadRequestError('invalid files list, some files are missing');
+  private async validateFiles(data: IngestionParams, isUpdateJob: boolean): Promise<void> {
+    // const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
+    // if (!filesExists) {
+    //   throw new BadRequestError('invalid files list, some files are missing');
+    // }
+    if (isUpdateJob) {
+      const gpkgFiles = await this.fileValidator.validateGpkgFiles(data.originDirectory, data.fileNames);
+      if (!gpkgFiles) {
+        throw new BadRequestError('Invalid files list, some files are not includes "gpkg" extension');
+      }
     }
   }
 
@@ -137,8 +151,8 @@ export class LayersManager {
     }
   }
 
-  private async validateNotRunning(resourceId: string, version: string, productType: ProductType): Promise<void> {
-    const jobs = await this.db.findJobs(resourceId, version, productType);
+  private async validateNotRunning(resourceId: string, version: string, productType: ProductType, jobType: JobType): Promise<void> {
+    const jobs = await this.db.findJobs(resourceId, version, productType, jobType);
     jobs.forEach((job) => {
       if (job.status == OperationStatus.IN_PROGRESS || job.status == OperationStatus.PENDING) {
         throw new ConflictError(`layer id: ${resourceId} version: ${version} product type: ${productType}, generation is already running`);
@@ -153,5 +167,3 @@ export class LayersManager {
     }
   }
 }
-
-

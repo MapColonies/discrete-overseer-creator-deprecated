@@ -1,6 +1,6 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
-import { createLayerJobMock, findJobsMock, jobManagerClientMock, createTasksMock } from '../../../mocks/clients/jobManagerClient';
+import { createLayerJobMock, findJobsMock, jobManagerClientMock, createTasksMock, checkForUpdateMock } from '../../../mocks/clients/jobManagerClient';
 import { catalogExistsMock, catalogClientMock } from '../../../mocks/clients/catalogClient';
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../../mocks/config';
@@ -108,6 +108,7 @@ describe('LayersManager', () => {
         },
       ];
 
+      checkForUpdateMock.mockResolvedValue(false);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -135,9 +136,9 @@ describe('LayersManager', () => {
         { minZoom: 2, maxZoom: 3 },
       ]);
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
-      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParams);
+      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, false, taskParams);
       expect(createTasksMock).toHaveBeenCalledTimes(1);
-      expect(createTasksMock).toHaveBeenCalledWith('testJobId', taskParams2);
+      expect(createTasksMock).toHaveBeenCalledWith('testJobId', taskParams2, false);
     });
 
     it('split the tasks based on configuration', async function () {
@@ -186,6 +187,7 @@ describe('LayersManager', () => {
 
       setValue({ 'tiling.zoomGroups': '1,8-5,2' });
 
+      checkForUpdateMock.mockResolvedValue(false);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -213,7 +215,7 @@ describe('LayersManager', () => {
         { minZoom: 2, maxZoom: 2 },
       ]);
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
-      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParms);
+      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, false, taskParms);
     });
 
     it('fail if layer status is pending', async function () {
@@ -343,6 +345,7 @@ describe('LayersManager', () => {
 
     it('fail if layer exists in mapping server', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
+      checkForUpdateMock.mockResolvedValue(false);
       mapExistsMock.mockResolvedValue(true);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -368,6 +371,7 @@ describe('LayersManager', () => {
 
     it('fail if layer exists in catalog', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
+      checkForUpdateMock.mockResolvedValue(false);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(true);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -393,6 +397,7 @@ describe('LayersManager', () => {
 
     it('fail if files are missing', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
+      checkForUpdateMock.mockResolvedValue(false);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(false);

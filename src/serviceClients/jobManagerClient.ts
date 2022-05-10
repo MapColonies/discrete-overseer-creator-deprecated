@@ -3,7 +3,7 @@ import { inject, injectable } from 'tsyringe';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
-import { OperationStatus } from '../common/enums';
+import { JobType, OperationStatus, TaskType } from '../common/enums';
 import { ICompletedTasks } from '../tasks/interfaces';
 import { ITaskParameters } from '../layers/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
@@ -77,7 +77,6 @@ interface IGetJobResponse {
 }
 
 const jobType = config.get<string>('jobType');
-const taskType = config.get<string>('taskType');
 @injectable()
 export class JobManagerClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -89,14 +88,14 @@ export class JobManagerClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async createLayerJob(data: IngestionParams, layerRelativePath: string, taskParams?: ITaskParameters[]): Promise<string> {
+  public async createLayerJob(data: IngestionParams, layerRelativePath: string, isUpdateJob: boolean, taskParams?: ITaskParameters[]): Promise<string> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const createLayerTasksUrl = `/jobs`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
       version: version,
-      type: jobType,
+      type: isUpdateJob? JobType.UPDATE : JobType.DISCRETE_TILING,
       status: OperationStatus.IN_PROGRESS,
       parameters: { ...data, layerRelativePath } as unknown as Record<string, unknown>,
       producerName: data.metadata.producerName,
@@ -104,7 +103,7 @@ export class JobManagerClient extends HttpClient {
       productType: data.metadata.productType,
       tasks: taskParams?.map((params) => {
         return {
-          type: taskType,
+          type:  isUpdateJob? TaskType.MERGE : TaskType.DISCRETE_TILING,
           parameters: params,
         };
       }),
@@ -114,11 +113,11 @@ export class JobManagerClient extends HttpClient {
     return res.id;
   }
 
-  public async createTasks(jobId: string, taskParams: ITaskParameters[]): Promise<void> {
+  public async createTasks(jobId: string, taskParams: ITaskParameters[], isUpdateJob: boolean): Promise<void> {
     const createTasksUrl = `/jobs/${jobId}/tasks`;
     const req = taskParams.map((params) => {
       return {
-        type: taskType,
+        type: isUpdateJob? TaskType.MERGE : TaskType.DISCRETE_TILING,
         parameters: params,
       };
     });
@@ -149,7 +148,7 @@ export class JobManagerClient extends HttpClient {
     });
   }
 
-  public async findJobs(resourceId: string, version: string, productType: ProductType): Promise<IGetJobResponse[]> {
+  public async findJobs(resourceId: string, version: string, productType: ProductType, jobType: JobType): Promise<IGetJobResponse[]> {
     const getLayerUrl = `/jobs`;
     const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, version, type: jobType, productType: productType });
     if (typeof res === 'string' || res.length === 0) {

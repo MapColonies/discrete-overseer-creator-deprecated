@@ -12,3 +12,13 @@ export enum MapServerCacheType {
   FS = 'FS',
   S3 = 'S3',
 }
+
+export enum JobType {
+  DISCRETE_TILING = 'Discrete-Tiling',
+  UPDATE = 'Update'
+}
+
+export enum TaskType {
+  DISCRETE_TILING = 'Discrete-Tiling',
+  MERGE = 'Merge'
+}

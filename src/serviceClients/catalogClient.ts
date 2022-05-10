@@ -54,16 +54,19 @@ export class CatalogClient extends HttpClient {
     return res[0].metadata;
   }
 
-  public async getLayerVersions(productId: string, productType: string): Promise<LayerMetadata[] | undefined> {
+  public async getLayerVersions(productId: string, productType: string): Promise<number[] | undefined> {
     const req = {
       metadata: {
         productId,
         productType,
       },
     };
-    const res = await this.post<FindRecordResponse>('/records/find/versions', req);
-    console.log(res)
-    return res.map((rec) => rec.metadata);
+    const res = await this.post<string[]>('/records/find/versions', req);
+    const layerVersions = res.map(str => {
+      return Number(str);
+    });
+    
+    return layerVersions;
   }
 
   public async publish(record: IRasterCatalogUpsertRequestBody): Promise<string> {
