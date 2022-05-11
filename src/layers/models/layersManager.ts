@@ -1,11 +1,13 @@
+import { join } from 'path';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
+import { BBox } from '@turf/helpers';
 import { inject, injectable } from 'tsyringe';
 import { GeoJSON } from 'geojson';
 import { Services } from '../../common/constants';
-import { JobType, OperationStatus, TaskType } from '../../common/enums';
+import { JobType, OperationStatus } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
-import { IConfig, ILogger } from '../../common/interfaces';
+import { IConfig, ILayerMergeData, ILogger, IMergeParameters } from '../../common/interfaces';
 import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
@@ -15,6 +17,9 @@ import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { createBBoxString } from '../../utils/bbox';
 import { ITaskZoomRange } from '../../tasks/interfaces';
 import { ITaskParameters } from '../interfaces';
+import { getGpkgBoundingBox } from '../../serviceClients/sqlite';
+import { bboxToFootprint } from '../../utils/bbox';
+import { MergeTasker } from '../../merger/mergeTasker';
 import { FileValidator } from './fileValidator';
 import { Tasker } from './tasker';
 
@@ -24,13 +29,14 @@ export class LayersManager {
 
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
-    @inject(Services.CONFIG) config: IConfig,
+    @inject(Services.CONFIG) private readonly config: IConfig,
     private readonly zoomLevelCalculator: ZoomLevelCalculator,
     private readonly db: JobManagerClient,
     private readonly catalog: CatalogClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator,
-    private readonly tasker: Tasker
+    private readonly tasker: Tasker,
+    private readonly mergeTasker: MergeTasker
   ) {
     this.tasksBatchSize = config.get<number>('tasksBatchSize');
   }
@@ -60,9 +66,15 @@ export class LayersManager {
     const productType = data.metadata.productType as ProductType;
 
     const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
+    console.log(existsLayerVersions);
     if (existsLayerVersions) {
       const highestExistsProductVersion = Math.max(...existsLayerVersions);
+      console.log(highestExistsProductVersion);
       const requestedLayerVersion = parseFloat(version);
+      if (!existsLayerVersions.length) {
+        console.log('empty array');
+        return false;
+      }
       if (requestedLayerVersion > highestExistsProductVersion) {
         return true;
       } else {
@@ -79,14 +91,41 @@ export class LayersManager {
     isUpdateJob: boolean
   ): Promise<void> {
     if (isUpdateJob) {
-      console.log('creating update task');
-    }
-    const taskParams = this.tasker.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
-    let taskBatch: ITaskParameters[] = [];
-    let jobId: string | undefined = undefined;
-    for (const task of taskParams) {
-      taskBatch.push(task);
-      if (taskBatch.length === this.tasksBatchSize) {
+      console.log('creating update task'); //#################################
+      const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
+        const sourceDir = this.config.get<string>('LayerSourceDir');
+        const fileFullPath = join(sourceDir, fileName);
+        console.log(fileFullPath)
+        return {
+          id: fileName,
+          tilesPath: '',
+          footprint: bboxToFootprint(getGpkgBoundingBox(fileFullPath) as BBox),
+        };
+      });
+      console.log(layers);
+    } else {
+      const taskParams = this.tasker.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
+      let taskBatch: ITaskParameters[] = [];
+      let jobId: string | undefined = undefined;
+      for (const task of taskParams) {
+        taskBatch.push(task);
+        if (taskBatch.length === this.tasksBatchSize) {
+          if (jobId === undefined) {
+            jobId = await this.db.createLayerJob(data, layerRelativePath, isUpdateJob, taskBatch);
+          } else {
+            // eslint-disable-next-line no-useless-catch
+            try {
+              await this.db.createTasks(jobId, taskBatch, isUpdateJob);
+            } catch (err) {
+              //TODO: properly handle errors
+              await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
+              throw err;
+            }
+          }
+          taskBatch = [];
+        }
+      }
+      if (taskBatch.length !== 0) {
         if (jobId === undefined) {
           jobId = await this.db.createLayerJob(data, layerRelativePath, isUpdateJob, taskBatch);
         } else {
@@ -98,21 +137,6 @@ export class LayersManager {
             await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
             throw err;
           }
-        }
-        taskBatch = [];
-      }
-    }
-    if (taskBatch.length !== 0) {
-      if (jobId === undefined) {
-        jobId = await this.db.createLayerJob(data, layerRelativePath, isUpdateJob, taskBatch);
-      } else {
-        // eslint-disable-next-line no-useless-catch
-        try {
-          await this.db.createTasks(jobId, taskBatch, isUpdateJob);
-        } catch (err) {
-          //TODO: properly handle errors
-          await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
-          throw err;
         }
       }
     }
