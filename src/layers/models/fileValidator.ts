@@ -23,7 +23,7 @@ export class FileValidator {
     return allValid;
   }
 
-  public async validateGpkgFiles(srcDir: string, files: string[]): Promise<boolean> {
+  public async validateGpkgFiles(files: string[]): Promise<boolean> {
     const gpkgExt = '.gpkg';
     const filePromises = files.map((file) => {
       const ext = path.extname(file);

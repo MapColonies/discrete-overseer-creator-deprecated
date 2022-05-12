@@ -2,12 +2,13 @@ import { join } from 'path';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { BBox } from '@turf/helpers';
 import { inject, injectable } from 'tsyringe';
+import { degreesPerPixelToZoomLevel } from '@map-colonies/mc-utils';
 import { GeoJSON } from 'geojson';
 import { Services } from '../../common/constants';
 import { JobType, OperationStatus } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
-import { IConfig, ILayerMergeData, ILogger, IMergeParameters } from '../../common/interfaces';
+import { IConfig, ILayerMergeData, ILogger, IMergeParameters, IMergeTaskParams } from '../../common/interfaces';
 import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
@@ -17,9 +18,6 @@ import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { createBBoxString } from '../../utils/bbox';
 import { ITaskZoomRange } from '../../tasks/interfaces';
 import { ITaskParameters } from '../interfaces';
-import { getGpkgBoundingBox } from '../../serviceClients/sqlite';
-import { GPKGHandler } from '../../gpkg';
-import { bboxToFootprint } from '../../utils/bbox';
 import { MergeTasker } from '../../merger/mergeTasker';
 import { FileValidator } from './fileValidator';
 import { Tasker } from './tasker';
@@ -27,6 +25,7 @@ import { Tasker } from './tasker';
 @injectable()
 export class LayersManager {
   private readonly tasksBatchSize: number;
+  private readonly mergeTaskBatchSize: number;
 
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
@@ -37,8 +36,10 @@ export class LayersManager {
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator,
     private readonly tasker: Tasker,
+    private readonly mergeTasker: MergeTasker
   ) {
     this.tasksBatchSize = config.get<number>('tasksBatchSize');
+    this.mergeTaskBatchSize = config.get<number>('mergeBatchSize');
   }
 
   public async createLayer(data: IngestionParams): Promise<void> {
@@ -47,7 +48,14 @@ export class LayersManager {
       throw new BadRequestError(`received invalid field id`);
     }
     const isUpdateJob = await this.checkForUpdate(data);
-    await this.validateRunConditions(data, isUpdateJob);
+    const jobType = isUpdateJob ? JobType.UPDATE : JobType.DISCRETE_TILING;
+    if (jobType === JobType.UPDATE) {
+      const allValidGpkgs = await this.fileValidator.validateGpkgFiles(data.fileNames);
+      if (!allValidGpkgs) {
+        throw new BadRequestError('Some of the files are not supported yet. UPDATE operation support: [GPKG] files only');
+      }
+    }
+    await this.validateRunConditions(data, jobType);
     data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
     data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
     data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
@@ -57,7 +65,7 @@ export class LayersManager {
     this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
     const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
-    await this.createTasks(data, layerRelativePath, layerZoomRanges, isUpdateJob);
+    await this.createTasks(data, layerRelativePath, layerZoomRanges, jobType);
   }
 
   public async checkForUpdate(data: IngestionParams): Promise<boolean> {
@@ -66,46 +74,72 @@ export class LayersManager {
     const productType = data.metadata.productType as ProductType;
 
     const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
-    console.log(existsLayerVersions);
     if (existsLayerVersions) {
       const highestExistsProductVersion = Math.max(...existsLayerVersions);
-      console.log(highestExistsProductVersion);
       const requestedLayerVersion = parseFloat(version);
       if (!existsLayerVersions.length) {
-        console.log('empty array');
         return false;
       }
       if (requestedLayerVersion > highestExistsProductVersion) {
         return true;
       } else {
-        throw new BadRequestError(`layer id: ${resourceId} version: ${version} product type: ${productType} has already higher version in catalog`);
+        throw new BadRequestError(`layer id: ${resourceId} version: ${version} product type: ${productType} has already higher version (${highestExistsProductVersion}) in catalog`);
       }
     }
     return false;
   }
 
-  private async createTasks(
-    data: IngestionParams,
-    layerRelativePath: string,
-    layerZoomRanges: ITaskZoomRange[],
-    isUpdateJob: boolean
-  ): Promise<void> {
-    if (isUpdateJob) {
-      console.log('creating update task'); //#################################
-      const gpkg = new GPKGHandler(data.fileNames[0]);
-      gpkg.getMinMaxCoordinates();
-      gpkg.closeConnection();
-      // const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
-      //   const sourceDir = this.config.get<string>('LayerSourceDir');
-      //   const fileFullPath = join(sourceDir, fileName);
-      //   console.log(fileFullPath)
-      //   return {
-      //     id: fileName,
-      //     tilesPath: '',
-      //     footprint: bboxToFootprint(getGpkgBoundingBox(fileFullPath) as BBox),
-      //   };
-      // });
-      // console.log(layers);
+  private async createTasks(data: IngestionParams, layerRelativePath: string, layerZoomRanges: ITaskZoomRange[], jobType: JobType): Promise<void> {
+    if (jobType === JobType.UPDATE) {
+      const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
+        const sourceDir = this.config.get<string>('LayerSourceDir');
+        const fileFullPath = join(sourceDir, fileName);
+        const footprint = data.metadata.footprint;
+        return {
+          id: fileName,
+          tilesPath: fileFullPath,
+          footprint: footprint,
+        };
+      });
+      const maxZoom = degreesPerPixelToZoomLevel(data.metadata.maxResolutionDeg as number);
+      const params: IMergeParameters = {
+        layers: layers,
+        destPath: layerRelativePath,
+        maxZoom: maxZoom,
+      };
+      const mergeTasksParams = this.mergeTasker.createBatchedTasks(params);
+      let mergeTaskBatch: IMergeTaskParams[] = [];
+      let jobId: string | undefined = undefined;
+      for (const mergeTask of mergeTasksParams) {
+        mergeTaskBatch.push(mergeTask);
+        if (mergeTaskBatch.length === this.mergeTaskBatchSize) {
+          if (jobId === undefined) {
+            jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, mergeTaskBatch);
+          } else {
+            try {
+              await this.db.createMergeTasks(jobId, mergeTaskBatch);
+            } catch (err) {
+              await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
+              throw err;
+            }
+          }
+          mergeTaskBatch = [];
+        }
+      }
+      if (mergeTaskBatch.length !== 0) {
+        if (jobId === undefined) {
+          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, mergeTaskBatch);
+        } else {
+          // eslint-disable-next-line no-useless-catch
+          try {
+            await this.db.createMergeTasks(jobId, mergeTaskBatch);
+          } catch (err) {
+            //TODO: properly handle errors
+            await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
+            throw err;
+          }
+        }
+      }
     } else {
       const taskParams = this.tasker.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
       let taskBatch: ITaskParameters[] = [];
@@ -114,7 +148,7 @@ export class LayersManager {
         taskBatch.push(task);
         if (taskBatch.length === this.tasksBatchSize) {
           if (jobId === undefined) {
-            jobId = await this.db.createLayerJob(data, layerRelativePath, taskBatch);
+            jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskBatch);
           } else {
             // eslint-disable-next-line no-useless-catch
             try {
@@ -130,7 +164,7 @@ export class LayersManager {
       }
       if (taskBatch.length !== 0) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, taskBatch);
+          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskBatch);
         } else {
           // eslint-disable-next-line no-useless-catch
           try {
@@ -145,28 +179,21 @@ export class LayersManager {
     }
   }
 
-  private async validateRunConditions(data: IngestionParams, isUpdateJob: boolean): Promise<void> {
+  private async validateRunConditions(data: IngestionParams, jobType: JobType): Promise<void> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
-    const jobType = isUpdateJob ? JobType.UPDATE : JobType.DISCRETE_TILING;
 
     await this.validateNotRunning(resourceId, version, productType, jobType);
     await this.validateNotExistsInCatalog(resourceId, version, productType);
-    await this.validateFiles(data, isUpdateJob);
+    await this.validateFiles(data);
     await this.validateNotExistsInMapServer(resourceId, productType);
   }
 
-  private async validateFiles(data: IngestionParams, isUpdateJob: boolean): Promise<void> {
+  private async validateFiles(data: IngestionParams): Promise<void> {
     const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
     if (!filesExists) {
       throw new BadRequestError('invalid files list, some files are missing');
-    }
-    if (isUpdateJob) {
-      const gpkgFiles = await this.fileValidator.validateGpkgFiles(data.originDirectory, data.fileNames);
-      if (!gpkgFiles) {
-        throw new BadRequestError('Invalid files list, some files are not includes "gpkg" extension');
-      }
     }
   }
 

@@ -1,7 +1,7 @@
 import config, { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
-import { ILogger } from '../common/interfaces';
+import { ILogger, IMergeTaskParams } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { JobType, OperationStatus, TaskType } from '../common/enums';
 import { ICompletedTasks } from '../tasks/interfaces';
@@ -10,7 +10,7 @@ import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpCli
 
 interface ICreateTaskBody {
   description?: string;
-  parameters: ITaskParameters;
+  parameters: ITaskParameters | IMergeTaskParams;
   reason?: string;
   type?: string;
   status?: OperationStatus;
@@ -88,7 +88,7 @@ export class JobManagerClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async createLayerJob(data: IngestionParams, layerRelativePath: string, taskParams?: ITaskParameters[]): Promise<string> {
+  public async createLayerJob(data: IngestionParams, layerRelativePath: string, jobType: JobType, taskParams?: (ITaskParameters | IMergeTaskParams)[]): Promise<string> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const createLayerTasksUrl = `/jobs`;
@@ -103,7 +103,7 @@ export class JobManagerClient extends HttpClient {
       productType: data.metadata.productType,
       tasks: taskParams?.map((params) => {
         return {
-          type: jobType,
+          type: jobType === JobType.UPDATE? TaskType.MERGE : TaskType.DISCRETE_TILING,
           parameters: params,
         };
       }),
@@ -113,11 +113,23 @@ export class JobManagerClient extends HttpClient {
     return res.id;
   }
 
+
   public async createTasks(jobId: string, taskParams: ITaskParameters[]): Promise<void> {
     const createTasksUrl = `/jobs/${jobId}/tasks`;
     const req = taskParams.map((params) => {
       return {
         type: jobType,
+        parameters: params,
+      };
+    });
+    await this.post(createTasksUrl, req);
+  }
+
+  public async createMergeTasks(jobId: string, taskParams: IMergeTaskParams[]): Promise<void> {
+    const createTasksUrl = `/jobs/${jobId}/tasks`;
+    const req = taskParams.map((params) => {
+      return {
+        type: TaskType.MERGE,
         parameters: params,
       };
     });
