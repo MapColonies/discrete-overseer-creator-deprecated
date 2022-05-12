@@ -136,9 +136,9 @@ describe('LayersManager', () => {
         { minZoom: 2, maxZoom: 3 },
       ]);
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
-      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, false, taskParams);
+      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParams);
       expect(createTasksMock).toHaveBeenCalledTimes(1);
-      expect(createTasksMock).toHaveBeenCalledWith('testJobId', taskParams2, false);
+      expect(createTasksMock).toHaveBeenCalledWith('testJobId', taskParams2);
     });
 
     it('split the tasks based on configuration', async function () {
@@ -215,7 +215,7 @@ describe('LayersManager', () => {
         { minZoom: 2, maxZoom: 2 },
       ]);
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
-      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, false, taskParms);
+      expect(createLayerJobMock).toHaveBeenCalledWith(testData, layerRelativePath, taskParms);
     });
 
     it('fail if layer status is pending', async function () {

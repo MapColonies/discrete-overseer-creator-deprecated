@@ -18,6 +18,7 @@ import { createBBoxString } from '../../utils/bbox';
 import { ITaskZoomRange } from '../../tasks/interfaces';
 import { ITaskParameters } from '../interfaces';
 import { getGpkgBoundingBox } from '../../serviceClients/sqlite';
+import { GPKGHandler } from '../../gpkg';
 import { bboxToFootprint } from '../../utils/bbox';
 import { MergeTasker } from '../../merger/mergeTasker';
 import { FileValidator } from './fileValidator';
@@ -36,7 +37,6 @@ export class LayersManager {
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator,
     private readonly tasker: Tasker,
-    private readonly mergeTasker: MergeTasker
   ) {
     this.tasksBatchSize = config.get<number>('tasksBatchSize');
   }
@@ -92,17 +92,20 @@ export class LayersManager {
   ): Promise<void> {
     if (isUpdateJob) {
       console.log('creating update task'); //#################################
-      const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
-        const sourceDir = this.config.get<string>('LayerSourceDir');
-        const fileFullPath = join(sourceDir, fileName);
-        console.log(fileFullPath)
-        return {
-          id: fileName,
-          tilesPath: '',
-          footprint: bboxToFootprint(getGpkgBoundingBox(fileFullPath) as BBox),
-        };
-      });
-      console.log(layers);
+      const gpkg = new GPKGHandler(data.fileNames[0]);
+      gpkg.getMinMaxCoordinates();
+      gpkg.closeConnection();
+      // const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
+      //   const sourceDir = this.config.get<string>('LayerSourceDir');
+      //   const fileFullPath = join(sourceDir, fileName);
+      //   console.log(fileFullPath)
+      //   return {
+      //     id: fileName,
+      //     tilesPath: '',
+      //     footprint: bboxToFootprint(getGpkgBoundingBox(fileFullPath) as BBox),
+      //   };
+      // });
+      // console.log(layers);
     } else {
       const taskParams = this.tasker.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
       let taskBatch: ITaskParameters[] = [];
@@ -111,11 +114,11 @@ export class LayersManager {
         taskBatch.push(task);
         if (taskBatch.length === this.tasksBatchSize) {
           if (jobId === undefined) {
-            jobId = await this.db.createLayerJob(data, layerRelativePath, isUpdateJob, taskBatch);
+            jobId = await this.db.createLayerJob(data, layerRelativePath, taskBatch);
           } else {
             // eslint-disable-next-line no-useless-catch
             try {
-              await this.db.createTasks(jobId, taskBatch, isUpdateJob);
+              await this.db.createTasks(jobId, taskBatch);
             } catch (err) {
               //TODO: properly handle errors
               await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
@@ -127,11 +130,11 @@ export class LayersManager {
       }
       if (taskBatch.length !== 0) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, isUpdateJob, taskBatch);
+          jobId = await this.db.createLayerJob(data, layerRelativePath, taskBatch);
         } else {
           // eslint-disable-next-line no-useless-catch
           try {
-            await this.db.createTasks(jobId, taskBatch, isUpdateJob);
+            await this.db.createTasks(jobId, taskBatch);
           } catch (err) {
             //TODO: properly handle errors
             await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
@@ -155,10 +158,10 @@ export class LayersManager {
   }
 
   private async validateFiles(data: IngestionParams, isUpdateJob: boolean): Promise<void> {
-    // const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
-    // if (!filesExists) {
-    //   throw new BadRequestError('invalid files list, some files are missing');
-    // }
+    const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
+    if (!filesExists) {
+      throw new BadRequestError('invalid files list, some files are missing');
+    }
     if (isUpdateJob) {
       const gpkgFiles = await this.fileValidator.validateGpkgFiles(data.originDirectory, data.fileNames);
       if (!gpkgFiles) {
