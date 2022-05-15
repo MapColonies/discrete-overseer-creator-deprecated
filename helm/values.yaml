@@ -20,7 +20,6 @@ rasterCommon:
       ingestionSourcePvc:
         enabled: true
         name: ingestion-source-pvc
-        subPath: ingestion-source
   ca:
     secretName: ''
     path: '/usr/local/share/ca-certificates'
