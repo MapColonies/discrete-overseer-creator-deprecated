@@ -88,7 +88,12 @@ export class JobManagerClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async createLayerJob(data: IngestionParams, layerRelativePath: string, jobType: JobType, taskParams?: (ITaskParameters | IMergeTaskParams)[]): Promise<string> {
+  public async createLayerJob(
+    data: IngestionParams,
+    layerRelativePath: string,
+    jobType: JobType,
+    taskParams?: (ITaskParameters | IMergeTaskParams)[]
+  ): Promise<string> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const createLayerTasksUrl = `/jobs`;
@@ -103,7 +108,7 @@ export class JobManagerClient extends HttpClient {
       productType: data.metadata.productType,
       tasks: taskParams?.map((params) => {
         return {
-          type: jobType === JobType.UPDATE? TaskType.MERGE : TaskType.DISCRETE_TILING,
+          type: jobType === JobType.UPDATE ? TaskType.MERGE : TaskType.DISCRETE_TILING,
           parameters: params,
         };
       }),
@@ -112,7 +117,6 @@ export class JobManagerClient extends HttpClient {
     const res = await this.post<ICreateJobResponse>(createLayerTasksUrl, createJobRequest);
     return res.id;
   }
-
 
   public async createTasks(jobId: string, taskParams: ITaskParameters[]): Promise<void> {
     const createTasksUrl = `/jobs/${jobId}/tasks`;

@@ -87,15 +87,19 @@ export class MergeTasker {
         for (const batch of batches) {
           yield {
             batch,
-            sources: [{
-              type: sourceType,
-              path: params.destPath,
-            }].concat( overlap.layers.map<IMergeSources>((layer) => {
-              return {
+            sources: [
+              {
                 type: sourceType,
-                path: layer.tilesPath,
-              };
-            })),
+                path: params.destPath,
+              },
+            ].concat(
+              overlap.layers.map<IMergeSources>((layer) => {
+                return {
+                  type: sourceType,
+                  path: layer.tilesPath,
+                };
+              })
+            ),
           };
         }
       }

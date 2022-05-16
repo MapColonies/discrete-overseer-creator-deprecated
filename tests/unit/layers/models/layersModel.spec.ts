@@ -1,6 +1,6 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
-import { createLayerJobMock, findJobsMock, jobManagerClientMock, createTasksMock } from '../../../mocks/clients/jobManagerClient';
+import { createLayerJobMock, findJobsMock, jobManagerClientMock } from '../../../mocks/clients/jobManagerClient';
 import { catalogExistsMock, catalogClientMock, getLayerVersionsMock } from '../../../mocks/clients/catalogClient';
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../../mocks/config';
@@ -15,7 +15,6 @@ import { createMergeTaskMock, mergeTaskerMock } from '../../../mocks/mergeTasker
 
 let layersManager: LayersManager;
 let checkForUpdateSpy: jest.SpyInstance;
-let createTasksSpy: jest.SpyInstance;
 
 const testImageMetadata: LayerMetadata = {
   productId: 'test',
@@ -73,7 +72,6 @@ describe('LayersManager', () => {
     clearMockConfig();
     initMockConfig();
     checkForUpdateSpy = jest.spyOn(LayersManager.prototype, 'checkForUpdate');
-    
   });
 
   describe('createLayer', () => {

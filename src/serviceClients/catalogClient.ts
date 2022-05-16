@@ -62,10 +62,10 @@ export class CatalogClient extends HttpClient {
       },
     };
     const res = await this.post<string[]>('/records/find/versions', req);
-    const layerVersions = res.map(str => {
+    const layerVersions = res.map((str) => {
       return Number(str);
     });
-    
+
     return layerVersions;
   }
 

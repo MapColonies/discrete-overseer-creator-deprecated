@@ -129,7 +129,7 @@ describe('layers', function () {
 
     it('should return 400 status code for update layer operation with lower version then catalog exists', async function () {
       let invalidTestMetaDataHasLowerVersion = { ...validTestData.metadata } as Record<string, unknown>;
-      invalidTestMetaDataHasLowerVersion = { ...invalidTestMetaDataHasLowerVersion, productVersion: "1.0" };
+      invalidTestMetaDataHasLowerVersion = { ...invalidTestMetaDataHasLowerVersion, productVersion: '1.0' };
       const invalidTestData = { ...validTestData, metadata: invalidTestMetaDataHasLowerVersion };
       getLayerVersionsMock.mockResolvedValue([2.0]);
       const response = await requestSender.createLayer(invalidTestData);

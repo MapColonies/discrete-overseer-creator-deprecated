@@ -5,7 +5,7 @@ const validateGpkgFilesMock = jest.fn();
 
 const fileValidatorMock = {
   validateExists: fileValidatorValidateExistsMock,
-  validateGpkgFiles: validateGpkgFilesMock
+  validateGpkgFiles: validateGpkgFilesMock,
 } as unknown as FileValidator;
 
 export { fileValidatorValidateExistsMock, validateGpkgFilesMock, fileValidatorMock };

@@ -14,12 +14,17 @@ export class Tasker {
   private readonly bboxSizeTiles: number;
   private readonly tasksBatchSize: number;
 
-  public constructor(@inject(Services.CONFIG) private readonly config: IConfig, private readonly db: JobManagerClient,) {
+  public constructor(@inject(Services.CONFIG) private readonly config: IConfig, private readonly db: JobManagerClient) {
     this.bboxSizeTiles = config.get<number>('bboxSizeTiles');
     this.tasksBatchSize = config.get<number>('tasksBatchSize');
   }
 
-  public async createIngestionTask(data: IngestionParams, layerRelativePath: string, layerZoomRanges: ITaskZoomRange[], jobType: JobType): Promise<void> {
+  public async createIngestionTask(
+    data: IngestionParams,
+    layerRelativePath: string,
+    layerZoomRanges: ITaskZoomRange[],
+    jobType: JobType
+  ): Promise<void> {
     const taskParams = this.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
     let taskBatch: ITaskParameters[] = [];
     let jobId: string | undefined = undefined;
