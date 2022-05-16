@@ -6,14 +6,56 @@ import { ITaskParameters } from '../interfaces';
 import { ITaskZoomRange } from '../../tasks/interfaces';
 import { Services } from '../../common/constants';
 import { IConfig } from '../../common/interfaces';
+import { JobType, OperationStatus } from '../../common/enums';
+import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 
 @singleton()
 export class Tasker {
   private readonly bboxSizeTiles: number;
-  public constructor(@inject(Services.CONFIG) private readonly config: IConfig) {
+  private readonly tasksBatchSize: number;
+
+  public constructor(@inject(Services.CONFIG) private readonly config: IConfig, private readonly db: JobManagerClient,) {
     this.bboxSizeTiles = config.get<number>('bboxSizeTiles');
+    this.tasksBatchSize = config.get<number>('tasksBatchSize');
   }
 
+  public async createIngestionTask(data: IngestionParams, layerRelativePath: string, layerZoomRanges: ITaskZoomRange[], jobType: JobType): Promise<void> {
+    const taskParams = this.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
+    let taskBatch: ITaskParameters[] = [];
+    let jobId: string | undefined = undefined;
+    for (const task of taskParams) {
+      taskBatch.push(task);
+      if (taskBatch.length === this.tasksBatchSize) {
+        if (jobId === undefined) {
+          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskBatch);
+        } else {
+          // eslint-disable-next-line no-useless-catch
+          try {
+            await this.db.createTasks(jobId, taskBatch);
+          } catch (err) {
+            //TODO: properly handle errors
+            await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
+            throw err;
+          }
+        }
+        taskBatch = [];
+      }
+    }
+    if (taskBatch.length !== 0) {
+      if (jobId === undefined) {
+        jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskBatch);
+      } else {
+        // eslint-disable-next-line no-useless-catch
+        try {
+          await this.db.createTasks(jobId, taskBatch);
+        } catch (err) {
+          //TODO: properly handle errors
+          await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
+          throw err;
+        }
+      }
+    }
+  }
   public *generateTasksParameters(data: IngestionParams, layerRelativePath: string, zoomRanges: ITaskZoomRange[]): Generator<ITaskParameters> {
     const ranger = new TileRanger();
     for (const zoomRange of zoomRanges) {

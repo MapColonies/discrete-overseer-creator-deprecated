@@ -1,6 +1,7 @@
 import { IRasterCatalogUpsertRequestBody } from '@map-colonies/mc-model-types';
 import { ITileRange } from '@map-colonies/mc-utils';
 import { GeoJSON } from 'geojson';
+import { SourceType } from './enums';
 
 export interface ILogger {
   log: (level: string, message: string) => void;
@@ -23,7 +24,6 @@ export interface IFindResponseRecord extends IRasterCatalogUpsertRequestBody {
 }
 
 export type FindRecordResponse = IFindResponseRecord[];
-
 export interface ILayerMergeData {
   id: string;
   tilesPath: string;
@@ -40,8 +40,11 @@ export interface IMergeOverlaps {
   intersection: GeoJSON;
 }
 
+export interface IMergeSources {
+  type: string,
+  path: string
+}
 export interface IMergeTaskParams {
-  sourcePaths: string[];
-  destPath: string;
+  sources: IMergeSources[];
   batch: ITileRange[];
 }

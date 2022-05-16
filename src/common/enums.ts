@@ -22,3 +22,9 @@ export enum TaskType {
   DISCRETE_TILING = 'Discrete-Tiling',
   MERGE = 'Merge'
 }
+
+export enum SourceType {
+  S3 = 'S3',
+  FS = 'FS',
+  GPKG = 'GPKG'
+}

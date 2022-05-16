@@ -1,9 +1,15 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
+import { JobType } from '../../../../src/common/enums';
 import { Tasker } from '../../../../src/layers/models/tasker';
+import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
+import { jobManagerClientMock } from '../../../mocks/clients/jobManagerClient';
 import { configMock, init as initConfig, setValue } from '../../../mocks/config';
+import { logger } from '../../../mocks/logger';
+import { generateTasksParametersMock } from '../../../mocks/tasker';
 
 describe('Tasker', () => {
   let tasker: Tasker;
+  let generateTasksParametersSpy: jest.SpyInstance;
 
   const testImageMetadata: LayerMetadata = {
     productId: 'test',
@@ -64,6 +70,27 @@ describe('Tasker', () => {
     initConfig();
   });
 
+  describe('createIngestionTask', () => {
+    it('split the tasks based on configuration', async function () {
+      tasker = new Tasker(configMock, jobManagerClientMock);
+      generateTasksParametersSpy = jest.spyOn(Tasker.prototype, "generateTasksParameters")
+
+      setValue({ 'tiling.zoomGroups': '1,8-5,2' });
+      await tasker.createIngestionTask(testData, layerRelativePath, [
+        { minZoom: 1, maxZoom: 1 },
+        { minZoom: 5, maxZoom: 8 },
+        { minZoom: 2, maxZoom: 2 },
+      ], JobType.DISCRETE_TILING);
+
+      expect(generateTasksParametersSpy).toHaveBeenCalledTimes(1);
+      expect(generateTasksParametersSpy).toHaveBeenCalledWith(testData, layerRelativePath, [
+        { minZoom: 1, maxZoom: 1 },
+        { minZoom: 5, maxZoom: 8 },
+        { minZoom: 2, maxZoom: 2 },
+      ]);
+    });
+  });
+
   describe('generateTasksParameters', () => {
     it('generate tasks for multiple ranges', () => {
       setValue('bboxSizeTiles', 10000);
@@ -72,7 +99,7 @@ describe('Tasker', () => {
         { minZoom: 5, maxZoom: 8 },
         { minZoom: 2, maxZoom: 2 },
       ];
-      tasker = new Tasker(configMock);
+      tasker = new Tasker(configMock, jobManagerClientMock);
 
       const gen = tasker.generateTasksParameters(testData, layerRelativePath, zoomRanges);
       const params = [];
