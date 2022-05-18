@@ -23,6 +23,7 @@ export interface IFindResponseRecord extends IRasterCatalogUpsertRequestBody {
 }
 
 export type FindRecordResponse = IFindResponseRecord[];
+
 export interface ILayerMergeData {
   id: string;
   tilesPath: string;
