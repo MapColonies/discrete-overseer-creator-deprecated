@@ -14,9 +14,9 @@ import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { createBBoxString } from '../../utils/bbox';
 import { ITaskZoomRange } from '../../tasks/interfaces';
-import { MergeTasker } from '../../merge/mergeTasker';
+import { MergeTilesTasker } from '../../merge/mergeTilesTasker';
 import { FileValidator } from './fileValidator';
-import { Tasker } from './tasker';
+import { SplitTilesTasker } from './splitTilesTasker';
 
 @injectable()
 export class LayersManager {
@@ -27,31 +27,43 @@ export class LayersManager {
     private readonly catalog: CatalogClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator,
-    private readonly tasker: Tasker,
-    private readonly mergeTasker: MergeTasker
+    private readonly splitTilesTasker: SplitTilesTasker,
+    private readonly mergeTilesTasker: MergeTilesTasker
   ) {}
 
   public async createLayer(data: IngestionParams): Promise<void> {
     const convertedData: Record<string, unknown> = data.metadata as unknown as Record<string, unknown>;
+    const resourceId = data.metadata.productId as string;
+    const version = data.metadata.productVersion as string;
+    const productType = data.metadata.productType as ProductType;
+    const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
+    const jobType = await this.getJobType(data);
+
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }
-    const isUpdateJob = await this.checkForUpdate(data);
-    const jobType = isUpdateJob ? JobType.UPDATE : JobType.DISCRETE_TILING;
-    await this.validateRunConditions(data, jobType);
-    data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
-    data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
-    data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
-    if (!data.metadata.layerPolygonParts) {
-      data.metadata.layerPolygonParts = layerMetadataToPolygonParts(data.metadata);
+    await this.validateFiles(data);
+    await this.validateNotRunning(resourceId, productType);
+
+    if (jobType === JobType.NEW) {
+      const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
+
+      await this.validateNotExistsInMapServer(resourceId, productType);
+      await this.validateNotExistsInCatalog(resourceId, version, productType);
+
+      this.logger.log('info', `creating "New" job and "Split-Tiles" tasks for layer ${data.metadata.productId as string} type: ${productType}`);
+      await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    } else if (jobType === JobType.UPDATE) {
+      const files = data.fileNames;
+      this.validateSupportedFiles(files);
+
+      this.logger.log('info', `creating "Update" job and "Merge" tasks for layer ${data.metadata.productId as string} type: ${productType}`);
+      await this.mergeTilesTasker.createMergeTasks(data, layerRelativePath);
     }
-    this.logger.log('info', `creating job and tasks for layer ${data.metadata.productId as string}`);
-    const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
-    const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
-    await this.createTasks(data, layerRelativePath, layerZoomRanges, jobType);
   }
 
-  public async checkForUpdate(data: IngestionParams): Promise<boolean> {
+  private async getJobType(data: IngestionParams): Promise<JobType> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
@@ -59,43 +71,20 @@ export class LayersManager {
     const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
 
     if (existsLayerVersions) {
-      const highestExistsProductVersion = Math.max(...existsLayerVersions);
+      const highestExistsLayerVersion = Math.max(...existsLayerVersions);
       const requestedLayerVersion = parseFloat(version);
       if (!existsLayerVersions.length) {
-        return false;
+        return JobType.NEW;
       }
-      if (requestedLayerVersion > highestExistsProductVersion) {
-        return true;
+      if (requestedLayerVersion > highestExistsLayerVersion) {
+        return JobType.UPDATE;
       } else {
         throw new BadRequestError(
-          `layer id: ${resourceId} version: ${version} product type: ${productType} has already higher version (${highestExistsProductVersion}) in catalog`
+          `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same or higher version (${highestExistsLayerVersion}) in catalog`
         );
       }
     }
-    return false;
-  }
-
-  private async createTasks(data: IngestionParams, layerRelativePath: string, layerZoomRanges: ITaskZoomRange[], jobType: JobType): Promise<void> {
-    if (jobType === JobType.UPDATE) {
-      const allValidGpkgs = await this.fileValidator.validateGpkgFiles(data.fileNames);
-      if (!allValidGpkgs) {
-        throw new BadRequestError('Some of the files are not supported yet. UPDATE operation support: [GPKG] files only');
-      }
-      await this.mergeTasker.createMergeTask(data, layerRelativePath, jobType);
-    } else {
-      await this.tasker.createIngestionTask(data, layerRelativePath, layerZoomRanges, jobType);
-    }
-  }
-
-  private async validateRunConditions(data: IngestionParams, jobType: JobType): Promise<void> {
-    const resourceId = data.metadata.productId as string;
-    const version = data.metadata.productVersion as string;
-    const productType = data.metadata.productType as ProductType;
-
-    await this.validateNotRunning(resourceId, version, productType, jobType);
-    await this.validateNotExistsInCatalog(resourceId, version, productType);
-    await this.validateFiles(data);
-    await this.validateNotExistsInMapServer(resourceId, productType);
+    return JobType.NEW;
   }
 
   private async validateFiles(data: IngestionParams): Promise<void> {
@@ -113,11 +102,11 @@ export class LayersManager {
     }
   }
 
-  private async validateNotRunning(resourceId: string, version: string, productType: ProductType, jobType: JobType): Promise<void> {
-    const jobs = await this.db.findJobs(resourceId, version, productType, jobType);
+  private async validateNotRunning(resourceId: string, productType: ProductType): Promise<void> {
+    const jobs = await this.db.findJobs(resourceId, productType);
     jobs.forEach((job) => {
       if (job.status == OperationStatus.IN_PROGRESS || job.status == OperationStatus.PENDING) {
-        throw new ConflictError(`layer id: ${resourceId} version: ${version} product type: ${productType}, generation is already running`);
+        throw new ConflictError(`layer id: ${resourceId} product type: ${productType}, generation is already running`);
       }
     });
   }
@@ -126,6 +115,13 @@ export class LayersManager {
     const existsInCatalog = await this.catalog.exists(resourceId, version, productType);
     if (existsInCatalog) {
       throw new ConflictError(`layer id: ${resourceId} version: ${version as string}, already exists in catalog`);
+    }
+  }
+
+  private validateSupportedFiles(files: string[]): void {
+    const validSupportedFiles = this.fileValidator.validateGpkgFiles(files);
+    if (!validSupportedFiles) {
+      throw new BadRequestError('Invalid files list, UPDATE operation supports: "gpkg" files only.');
     }
   }
 }

@@ -14,13 +14,13 @@ export enum MapServerCacheType {
 }
 
 export enum JobType {
-  DISCRETE_TILING = 'Discrete-Tiling',
+  NEW = 'New',
   UPDATE = 'Update',
 }
 
 export enum TaskType {
-  DISCRETE_TILING = 'Discrete-Tiling',
-  MERGE = 'Merge',
+  SPLIT_TILES = 'Split-Tiles',
+  MERGE_TILES = 'Merge-Tiles',
 }
 
 export enum SourceType {

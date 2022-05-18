@@ -36,9 +36,15 @@
   },
   "shouldSync": true,
   "linkTemplatesPath": "config/linkTemplates.template",
-  "jobType": "Discrete-Tiling",
-  "taskType": "Discrete-Tiling",
-  "bboxSizeTiles": 10000,
-  "mergeBatchSize": 10000,
-  "tasksBatchSize": 5
+  "ingestionNewJobType": "New",
+  "ingestionNewTaskType": "Split-Tiles",
+  "ingestionUpdateJobType": "Update",
+  "ingestionUpdateTaskType": "Merge",
+  "ingestionMergeTiles": {
+    "mergeBatchSize": 10000
+  },
+  "ingestionNewTiles": {
+    "bboxSizeTiles": 10000,
+    "tasksBatchSize": 5
+  }
 }

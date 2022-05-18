@@ -23,13 +23,9 @@ export class FileValidator {
     return allValid;
   }
 
-  public async validateGpkgFiles(files: string[]): Promise<boolean> {
+  public validateGpkgFiles(files: string[]): boolean {
     const gpkgExt = '.gpkg';
-    const filePromises = files.map((file) => {
-      const ext = path.extname(file);
-      return ext === gpkgExt;
-    });
-    const allValid = (await Promise.all(filePromises)).every((value) => value);
+    const allValid = files.every((file) => path.extname(file) === gpkgExt);
     return allValid;
   }
 }

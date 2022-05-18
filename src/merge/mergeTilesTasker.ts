@@ -12,15 +12,16 @@ import {
 import { difference, union, bbox as toBbox, bboxPolygon, Feature, Polygon } from '@turf/turf';
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../common/constants';
-import { JobType, OperationStatus } from '../common/enums';
+import { OperationStatus } from '../common/enums';
 import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams, ILogger, IMergeSources } from '../common/interfaces';
 import { JobManagerClient } from '../serviceClients/jobManagerClient';
 
 @singleton()
-export class MergeTasker {
+export class MergeTilesTasker {
   private readonly tileRanger: TileRanger;
   private readonly batchSize: number;
   private readonly mergeTaskBatchSize: number;
+  private readonly mergeTilesTaskType: string;
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
@@ -28,7 +29,8 @@ export class MergeTasker {
     private readonly db: JobManagerClient
   ) {
     this.batchSize = config.get('mergeBatchSize');
-    this.mergeTaskBatchSize = config.get<number>('mergeBatchSize');
+    this.mergeTaskBatchSize = config.get<number>('ingestionMergeTiles.mergeBatchSize');
+    this.mergeTilesTaskType = config.get<string>('ingestionUpdateTaskType');
     this.tileRanger = new TileRanger();
   }
 
@@ -106,8 +108,9 @@ export class MergeTasker {
     }
   }
 
-  public async createMergeTask(data: IngestionParams, layerRelativePath: string, jobType: JobType): Promise<void> {
+  public async createMergeTasks(data: IngestionParams, layerRelativePath: string): Promise<void> {
     const sourceDir = this.config.get<string>('LayerSourceDir');
+    const jobType = this.config.get<string>('ingestionUpdateJobType');
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
       const fileFullPath = join(sourceDir, fileName);
       const footprint = data.metadata.footprint;
@@ -130,7 +133,7 @@ export class MergeTasker {
       mergeTaskBatch.push(mergeTask);
       if (mergeTaskBatch.length === this.mergeTaskBatchSize) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, mergeTaskBatch);
+          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, this.mergeTilesTaskType, mergeTaskBatch);
         } else {
           try {
             await this.db.createMergeTasks(jobId, mergeTaskBatch);
@@ -144,7 +147,7 @@ export class MergeTasker {
     }
     if (mergeTaskBatch.length !== 0) {
       if (jobId === undefined) {
-        jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, mergeTaskBatch);
+        jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, this.mergeTilesTaskType, mergeTaskBatch);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {

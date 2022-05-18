@@ -76,7 +76,9 @@ interface IGetJobResponse {
   abortedTasks: number;
 }
 
-const jobType = config.get<string>('jobType');
+const ingestionNewTaskType = config.get<string>('ingestionNewTaskType');
+const ingestionUpdateTaskType = config.get<string>('ingestionUpdateTaskType');
+
 @injectable()
 export class JobManagerClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -91,7 +93,8 @@ export class JobManagerClient extends HttpClient {
   public async createLayerJob(
     data: IngestionParams,
     layerRelativePath: string,
-    jobType: JobType,
+    jobType: string,
+    taskType: string,
     taskParams?: (ITaskParameters | IMergeTaskParams)[]
   ): Promise<string> {
     const resourceId = data.metadata.productId as string;
@@ -108,7 +111,7 @@ export class JobManagerClient extends HttpClient {
       productType: data.metadata.productType,
       tasks: taskParams?.map((params) => {
         return {
-          type: jobType === JobType.UPDATE ? TaskType.MERGE : TaskType.DISCRETE_TILING,
+          type: taskType,
           parameters: params,
         };
       }),
@@ -122,7 +125,7 @@ export class JobManagerClient extends HttpClient {
     const createTasksUrl = `/jobs/${jobId}/tasks`;
     const req = taskParams.map((params) => {
       return {
-        type: jobType,
+        type: ingestionNewTaskType,
         parameters: params,
       };
     });
@@ -133,7 +136,7 @@ export class JobManagerClient extends HttpClient {
     const createTasksUrl = `/jobs/${jobId}/tasks`;
     const req = taskParams.map((params) => {
       return {
-        type: TaskType.MERGE,
+        type: ingestionUpdateTaskType,
         parameters: params,
       };
     });
@@ -164,9 +167,9 @@ export class JobManagerClient extends HttpClient {
     });
   }
 
-  public async findJobs(resourceId: string, version: string, productType: ProductType, jobType: JobType): Promise<IGetJobResponse[]> {
+  public async findJobs(resourceId: string, productType: ProductType): Promise<IGetJobResponse[]> {
     const getLayerUrl = `/jobs`;
-    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, version, type: jobType, productType: productType });
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, productType: productType });
     if (typeof res === 'string' || res.length === 0) {
       return [];
     }
