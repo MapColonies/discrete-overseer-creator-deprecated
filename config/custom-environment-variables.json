@@ -56,7 +56,7 @@
       "__name": "BBOX_SIZE_TILES",
       "__format": "number"
     },
-  
+
     "tasksBatchSize": {
       "__name": "TASKS_BATCH_SIZE",
       "__format": "number"

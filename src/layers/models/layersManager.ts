@@ -33,19 +33,19 @@ export class LayersManager {
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
-    const jobType = await this.getJobType(data);
 
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }
+    const jobType = await this.getJobType(data);
     await this.validateFiles(data);
     await this.validateNotRunning(resourceId, productType);
 
     if (jobType === JobType.NEW) {
       const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
 
-      await this.validateNotExistsInMapServer(resourceId, productType);
       await this.validateNotExistsInCatalog(resourceId, version, productType);
+      await this.validateNotExistsInMapServer(resourceId, productType);
 
       this.logger.log('info', `creating "New" job and "Split-Tiles" tasks for layer ${data.metadata.productId as string} type: ${productType}`);
       await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType);
@@ -55,7 +55,7 @@ export class LayersManager {
       this.validateSupportedFiles(files);
 
       this.logger.log('info', `creating "Update" job and "Merge" tasks for layer ${data.metadata.productId as string} type: ${productType}`);
-      await this.mergeTilesTasker.createMergeTasks(data, layerRelativePath);
+      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath);
     }
   }
 

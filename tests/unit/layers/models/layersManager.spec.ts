@@ -10,15 +10,14 @@ import { ConflictError } from '../../../../src/common/exceptions/http/conflictEr
 import { BadRequestError } from '../../../../src/common/exceptions/http/badRequestError';
 import { OperationStatus } from '../../../../src/common/enums';
 import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
-import { createIngestionTaskMock, generateTasksParametersMock, taskerMock } from '../../../mocks/tasker';
-import { createMergeTaskMock, mergeTaskerMock } from '../../../mocks/mergeTasker';
+import { createSplitTilesTasksMock, generateTasksParametersMock, splitTilesTaskerMock } from '../../../mocks/splitTilesTasker';
+import { createMergeTilesTasksMock, mergeTilesTasker } from '../../../mocks/mergeTilesTasker';
 
 let layersManager: LayersManager;
-let checkForUpdateSpy: jest.SpyInstance;
 
 const testImageMetadata: LayerMetadata = {
   productId: 'test',
-  productVersion: '1.22',
+  productVersion: '3.0',
   productName: 'test name',
   description: 'test desc',
   minHorizontalAccuracyCE90: 3,
@@ -71,13 +70,12 @@ describe('LayersManager', () => {
     jest.restoreAllMocks();
     clearMockConfig();
     initMockConfig();
-    checkForUpdateSpy = jest.spyOn(LayersManager.prototype, 'checkForUpdate');
   });
 
   describe('createLayer', () => {
-    it('saves metadata before queueing ingestion tasks', async function () {
+    it('should create "New" job type with "Split-Tiles" task type successfully', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
-      setValue('tasksBatchSize', 2);
+      setValue('ingestionNewTiles.tasksBatchSize', 2);
 
       getLayerVersionsMock.mockResolvedValue([]);
       mapExistsMock.mockResolvedValue(false);
@@ -85,8 +83,7 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
       createLayerJobMock.mockResolvedValue('testJobId');
-      validateGpkgFilesMock.mockResolvedValue(false);
-      createIngestionTaskMock.mockResolvedValue(undefined);
+      createSplitTilesTasksMock.mockResolvedValue(undefined);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       layersManager = new LayersManager(
@@ -96,34 +93,27 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       await layersManager.createLayer(testData);
-
       expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
-      expect(checkForUpdateSpy).toHaveBeenCalledTimes(1);
-      expect(createIngestionTaskMock).toHaveBeenCalledTimes(1);
+      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(createSplitTilesTasksMock).toHaveBeenCalledTimes(1);
     });
 
-    it('saves metadata before queueing merge tasks if all files are gpkg', async function () {
+    it('should create "Update" job type with "Merge-Tiles" task type successfully when includes only GPKG files', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
-      setValue('tasksBatchSize', 2);
-      const testData: IngestionParams = {
-        fileNames: ['test.gpkg'],
-        metadata: testImageMetadata,
-        originDirectory: '/here',
-      };
+      setValue('ingestionNewTiles.tasksBatchSize', 2);
 
-      getLayerVersionsMock.mockResolvedValue([0.5]);
-      mapExistsMock.mockResolvedValue(false);
-      catalogExistsMock.mockResolvedValue(false);
+      getLayerVersionsMock.mockResolvedValue([1.0, 2.0]);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
+      validateGpkgFilesMock.mockReturnValue(true);
       createLayerJobMock.mockResolvedValue('testJobId');
-      validateGpkgFilesMock.mockResolvedValue(true);
-      createIngestionTaskMock.mockResolvedValue(undefined);
+      createMergeTilesTasksMock.mockResolvedValue(undefined);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       layersManager = new LayersManager(
@@ -133,22 +123,23 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       await layersManager.createLayer(testData);
-
       expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
-      expect(checkForUpdateSpy).toHaveBeenCalledTimes(1);
-      expect(createMergeTaskMock).toHaveBeenCalledTimes(1);
+      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(validateGpkgFilesMock).toHaveBeenCalledTimes(1);
+      expect(createMergeTilesTasksMock).toHaveBeenCalledTimes(1);
     });
 
-    it('should failed if higher product version is exists in catalog', async function () {
+    it('should throw Bad Request Error for "New" or "Update" job type if higher product version is already exists in catalog', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
-      setValue('tasksBatchSize', 2);
+      setValue('ingestionNewTiles.tasksBatchSize', 2);
 
-      getLayerVersionsMock.mockResolvedValue([2.5]);
+      getLayerVersionsMock.mockResolvedValue([4.0]);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       layersManager = new LayersManager(
@@ -158,8 +149,8 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       const action = async () => {
@@ -168,18 +159,22 @@ describe('LayersManager', () => {
 
       await expect(action).rejects.toThrow(BadRequestError);
       expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(0);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(createSplitTilesTasksMock).toHaveBeenCalledTimes(0);
     });
 
-    it('should failed if there is unsupported file (not GPKG) in request', async function () {
+    // TODO: Handle test when update is supported for other formats
+    it('should throw Bad Request Error for "Update" job type if there is unsupported file (not GPKG) in request', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
-      setValue('tasksBatchSize', 2);
+      setValue('ingestionNewTiles.tasksBatchSize', 2);
 
-      const testData: IngestionParams = {
-        fileNames: ['test.tif'],
-        metadata: testImageMetadata,
-        originDirectory: '/here',
-      };
       getLayerVersionsMock.mockResolvedValue([2.5]);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      findJobsMock.mockResolvedValue([]);
+      validateGpkgFilesMock.mockReturnValue(false);
+      createLayerJobMock.mockResolvedValue('testJobId');
+      createMergeTilesTasksMock.mockResolvedValue(undefined);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       layersManager = new LayersManager(
@@ -189,8 +184,8 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       const action = async () => {
@@ -199,6 +194,9 @@ describe('LayersManager', () => {
 
       await expect(action).rejects.toThrow(BadRequestError);
       expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(validateGpkgFilesMock).toHaveBeenCalledTimes(1);
     });
 
     it('fail if layer status is pending', async function () {
@@ -215,8 +213,8 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       const action = async () => {
@@ -240,8 +238,8 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       const action = async () => {
@@ -265,7 +263,7 @@ describe('LayersManager', () => {
       ];
 
       setValue({ 'tiling.zoomGroups': '1' });
-      checkForUpdateSpy.mockResolvedValue(false);
+      getLayerVersionsMock.mockResolvedValue([]);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.COMPLETED }]);
@@ -279,8 +277,8 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       const action = async () => {
@@ -303,7 +301,7 @@ describe('LayersManager', () => {
         },
       ];
       setValue({ 'tiling.zoomGroups': '1' });
-      checkForUpdateSpy.mockResolvedValue(false);
+      getLayerVersionsMock.mockResolvedValue([]);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -318,8 +316,8 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       const action = async () => {
@@ -328,9 +326,9 @@ describe('LayersManager', () => {
       await expect(action()).resolves.not.toThrow();
     });
 
-    it('fail if layer exists in mapping server', async function () {
+    it('fail if layer exists in mapping server for "New" job type', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      checkForUpdateSpy.mockResolvedValue(false);
+      getLayerVersionsMock.mockResolvedValue([]);
       mapExistsMock.mockResolvedValue(true);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -344,8 +342,8 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       const action = async () => {
@@ -354,9 +352,9 @@ describe('LayersManager', () => {
       await expect(action).rejects.toThrow(ConflictError);
     });
 
-    it('fail if layer exists in catalog', async function () {
+    it('fail if layer exists in catalog for "New" job type', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      checkForUpdateSpy.mockResolvedValue(false);
+      getLayerVersionsMock.mockResolvedValue([]);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(true);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -370,8 +368,8 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       const action = async () => {
@@ -380,13 +378,12 @@ describe('LayersManager', () => {
       await expect(action).rejects.toThrow(ConflictError);
     });
 
-    it('fail if files are missing', async function () {
+    it('fail if files are missing for "New" job type', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      checkForUpdateSpy.mockResolvedValue(false);
+      getLayerVersionsMock.mockResolvedValue([]);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(false);
-      findJobsMock.mockResolvedValue([]);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       layersManager = new LayersManager(
@@ -396,8 +393,8 @@ describe('LayersManager', () => {
         catalogClientMock,
         mapPublisherClientMock,
         fileValidatorMock,
-        taskerMock,
-        mergeTaskerMock
+        splitTilesTaskerMock,
+        mergeTilesTasker
       );
 
       const action = async () => {
@@ -405,31 +402,5 @@ describe('LayersManager', () => {
       };
       await expect(action).rejects.toThrow(BadRequestError);
     });
-  });
-
-  it('fail if layer exists in catalog', async function () {
-    setValue({ 'tiling.zoomGroups': '1' });
-    checkForUpdateSpy.mockResolvedValue(false);
-    mapExistsMock.mockResolvedValue(false);
-    catalogExistsMock.mockResolvedValue(true);
-    fileValidatorValidateExistsMock.mockResolvedValue(true);
-    findJobsMock.mockResolvedValue([]);
-
-    const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
-    layersManager = new LayersManager(
-      logger,
-      zoomLevelCalculator,
-      jobManagerClientMock,
-      catalogClientMock,
-      mapPublisherClientMock,
-      fileValidatorMock,
-      taskerMock,
-      mergeTaskerMock
-    );
-
-    const action = async () => {
-      await layersManager.createLayer(testData);
-    };
-    await expect(action).rejects.toThrow(ConflictError);
   });
 });

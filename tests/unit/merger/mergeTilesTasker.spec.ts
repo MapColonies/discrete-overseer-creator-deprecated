@@ -1,7 +1,7 @@
 import { tilesGenerator } from '@map-colonies/mc-utils';
 import { bboxPolygon, polygon } from '@turf/turf';
 import { IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
-import { MergeTilesTasker} from '../../../src/merge/mergeTilesTasker';
+import { MergeTilesTasker } from '../../../src/merge/mergeTilesTasker';
 import { jobManagerClientMock } from '../../mocks/clients/jobManagerClient';
 import { configMock, init as initConfig, setValue as setConfigValue, clear as clearConfig } from '../../mocks/config';
 import { logger } from '../../mocks/logger';
@@ -266,101 +266,121 @@ describe('MergeTilesTasker', () => {
       expect(tasks).toEqual(expect.arrayContaining(expectedTasks));
     });
 
-    // it('same footprint', () => {
-    //   const layers = [
-    //     {
-    //       id: 'test1',
-    //       tilesPath: 'test/tile1',
-    //       footprint: bboxPolygon([-180, -90, 0, 90]),
-    //     },
-    //     {
-    //       id: 'test2',
-    //       tilesPath: 'test/tile2',
-    //       footprint: bboxPolygon([-180, -90, 0, 90]),
-    //     },
-    //   ];
-    //   const params: IMergeParameters = {
-    //     layers: layers,
-    //     destPath: 'test/dest',
-    //     maxZoom: 1,
-    //   };
+    it('same footprint', () => {
+      const layers = [
+        {
+          id: 'test1',
+          tilesPath: 'test/tile1',
+          footprint: bboxPolygon([-180, -90, 0, 90]),
+        },
+        {
+          id: 'test2',
+          tilesPath: 'test/tile2',
+          footprint: bboxPolygon([-180, -90, 0, 90]),
+        },
+      ];
+      const params: IMergeParameters = {
+        layers: layers,
+        destPath: 'test/dest',
+        maxZoom: 1,
+      };
 
-    //   const taskGen = mergeTilesTasker.createBatchedTasks(params);
-    //   const tasks: IMergeTaskParams[] = [];
-    //   for (const task of taskGen) {
-    //     tasks.push(task);
-    //   }
-    //   const mockSourceType = 'FS';
-    //   const expectedTasks: IMergeTaskParams[] = [
-    //     {
-    //       sources: [
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/dest',
-    //         },
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/tile1',
-    //         },
-    //       ],
-    //       batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
-    //     },
-    //     {
-    //       sources: [
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/dest',
-    //         },
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/tile1',
-    //         },
-    //       ],
-    //       batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
-    //     },
-    //     {
-    //       sources: [
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/dest',
-    //         },
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/tile1',
-    //         },
-    //       ],
-    //       batch: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
-    //     },
-    //     {
-    //       sources: [
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/dest',
-    //         },
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/tile1',
-    //         },
-    //       ],
-    //       batch: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
-    //     },
-    //     {
-    //       sources: [
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/dest',
-    //         },
-    //         {
-    //           type: mockSourceType,
-    //           path: 'test/tile1',
-    //         },
-    //       ],
-    //       batch: [{ minX: 1, maxX: 2, minY: 1, maxY: 2, zoom: 1 }],
-    //     },
-    //   ];
+      const taskGen = mergeTilesTasker.createBatchedTasks(params);
+      const tasks: IMergeTaskParams[] = [];
+      for (const task of taskGen) {
+        tasks.push(task);
+      }
+      const mockSourceType = 'FS';
+      const expectedTasks: IMergeTaskParams[] = [
+        {
+          sources: [
+            {
+              type: mockSourceType,
+              path: 'test/dest',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile1',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile2',
+            },
+          ],
+          batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
+        },
+        {
+          sources: [
+            {
+              type: mockSourceType,
+              path: 'test/dest',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile1',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile2',
+            },
+          ],
+          batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
+        },
+        {
+          sources: [
+            {
+              type: mockSourceType,
+              path: 'test/dest',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile1',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile2',
+            },
+          ],
+          batch: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
+        },
+        {
+          sources: [
+            {
+              type: mockSourceType,
+              path: 'test/dest',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile1',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile2',
+            },
+          ],
+          batch: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
+        },
+        {
+          sources: [
+            {
+              type: mockSourceType,
+              path: 'test/dest',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile1',
+            },
+            {
+              type: mockSourceType,
+              path: 'test/tile2',
+            },
+          ],
+          batch: [{ minX: 1, maxX: 2, minY: 1, maxY: 2, zoom: 1 }],
+        },
+      ];
 
-    //   expect(tasks).toHaveLength(expectedTasks.length);
-    //   expect(tasks).toEqual(expect.arrayContaining(expectedTasks));
-    // });
+      expect(tasks).toHaveLength(expectedTasks.length);
+      expect(tasks).toEqual(expect.arrayContaining(expectedTasks));
+    });
   });
 });

@@ -67,7 +67,7 @@ describe('SplitTilesTasker', () => {
     initConfig();
   });
 
-  describe('createIngestionTask', () => {
+  describe('createSplitTilesTasks', () => {
     it('split the tasks based on configuration', async function () {
       splitTilesTasker = new SplitTilesTasker(configMock, jobManagerClientMock);
       generateTasksParametersSpy = jest.spyOn(SplitTilesTasker.prototype, 'generateTasksParameters');
@@ -95,7 +95,7 @@ describe('SplitTilesTasker', () => {
 
   describe('generateTasksParameters', () => {
     it('generate tasks for multiple ranges', () => {
-      setValue('bboxSizeTiles', 10000);
+      setValue('ingestionNewTiles.bboxSizeTiles', 10000);
       const zoomRanges = [
         { minZoom: 1, maxZoom: 1 },
         { minZoom: 5, maxZoom: 8 },

@@ -25,7 +25,9 @@ export class FileValidator {
 
   public validateGpkgFiles(files: string[]): boolean {
     const gpkgExt = '.gpkg';
-    const allValid = files.every((file) => path.extname(file) === gpkgExt);
+    const allValid = files.every((file) => {
+      return path.extname(file) === gpkgExt;
+    });
     return allValid;
   }
 }

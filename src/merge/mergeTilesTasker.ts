@@ -108,7 +108,7 @@ export class MergeTilesTasker {
     }
   }
 
-  public async createMergeTasks(data: IngestionParams, layerRelativePath: string): Promise<void> {
+  public async createMergeTilesTasks(data: IngestionParams, layerRelativePath: string): Promise<void> {
     const sourceDir = this.config.get<string>('LayerSourceDir');
     const jobType = this.config.get<string>('ingestionUpdateJobType');
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
