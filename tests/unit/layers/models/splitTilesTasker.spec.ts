@@ -1,11 +1,11 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { JobType } from '../../../../src/common/enums';
-import { Tasker } from '../../../../src/layers/models/tasker';
+import { SplitTilesTasker } from '../../../../src/layers/models/splitTilesTasker';
 import { jobManagerClientMock } from '../../../mocks/clients/jobManagerClient';
 import { configMock, init as initConfig, setValue } from '../../../mocks/config';
 
-describe('Tasker', () => {
-  let tasker: Tasker;
+describe('SplitTilesTasker', () => {
+  let splitTilesTasker: SplitTilesTasker;
   let generateTasksParametersSpy: jest.SpyInstance;
 
   const testImageMetadata: LayerMetadata = {
@@ -69,11 +69,11 @@ describe('Tasker', () => {
 
   describe('createIngestionTask', () => {
     it('split the tasks based on configuration', async function () {
-      tasker = new Tasker(configMock, jobManagerClientMock);
-      generateTasksParametersSpy = jest.spyOn(Tasker.prototype, 'generateTasksParameters');
+      splitTilesTasker = new SplitTilesTasker(configMock, jobManagerClientMock);
+      generateTasksParametersSpy = jest.spyOn(SplitTilesTasker.prototype, 'generateTasksParameters');
 
       setValue({ 'tiling.zoomGroups': '1,8-5,2' });
-      await tasker.createIngestionTask(
+      await splitTilesTasker.createSplitTilesTasks(
         testData,
         layerRelativePath,
         [
@@ -81,7 +81,7 @@ describe('Tasker', () => {
           { minZoom: 5, maxZoom: 8 },
           { minZoom: 2, maxZoom: 2 },
         ],
-        JobType.DISCRETE_TILING
+        JobType.NEW
       );
 
       expect(generateTasksParametersSpy).toHaveBeenCalledTimes(1);
@@ -101,9 +101,9 @@ describe('Tasker', () => {
         { minZoom: 5, maxZoom: 8 },
         { minZoom: 2, maxZoom: 2 },
       ];
-      tasker = new Tasker(configMock, jobManagerClientMock);
+      splitTilesTasker = new SplitTilesTasker(configMock, jobManagerClientMock);
 
-      const gen = tasker.generateTasksParameters(testData, layerRelativePath, zoomRanges);
+      const gen = splitTilesTasker.generateTasksParameters(testData, layerRelativePath, zoomRanges);
       const params = [];
       for (const param of gen) {
         params.push(param);

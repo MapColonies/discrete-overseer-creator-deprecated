@@ -1,18 +1,18 @@
 import { tilesGenerator } from '@map-colonies/mc-utils';
 import { bboxPolygon, polygon } from '@turf/turf';
 import { IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
-import { MergeTasker } from '../../../src/merge/mergeTasker';
+import { MergeTilesTasker} from '../../../src/merge/mergeTilesTasker';
 import { jobManagerClientMock } from '../../mocks/clients/jobManagerClient';
 import { configMock, init as initConfig, setValue as setConfigValue, clear as clearConfig } from '../../mocks/config';
 import { logger } from '../../mocks/logger';
 
-describe('mergeTasker', () => {
-  let mergeTasker: MergeTasker;
+describe('MergeTilesTasker', () => {
+  let mergeTilesTasker: MergeTilesTasker;
 
   beforeEach(() => {
     initConfig();
     setConfigValue('mergeBatchSize', 1);
-    mergeTasker = new MergeTasker(configMock, logger, jobManagerClientMock);
+    mergeTilesTasker = new MergeTilesTasker(configMock, logger, jobManagerClientMock);
   });
 
   afterEach(() => {
@@ -40,7 +40,7 @@ describe('mergeTasker', () => {
         },
       ];
 
-      const overlapsGen = mergeTasker.createLayerOverlaps(layers);
+      const overlapsGen = mergeTilesTasker.createLayerOverlaps(layers);
       const overlaps: IMergeOverlaps[] = [];
       for (const overlap of overlapsGen) {
         overlaps.push(overlap);
@@ -111,7 +111,7 @@ describe('mergeTasker', () => {
         maxZoom: 5,
       };
 
-      const taskGen = mergeTasker.createBatchedTasks(params);
+      const taskGen = mergeTilesTasker.createBatchedTasks(params);
 
       const tiles: Set<string>[] = [new Set<string>(), new Set<string>(), new Set<string>(), new Set<string>(), new Set<string>(), new Set<string>()];
       for (const task of taskGen) {
@@ -150,7 +150,7 @@ describe('mergeTasker', () => {
         maxZoom: 1,
       };
 
-      const taskGen = mergeTasker.createBatchedTasks(params);
+      const taskGen = mergeTilesTasker.createBatchedTasks(params);
       const tasks: IMergeTaskParams[] = [];
       for (const task of taskGen) {
         tasks.push(task);
@@ -285,7 +285,7 @@ describe('mergeTasker', () => {
     //     maxZoom: 1,
     //   };
 
-    //   const taskGen = mergeTasker.createBatchedTasks(params);
+    //   const taskGen = mergeTilesTasker.createBatchedTasks(params);
     //   const tasks: IMergeTaskParams[] = [];
     //   for (const task of taskGen) {
     //     tasks.push(task);

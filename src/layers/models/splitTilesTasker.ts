@@ -7,7 +7,7 @@ import { ITaskParameters } from '../interfaces';
 import { ITaskZoomRange } from '../../tasks/interfaces';
 import { Services } from '../../common/constants';
 import { IConfig } from '../../common/interfaces';
-import { JobType, OperationStatus } from '../../common/enums';
+import { OperationStatus } from '../../common/enums';
 import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { createBBoxString } from '../../utils/bbox';
 import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';

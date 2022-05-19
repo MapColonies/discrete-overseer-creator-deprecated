@@ -1,19 +1,15 @@
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
-import { GeoJSON } from 'geojson';
 import { Services } from '../../common/constants';
 import { JobType, OperationStatus } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { ILogger } from '../../common/interfaces';
-import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
-import { createBBoxString } from '../../utils/bbox';
-import { ITaskZoomRange } from '../../tasks/interfaces';
 import { MergeTilesTasker } from '../../merge/mergeTilesTasker';
 import { FileValidator } from './fileValidator';
 import { SplitTilesTasker } from './splitTilesTasker';
@@ -119,6 +115,7 @@ export class LayersManager {
   }
 
   private validateSupportedFiles(files: string[]): void {
+    // TODO: handle this when update is supported for other formats
     const validSupportedFiles = this.fileValidator.validateGpkgFiles(files);
     if (!validSupportedFiles) {
       throw new BadRequestError('Invalid files list, UPDATE operation supports: "gpkg" files only.');

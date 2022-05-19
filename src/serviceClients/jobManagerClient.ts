@@ -3,7 +3,7 @@ import { inject, injectable } from 'tsyringe';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { ILogger, IMergeTaskParams } from '../common/interfaces';
 import { Services } from '../common/constants';
-import { JobType, OperationStatus, TaskType } from '../common/enums';
+import { OperationStatus } from '../common/enums';
 import { ICompletedTasks } from '../tasks/interfaces';
 import { ITaskParameters } from '../layers/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
