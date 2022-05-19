@@ -1,7 +1,7 @@
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
-import { JobType, OperationStatus } from '../../common/enums';
+import { JobType, OperationStatus, TaskType } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { ILogger } from '../../common/interfaces';
@@ -42,10 +42,12 @@ export class LayersManager {
     await this.validateNotRunning(resourceId, productType);
 
     if (jobType === JobType.NEW) {
+      this.getTaskType();
       const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
 
       await this.validateNotExistsInCatalog(resourceId, version, productType);
       await this.validateNotExistsInMapServer(resourceId, productType);
+      this.validateSupportedFiles(data.fileNames);
 
       this.logger.log('info', `creating "New" job and "Split-Tiles" tasks for layer ${data.metadata.productId as string} type: ${productType}`);
       await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType);
@@ -83,6 +85,32 @@ export class LayersManager {
     return JobType.NEW;
   }
 
+  private getTaskType(jobType: JobType, files: string[]): TaskType {
+    const validGpkgFiles = this.fileValidator.validateGpkgFiles(files);
+    const validTiffsFiles = this.fileValidator.validateTiffsFiles(files);
+    const mixedInputFormatFileError = 'Ingestion "New" job type does not support mixed files formats.';
+    switch (jobType) {
+      case JobType.NEW:
+        if (validGpkgFiles) {
+          return TaskType.MERGE_TILES;
+        } else if (validTiffsFiles) {
+          return TaskType.SPLIT_TILES;
+        } else {
+          return TaskType.SPLIT_TILES;
+        }
+      case JobType.UPDATE:
+        if (validGpkgFiles) {
+          return TaskType.MERGE_TILES;
+        } else if (validTiffsFiles) {
+          throw new BadRequestError('Ingesion "Update" job type does not support TIFF/TIF format yet.');
+        } else {
+          throw new BadRequestError(mixedInputFormatFileError);
+        }
+      default:
+        throw new BadRequestError(`Invalid job type: ${jobType as string}.`);
+    }
+  }
+
   private async validateFiles(data: IngestionParams): Promise<void> {
     const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
     if (!filesExists) {
@@ -116,9 +144,11 @@ export class LayersManager {
 
   private validateSupportedFiles(files: string[]): void {
     // TODO: handle this when update is supported for other formats
-    const validSupportedFiles = this.fileValidator.validateGpkgFiles(files);
-    if (!validSupportedFiles) {
-      throw new BadRequestError('Invalid files list, UPDATE operation supports: "gpkg" files only.');
-    }
+    // const validSupportedFiles = this.fileValidator.validateGpkgFiles(files);
+    const validTiffsFiles = this.fileValidator.validateTiffsFiles(files);
+    console.log(validTiffsFiles);
+    // if (!validSupportedFiles) {
+    //   throw new BadRequestError('Invalid files list, UPDATE operation supports: "gpkg" files only.');
+    // }
   }
 }

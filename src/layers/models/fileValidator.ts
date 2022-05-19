@@ -24,9 +24,17 @@ export class FileValidator {
   }
 
   public validateGpkgFiles(files: string[]): boolean {
-    const gpkgExt = '.gpkg';
+    const validGpkgExt = '.gpkg';
     const allValid = files.every((file) => {
-      return path.extname(file) === gpkgExt;
+      return path.extname(file) === validGpkgExt;
+    });
+    return allValid;
+  }
+
+  public validateTiffsFiles(files: string[]): boolean {
+    const validTiffExt = ['.tiff', '.tif'];
+    const allValid = files.every((file) => {
+      return validTiffExt.some((ext) => ext === path.extname(file));
     });
     return allValid;
   }
