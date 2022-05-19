@@ -11,7 +11,7 @@ describe('MergeTilesTasker', () => {
 
   beforeEach(() => {
     initConfig();
-    setConfigValue('mergeBatchSize', 1);
+    setConfigValue('ingestionMergeTiles.mergeBatchSize', 1);
     mergeTilesTasker = new MergeTilesTasker(configMock, logger, jobManagerClientMock);
   });
 

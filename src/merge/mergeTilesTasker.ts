@@ -28,7 +28,7 @@ export class MergeTilesTasker {
     @inject(Services.LOGGER) private readonly logger: ILogger,
     private readonly db: JobManagerClient
   ) {
-    this.batchSize = config.get('mergeBatchSize');
+    this.batchSize = config.get('ingestionMergeTiles.mergeBatchSize');
     this.mergeTaskBatchSize = config.get<number>('ingestionMergeTiles.mergeBatchSize');
     this.mergeTilesTaskType = config.get<string>('ingestionUpdateTaskType');
     this.tileRanger = new TileRanger();
