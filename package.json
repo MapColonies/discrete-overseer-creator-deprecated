@@ -50,7 +50,7 @@
     "@map-colonies/storage-explorer-middleware": "^1.2.3",
     "@turf/turf": "^6.5.0",
     "axios": "^0.26.1",
-    "axios-retry": "^3.2.4",
+    "axios-retry": "^3.2.5",
     "config": "^3.3.7",
     "express": "^4.17.3",
     "express-openapi-validator": "^4.13.7",
