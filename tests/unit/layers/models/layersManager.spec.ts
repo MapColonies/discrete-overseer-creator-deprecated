@@ -5,7 +5,7 @@ import { catalogExistsMock, catalogClientMock, getLayerVersionsMock } from '../.
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../../mocks/config';
 import { logger } from '../../../mocks/logger';
-import { fileValidatorValidateExistsMock, validateGpkgFilesMock, fileValidatorMock } from '../../../mocks/fileValidator';
+import { fileValidatorValidateExistsMock, validateGpkgFilesMock, fileValidatorMock, validateTiffsFilesMock } from '../../../mocks/fileValidator';
 import { ConflictError } from '../../../../src/common/exceptions/http/conflictError';
 import { BadRequestError } from '../../../../src/common/exceptions/http/badRequestError';
 import { OperationStatus } from '../../../../src/common/enums';
@@ -75,7 +75,12 @@ describe('LayersManager', () => {
   describe('createLayer', () => {
     it('should create "New" job type with "Split-Tiles" task type successfully', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
-      setValue('ingestionNewTiles.tasksBatchSize', 2);
+      setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: testImageMetadata,
+        originDirectory: '/here',
+      };
 
       getLayerVersionsMock.mockResolvedValue([]);
       mapExistsMock.mockResolvedValue(false);
@@ -106,7 +111,7 @@ describe('LayersManager', () => {
 
     it('should create "Update" job type with "Merge-Tiles" task type successfully when includes only GPKG files', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
-      setValue('ingestionNewTiles.tasksBatchSize', 2);
+      setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
 
       getLayerVersionsMock.mockResolvedValue([1.0, 2.0]);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -137,7 +142,7 @@ describe('LayersManager', () => {
 
     it('should throw Bad Request Error for "New" or "Update" job type if higher product version is already exists in catalog', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
-      setValue('ingestionNewTiles.tasksBatchSize', 2);
+      setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
 
       getLayerVersionsMock.mockResolvedValue([4.0]);
 
@@ -167,12 +172,13 @@ describe('LayersManager', () => {
     // TODO: Handle test when update is supported for other formats
     it('should throw Bad Request Error for "Update" job type if there is unsupported file (not GPKG) in request', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
-      setValue('ingestionNewTiles.tasksBatchSize', 2);
-
+      setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+      
       getLayerVersionsMock.mockResolvedValue([2.5]);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
       validateGpkgFilesMock.mockReturnValue(false);
+      validateTiffsFilesMock.mockReturnValue(true);
       createLayerJobMock.mockResolvedValue('testJobId');
       createMergeTilesTasksMock.mockResolvedValue(undefined);
 
@@ -194,9 +200,6 @@ describe('LayersManager', () => {
 
       await expect(action).rejects.toThrow(BadRequestError);
       expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
-      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
-      expect(findJobsMock).toHaveBeenCalledTimes(1);
-      expect(validateGpkgFilesMock).toHaveBeenCalledTimes(1);
     });
 
     it('fail if layer status is pending', async function () {

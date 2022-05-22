@@ -1,5 +1,5 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
-import { JobType } from '../../../../src/common/enums';
+import { JobType, TaskType } from '../../../../src/common/enums';
 import { SplitTilesTasker } from '../../../../src/layers/models/splitTilesTasker';
 import { jobManagerClientMock } from '../../../mocks/clients/jobManagerClient';
 import { configMock, init as initConfig, setValue } from '../../../mocks/config';
@@ -81,7 +81,8 @@ describe('SplitTilesTasker', () => {
           { minZoom: 5, maxZoom: 8 },
           { minZoom: 2, maxZoom: 2 },
         ],
-        JobType.NEW
+        JobType.NEW,
+        TaskType.SPLIT_TILES
       );
 
       expect(generateTasksParametersSpy).toHaveBeenCalledTimes(1);
@@ -95,7 +96,7 @@ describe('SplitTilesTasker', () => {
 
   describe('generateTasksParameters', () => {
     it('generate tasks for multiple ranges', () => {
-      setValue('ingestionNewTiles.bboxSizeTiles', 10000);
+      setValue('ingestionTilesSplittingTiles.bboxSizeTiles', 10000);
       const zoomRanges = [
         { minZoom: 1, maxZoom: 1 },
         { minZoom: 5, maxZoom: 8 },

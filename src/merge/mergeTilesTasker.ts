@@ -21,7 +21,6 @@ export class MergeTilesTasker {
   private readonly tileRanger: TileRanger;
   private readonly batchSize: number;
   private readonly mergeTaskBatchSize: number;
-  private readonly mergeTilesTaskType: string;
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
@@ -30,7 +29,6 @@ export class MergeTilesTasker {
   ) {
     this.batchSize = config.get('ingestionMergeTiles.mergeBatchSize');
     this.mergeTaskBatchSize = config.get<number>('ingestionMergeTiles.mergeBatchSize');
-    this.mergeTilesTaskType = config.get<string>('ingestionUpdateTaskType');
     this.tileRanger = new TileRanger();
   }
 
@@ -108,7 +106,7 @@ export class MergeTilesTasker {
     }
   }
 
-  public async createMergeTilesTasks(data: IngestionParams, layerRelativePath: string): Promise<void> {
+  public async createMergeTilesTasks(data: IngestionParams, layerRelativePath: string, taskType: string): Promise<void> {
     const sourceDir = this.config.get<string>('LayerSourceDir');
     const jobType = this.config.get<string>('ingestionUpdateJobType');
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
@@ -133,10 +131,10 @@ export class MergeTilesTasker {
       mergeTaskBatch.push(mergeTask);
       if (mergeTaskBatch.length === this.mergeTaskBatchSize) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, this.mergeTilesTaskType, mergeTaskBatch);
+          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch);
         } else {
           try {
-            await this.db.createMergeTasks(jobId, mergeTaskBatch);
+            await this.db.createMergeTasks(jobId, mergeTaskBatch, taskType);
           } catch (err) {
             await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
             throw err;
@@ -147,11 +145,11 @@ export class MergeTilesTasker {
     }
     if (mergeTaskBatch.length !== 0) {
       if (jobId === undefined) {
-        jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, this.mergeTilesTaskType, mergeTaskBatch);
+        jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {
-          await this.db.createMergeTasks(jobId, mergeTaskBatch);
+          await this.db.createMergeTasks(jobId, mergeTaskBatch, taskType);
         } catch (err) {
           //TODO: properly handle errors
           await this.db.updateJobStatus(jobId, OperationStatus.FAILED);

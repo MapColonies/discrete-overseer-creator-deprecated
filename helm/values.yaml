@@ -12,9 +12,9 @@ rasterCommon:
     jobManager: http://localhost:8084
   jobManagement:
     ingestion:
-      newJobType: New
+      newJobType: Ingestion_New
       newTaskType: Split-Tiles
-      updateJobType: Update
+      updateJobType: Ingestion_Update
       updateTaskType: Merge-Tiles
   storage:
     tilesStorageProvider: "FS"

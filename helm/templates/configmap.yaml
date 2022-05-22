@@ -27,9 +27,9 @@ data:
   LAYER_SOURCE_DIR: {{ .Values.env.layerSourceDir | quote }}
   SHOULD_SYNC: {{ .Values.env.shouldSync | quote }}
   INGESTION_NEW_JOB_TYPE: {{ .Values.rasterCommon.jobManagement.ingestion.newJobType | quote }}
-  INGESTION_NEW_TASK_TYPE: {{ .Values.rasterCommon.jobManagement.ingestion.newTaskType | quote }}
+  INGESTION_SPLIT_TILES_TASK_TYPE: {{ .Values.rasterCommon.jobManagement.ingestion.newTaskType | quote }}
   INGESTION_UPDATE_JOB_TYPE: {{ .Values.rasterCommon.jobManagement.ingestion.updateJobType | quote }}
-  INGESTION_UPDATE_TASK_TYPE: {{ .Values.rasterCommon.jobManagement.ingestion.updateTaskType | quote }}
+  INGESTION_MERGE_TASK_TYPE: {{ .Values.rasterCommon.jobManagement.ingestion.updateTaskType | quote }}
   BBOX_SIZE_TILES: {{ .Values.env.bboxSizeTiles | quote }}
   MERGE_BATCH_SIZE: {{ .Values.env.mergeBatchSize | quote }}
   TASKS_BATCH_SIZE: {{ .Values.env.tasksBatchSize | quote }}

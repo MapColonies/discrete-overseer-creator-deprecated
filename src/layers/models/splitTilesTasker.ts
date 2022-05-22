@@ -16,19 +16,18 @@ import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBui
 export class SplitTilesTasker {
   private readonly bboxSizeTiles: number;
   private readonly tasksBatchSize: number;
-  private readonly splitTilesTaskType: string;
 
   public constructor(@inject(Services.CONFIG) private readonly config: IConfig, private readonly db: JobManagerClient) {
-    this.bboxSizeTiles = config.get<number>('ingestionNewTiles.bboxSizeTiles');
-    this.tasksBatchSize = config.get<number>('ingestionNewTiles.tasksBatchSize');
-    this.splitTilesTaskType = config.get<string>('ingestionNewTaskType');
+    this.bboxSizeTiles = config.get<number>('ingestionTilesSplittingTiles.bboxSizeTiles');
+    this.tasksBatchSize = config.get<number>('ingestionTilesSplittingTiles.tasksBatchSize');
   }
 
   public async createSplitTilesTasks(
     data: IngestionParams,
     layerRelativePath: string,
     layerZoomRanges: ITaskZoomRange[],
-    jobType: string
+    jobType: string,
+    taskType: string
   ): Promise<void> {
     this.setDefaultValues(data);
     const taskParams = this.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
@@ -38,11 +37,11 @@ export class SplitTilesTasker {
       taskBatch.push(task);
       if (taskBatch.length === this.tasksBatchSize) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, this.splitTilesTaskType, taskBatch);
+          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, taskBatch);
         } else {
           // eslint-disable-next-line no-useless-catch
           try {
-            await this.db.createTasks(jobId, taskBatch);
+            await this.db.createTasks(jobId, taskBatch, taskType);
           } catch (err) {
             //TODO: properly handle errors
             await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
@@ -54,11 +53,11 @@ export class SplitTilesTasker {
     }
     if (taskBatch.length !== 0) {
       if (jobId === undefined) {
-        jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, this.splitTilesTaskType, taskBatch);
+        jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, taskBatch);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {
-          await this.db.createTasks(jobId, taskBatch);
+          await this.db.createTasks(jobId, taskBatch, taskType);
         } catch (err) {
           //TODO: properly handle errors
           await this.db.updateJobStatus(jobId, OperationStatus.FAILED);

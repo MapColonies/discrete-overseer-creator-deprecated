@@ -1,4 +1,4 @@
-import config, { IConfig } from 'config';
+import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { ILogger, IMergeTaskParams } from '../common/interfaces';
@@ -76,9 +76,6 @@ interface IGetJobResponse {
   abortedTasks: number;
 }
 
-const ingestionNewTaskType = config.get<string>('ingestionNewTaskType');
-const ingestionUpdateTaskType = config.get<string>('ingestionUpdateTaskType');
-
 @injectable()
 export class JobManagerClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -121,22 +118,22 @@ export class JobManagerClient extends HttpClient {
     return res.id;
   }
 
-  public async createTasks(jobId: string, taskParams: ITaskParameters[]): Promise<void> {
+  public async createTasks(jobId: string, taskParams: ITaskParameters[], taskType: string): Promise<void> {
     const createTasksUrl = `/jobs/${jobId}/tasks`;
     const req = taskParams.map((params) => {
       return {
-        type: ingestionNewTaskType,
+        type: taskType,
         parameters: params,
       };
     });
     await this.post(createTasksUrl, req);
   }
 
-  public async createMergeTasks(jobId: string, taskParams: IMergeTaskParams[]): Promise<void> {
+  public async createMergeTasks(jobId: string, taskParams: IMergeTaskParams[], taskType: string): Promise<void> {
     const createTasksUrl = `/jobs/${jobId}/tasks`;
     const req = taskParams.map((params) => {
       return {
-        type: ingestionUpdateTaskType,
+        type: taskType,
         parameters: params,
       };
     });

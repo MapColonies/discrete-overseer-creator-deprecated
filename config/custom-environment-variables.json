@@ -42,16 +42,18 @@
   },
   "linkTemplatesPath": "LINKS_TEMPLATE_PATH",
   "ingestionNewJobType": "INGESTION_NEW_JOB_TYPE",
-  "ingestionNewTaskType": "INGESTION_NEW_TASK_TYPE",
   "ingestionUpdateJobType": "INGESTION_UPDATE_JOB_TYPE",
-  "ingestionUpdateTaskType": "INGESTION_UPDATE_TASK_TYPE",
+  "ingestionTaskType": {
+    "tileMergeTask": "INGESTION_MERGE_TASK_TYPE",
+    "tileSplitTask": "INGESTION_SPLIT_TILES_TASK_TYPE"
+  },
   "ingestionMergeTiles": {
     "mergeBatchSize": {
       "__name": "MERGE_BATCH_SIZE",
       "__format": "number"
     }
   },
-  "ingestionNewTiles": {
+  "ingestionTilesSplittingTiles": {
     "bboxSizeTiles": {
       "__name": "BBOX_SIZE_TILES",
       "__format": "number"
