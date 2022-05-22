@@ -173,7 +173,7 @@ describe('LayersManager', () => {
     it('should throw Bad Request Error for "Update" job type if there is unsupported file (not GPKG) in request', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
-      
+
       getLayerVersionsMock.mockResolvedValue([2.5]);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
