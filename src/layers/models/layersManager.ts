@@ -1,4 +1,5 @@
 import config from 'config';
+import { GeoJSON } from 'geojson';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
@@ -12,6 +13,8 @@ import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { MergeTilesTasker } from '../../merge/mergeTilesTasker';
+import { createBBoxString } from '../../utils/bbox';
+import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 import { FileValidator } from './fileValidator';
 import { SplitTilesTasker } from './splitTilesTasker';
 
@@ -47,7 +50,7 @@ export class LayersManager {
     const taskType = this.getTaskType(jobType, data.fileNames);
 
     await this.validateFiles(data);
-    await this.validateNotRunning(resourceId, productType);
+    await this.validateJobNotRunning(resourceId, productType);
 
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
 
@@ -56,6 +59,7 @@ export class LayersManager {
 
       await this.validateNotExistsInCatalog(resourceId, version, productType);
       await this.validateNotExistsInMapServer(resourceId, productType);
+      this.setDefaultValues(data);
 
       await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -130,11 +134,11 @@ export class LayersManager {
     }
   }
 
-  private async validateNotRunning(resourceId: string, productType: ProductType): Promise<void> {
+  private async validateJobNotRunning(resourceId: string, productType: ProductType): Promise<void> {
     const jobs = await this.db.findJobs(resourceId, productType);
     jobs.forEach((job) => {
       if (job.status == OperationStatus.IN_PROGRESS || job.status == OperationStatus.PENDING) {
-        throw new ConflictError(`layer id: ${resourceId} product type: ${productType}, generation is already running`);
+        throw new ConflictError(`layer id: ${resourceId} product type: ${productType}, job is already running`);
       }
     });
   }
@@ -143,6 +147,15 @@ export class LayersManager {
     const existsInCatalog = await this.catalog.exists(resourceId, version, productType);
     if (existsInCatalog) {
       throw new ConflictError(`layer id: ${resourceId} version: ${version as string}, already exists in catalog`);
+    }
+  }
+
+  private setDefaultValues(data: IngestionParams): void {
+    data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
+    data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
+    data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
+    if (!data.metadata.layerPolygonParts) {
+      data.metadata.layerPolygonParts = layerMetadataToPolygonParts(data.metadata);
     }
   }
 }

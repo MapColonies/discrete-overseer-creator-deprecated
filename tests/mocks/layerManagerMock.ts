@@ -1,9 +1,9 @@
 import { LayersManager } from '../../src/layers/models/layersManager';
 
-const validateNotRunningMock = jest.fn();
+const validateJobNotRunningMock = jest.fn();
 
 const layersManagerMock = {
-  validateNotRunning: validateNotRunningMock,
+  validateJobNotRunning: validateJobNotRunningMock,
 } as unknown as LayersManager;
 
-export { validateNotRunningMock, layersManagerMock };
+export { validateJobNotRunningMock, layersManagerMock };

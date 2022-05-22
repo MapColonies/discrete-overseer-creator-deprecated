@@ -1,4 +1,3 @@
-import { GeoJSON } from 'geojson';
 import { singleton, inject } from 'tsyringe';
 import { TileRanger, tileToBbox } from '@map-colonies/mc-utils';
 import { IngestionParams } from '@map-colonies/mc-model-types';
@@ -9,8 +8,6 @@ import { Services } from '../../common/constants';
 import { IConfig } from '../../common/interfaces';
 import { OperationStatus } from '../../common/enums';
 import { JobManagerClient } from '../../serviceClients/jobManagerClient';
-import { createBBoxString } from '../../utils/bbox';
-import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 
 @singleton()
 export class SplitTilesTasker {
@@ -29,7 +26,6 @@ export class SplitTilesTasker {
     jobType: string,
     taskType: string
   ): Promise<void> {
-    this.setDefaultValues(data);
     const taskParams = this.generateTasksParameters(data, layerRelativePath, layerZoomRanges);
     let taskBatch: ITaskParameters[] = [];
     let jobId: string | undefined = undefined;
@@ -96,14 +92,5 @@ export class SplitTilesTasker {
     const diff = Math.max(0, Math.floor(Math.log2(this.bboxSizeTiles >> 1) >> 1));
     return Math.max(0, maxRequestedZoom - diff);
     /* eslint-enable @typescript-eslint/no-magic-numbers */
-  }
-
-  private setDefaultValues(data: IngestionParams): void {
-    data.metadata.srsId = data.metadata.srsId === undefined ? '4326' : data.metadata.srsId;
-    data.metadata.srsName = data.metadata.srsName === undefined ? 'WGS84GEO' : data.metadata.srsName;
-    data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
-    if (!data.metadata.layerPolygonParts) {
-      data.metadata.layerPolygonParts = layerMetadataToPolygonParts(data.metadata);
-    }
   }
 }

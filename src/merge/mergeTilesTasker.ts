@@ -21,6 +21,8 @@ export class MergeTilesTasker {
   private readonly tileRanger: TileRanger;
   private readonly batchSize: number;
   private readonly mergeTaskBatchSize: number;
+  private readonly sourceDir: string;
+  private readonly jobType: string;
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
@@ -29,6 +31,8 @@ export class MergeTilesTasker {
   ) {
     this.batchSize = config.get('ingestionMergeTiles.mergeBatchSize');
     this.mergeTaskBatchSize = config.get<number>('ingestionMergeTiles.mergeBatchSize');
+    this.sourceDir = this.config.get<string>('LayerSourceDir');
+    this.jobType = this.config.get<string>('ingestionUpdateJobType');
     this.tileRanger = new TileRanger();
   }
 
@@ -107,10 +111,8 @@ export class MergeTilesTasker {
   }
 
   public async createMergeTilesTasks(data: IngestionParams, layerRelativePath: string, taskType: string): Promise<void> {
-    const sourceDir = this.config.get<string>('LayerSourceDir');
-    const jobType = this.config.get<string>('ingestionUpdateJobType');
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
-      const fileFullPath = join(sourceDir, fileName);
+      const fileFullPath = join(this.sourceDir, fileName);
       const footprint = data.metadata.footprint;
       return {
         id: fileName,
@@ -131,7 +133,7 @@ export class MergeTilesTasker {
       mergeTaskBatch.push(mergeTask);
       if (mergeTaskBatch.length === this.mergeTaskBatchSize) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch);
+          jobId = await this.db.createLayerJob(data, layerRelativePath, this.jobType, taskType, mergeTaskBatch);
         } else {
           try {
             await this.db.createTasks(jobId, mergeTaskBatch, taskType);
@@ -145,7 +147,7 @@ export class MergeTilesTasker {
     }
     if (mergeTaskBatch.length !== 0) {
       if (jobId === undefined) {
-        jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch);
+        jobId = await this.db.createLayerJob(data, layerRelativePath, this.jobType, taskType, mergeTaskBatch);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {
