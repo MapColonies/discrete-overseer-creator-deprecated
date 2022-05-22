@@ -118,20 +118,10 @@ export class JobManagerClient extends HttpClient {
     return res.id;
   }
 
-  public async createTasks(jobId: string, taskParams: ITaskParameters[], taskType: string): Promise<void> {
+  public async createTasks(jobId: string, taskParams: ITaskParameters[] | IMergeTaskParams[], taskType: string): Promise<void> {
     const createTasksUrl = `/jobs/${jobId}/tasks`;
-    const req = taskParams.map((params) => {
-      return {
-        type: taskType,
-        parameters: params,
-      };
-    });
-    await this.post(createTasksUrl, req);
-  }
-
-  public async createMergeTasks(jobId: string, taskParams: IMergeTaskParams[], taskType: string): Promise<void> {
-    const createTasksUrl = `/jobs/${jobId}/tasks`;
-    const req = taskParams.map((params) => {
+    const parmas = taskParams as unknown as (IMergeTaskParams | IMergeTaskParams)[];
+    const req = parmas.map((params) => {
       return {
         type: taskType,
         parameters: params,

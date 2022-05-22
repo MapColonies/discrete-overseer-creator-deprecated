@@ -134,7 +134,7 @@ export class MergeTilesTasker {
           jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch);
         } else {
           try {
-            await this.db.createMergeTasks(jobId, mergeTaskBatch, taskType);
+            await this.db.createTasks(jobId, mergeTaskBatch, taskType);
           } catch (err) {
             await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
             throw err;
@@ -149,7 +149,7 @@ export class MergeTilesTasker {
       } else {
         // eslint-disable-next-line no-useless-catch
         try {
-          await this.db.createMergeTasks(jobId, mergeTaskBatch, taskType);
+          await this.db.createTasks(jobId, mergeTaskBatch, taskType);
         } catch (err) {
           //TODO: properly handle errors
           await this.db.updateJobStatus(jobId, OperationStatus.FAILED);
