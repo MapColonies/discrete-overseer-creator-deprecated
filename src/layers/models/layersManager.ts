@@ -55,16 +55,20 @@ export class LayersManager {
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
 
     if (jobType === JobType.NEW) {
-      const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
-
       await this.validateNotExistsInCatalog(resourceId, version, productType);
       await this.validateNotExistsInMapServer(resourceId, productType);
+      const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
+
       this.setDefaultValues(data);
 
       await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (jobType === JobType.UPDATE) {
+      await this.validateExistsInMapServer(resourceId, productType);
+
       await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType);
+    } else {
+      throw new BadRequestError('Unsupported job type');
     }
   }
 
@@ -75,47 +79,32 @@ export class LayersManager {
 
     const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
 
-    if (existsLayerVersions) {
-      const highestExistsLayerVersion = Math.max(...existsLayerVersions);
-      const requestedLayerVersion = parseFloat(version);
-      if (!existsLayerVersions.length) {
-        return JobType.NEW;
-      }
-      if (requestedLayerVersion > highestExistsLayerVersion) {
-        return JobType.UPDATE;
-      } else {
-        throw new BadRequestError(
-          `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same or higher version (${highestExistsLayerVersion}) in catalog`
-        );
-      }
+    if (!(Array.isArray(existsLayerVersions) && existsLayerVersions.length > 0)) {
+      return JobType.NEW;
     }
-    return JobType.NEW;
+    const highestExistsLayerVersion = Math.max(...existsLayerVersions);
+    const requestedLayerVersion = parseFloat(version);
+    if (requestedLayerVersion > highestExistsLayerVersion) {
+      return JobType.UPDATE;
+    }
+    throw new BadRequestError(
+      `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same or higher version (${highestExistsLayerVersion}) in catalog`
+    );
   }
 
   private getTaskType(jobType: JobType, files: string[]): string {
     const validGpkgFiles = this.fileValidator.validateGpkgFiles(files);
-    const validTiffsFiles = this.fileValidator.validateTiffsFiles(files);
-    const mixedInputFormatFileError = 'Ingestion "New" job type does not support mixed files formats, files must be Unique: "Tif/Tiff" or "GPKG';
 
-    switch (jobType) {
-      case JobType.NEW:
-        if (validGpkgFiles) {
-          return this.tileMergeTask;
-        } else if (validTiffsFiles) {
-          return this.tileSplitTask;
-        } else {
-          return this.tileSplitTask;
-        }
-      case JobType.UPDATE:
-        if (validGpkgFiles) {
-          return this.tileMergeTask;
-        } else if (validTiffsFiles) {
-          throw new BadRequestError('Ingesion "Update" job type does not support TIFF/TIF format yet.');
-        } else {
-          throw new BadRequestError(mixedInputFormatFileError);
-        }
-      default:
-        throw new BadRequestError(`Invalid job type: ${jobType as string}.`);
+    if (jobType === JobType.NEW) {
+      if (validGpkgFiles) {
+        return this.tileMergeTask;
+      } else {
+        return this.tileSplitTask;
+      }
+    } else if (validGpkgFiles) {
+      return this.tileMergeTask;
+    } else {
+      throw new BadRequestError(`Ingesion "Update" job type does not support Mixed/TIFF/TIF/J2k etc.. (GPKG support only)`);
     }
   }
 
@@ -130,7 +119,15 @@ export class LayersManager {
     const layerName = getMapServingLayerName(productId, productType);
     const existsInMapServer = await this.mapPublisher.exists(layerName);
     if (existsInMapServer) {
-      throw new ConflictError(`layer ${layerName}, already exists on mapProxy`);
+      throw new ConflictError(`layer ${layerName}, already exists on MapProxy`);
+    }
+  }
+
+  private async validateExistsInMapServer(productId: string, productType: ProductType): Promise<void> {
+    const layerName = getMapServingLayerName(productId, productType);
+    const existsInMapServer = await this.mapPublisher.exists(layerName);
+    if (!existsInMapServer) {
+      throw new BadRequestError(`layer ${layerName}, is not exists on MapProxy`);
     }
   }
 

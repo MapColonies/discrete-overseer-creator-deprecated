@@ -5,7 +5,7 @@ import { catalogExistsMock, catalogClientMock, getLayerVersionsMock } from '../.
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../../mocks/config';
 import { logger } from '../../../mocks/logger';
-import { fileValidatorValidateExistsMock, validateGpkgFilesMock, fileValidatorMock, validateTiffsFilesMock } from '../../../mocks/fileValidator';
+import { fileValidatorValidateExistsMock, validateGpkgFilesMock, fileValidatorMock } from '../../../mocks/fileValidator';
 import { ConflictError } from '../../../../src/common/exceptions/http/conflictError';
 import { BadRequestError } from '../../../../src/common/exceptions/http/badRequestError';
 import { OperationStatus } from '../../../../src/common/enums';
@@ -115,6 +115,7 @@ describe('LayersManager', () => {
 
       getLayerVersionsMock.mockResolvedValue([1.0, 2.0]);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
+      mapExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
       validateGpkgFilesMock.mockReturnValue(true);
       createLayerJobMock.mockResolvedValue('testJobId');
@@ -133,11 +134,46 @@ describe('LayersManager', () => {
       );
 
       await layersManager.createLayer(testData);
+
       expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
       expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(validateGpkgFilesMock).toHaveBeenCalledTimes(1);
       expect(createMergeTilesTasksMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw Bad Request Error for "Update" job type if layer is not exists in map proxy', async function () {
+      setValue({ 'tiling.zoomGroups': '1,2-3' });
+      setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+
+      getLayerVersionsMock.mockResolvedValue([1.0, 2.0]);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      mapExistsMock.mockResolvedValue(false);
+      findJobsMock.mockResolvedValue([]);
+      validateGpkgFilesMock.mockReturnValue(true);
+      createLayerJobMock.mockResolvedValue('testJobId');
+      createMergeTilesTasksMock.mockResolvedValue(undefined);
+
+      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      layersManager = new LayersManager(
+        logger,
+        zoomLevelCalculator,
+        jobManagerClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock,
+        splitTilesTaskerMock,
+        mergeTilesTasker
+      );
+
+      const action = async () => {
+        await layersManager.createLayer(testData);
+      };
+
+      await expect(action).rejects.toThrow(BadRequestError);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
     });
 
     it('should throw Bad Request Error for "New" or "Update" job type if higher product version is already exists in catalog', async function () {
@@ -178,7 +214,6 @@ describe('LayersManager', () => {
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
       validateGpkgFilesMock.mockReturnValue(false);
-      validateTiffsFilesMock.mockReturnValue(true);
       createLayerJobMock.mockResolvedValue('testJobId');
       createMergeTilesTasksMock.mockResolvedValue(undefined);
 

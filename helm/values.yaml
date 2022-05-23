@@ -13,9 +13,9 @@ rasterCommon:
   jobManagement:
     ingestion:
       newJobType: Ingestion_New
-      newTaskType: Split-Tiles
+      splitTilesTaskType: tilesSplitting
       updateJobType: Ingestion_Update
-      updateTaskType: Merge-Tiles
+      mergeTilesTaskType: tilesMerging
   storage:
     tilesStorageProvider: "FS"
     fs:

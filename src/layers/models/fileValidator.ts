@@ -30,12 +30,4 @@ export class FileValidator {
     });
     return allValid;
   }
-
-  public validateTiffsFiles(files: string[]): boolean {
-    const validTiffExt = ['.tiff', '.tif'];
-    const allValid = files.every((file) => {
-      return validTiffExt.some((ext) => ext === path.extname(file));
-    });
-    return allValid;
-  }
 }
