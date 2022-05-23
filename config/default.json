@@ -39,8 +39,8 @@
   "ingestionNewJobType": "Ingestion_New",
   "ingestionUpdateJobType": "Ingestion_Update",
   "ingestionTaskType": {
-    "tileMergeTask": "Merge-Tiles",
-    "tileSplitTask": "Split-Tiles"
+    "tileMergeTask": "tilesMerging",
+    "tileSplitTask": "tilesSplitting"
   },
   "ingestionMergeTiles": {
     "mergeBatchSize": 10000
