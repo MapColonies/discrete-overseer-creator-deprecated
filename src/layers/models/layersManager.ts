@@ -72,8 +72,6 @@ export class LayersManager {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
 
-      await this.validateExistsInMapServer(resourceId, productType);
-
       await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType);
     } else {
       throw new BadRequestError('Unsupported job type');
@@ -120,22 +118,6 @@ export class LayersManager {
     const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
     if (!filesExists) {
       throw new BadRequestError('invalid files list, some files are missing');
-    }
-  }
-
-  private async validateNotExistsInMapServer(productId: string, productType: ProductType): Promise<void> {
-    const layerName = getMapServingLayerName(productId, productType);
-    const existsInMapServer = await this.mapPublisher.exists(layerName);
-    if (existsInMapServer) {
-      throw new ConflictError(`layer ${layerName}, already exists on MapProxy`);
-    }
-  }
-
-  private async validateExistsInMapServer(productId: string, productType: ProductType): Promise<void> {
-    const layerName = getMapServingLayerName(productId, productType);
-    const existsInMapServer = await this.mapPublisher.exists(layerName);
-    if (!existsInMapServer) {
-      throw new BadRequestError(`layer ${layerName}, is not exists on MapProxy`);
     }
   }
 
