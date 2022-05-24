@@ -41,18 +41,27 @@
     "__format": "boolean"
   },
   "linkTemplatesPath": "LINKS_TEMPLATE_PATH",
-  "jobType": "DISCRETE_JOB_TYPE",
-  "taskType": "DISCRETE_TASK_TYPE",
-  "bboxSizeTiles": {
-    "__name": "BBOX_SIZE_TILES",
-    "__format": "number"
+  "ingestionNewJobType": "INGESTION_NEW_JOB_TYPE",
+  "ingestionUpdateJobType": "INGESTION_UPDATE_JOB_TYPE",
+  "ingestionTaskType": {
+    "tileMergeTask": "INGESTION_MERGE_TASK_TYPE",
+    "tileSplitTask": "INGESTION_SPLIT_TILES_TASK_TYPE"
   },
-  "mergeBatchSize": {
-    "__name": "MERGE_BATCH_SIZE",
-    "__format": "number"
+  "ingestionMergeTiles": {
+    "mergeBatchSize": {
+      "__name": "MERGE_BATCH_SIZE",
+      "__format": "number"
+    }
   },
-  "tasksBatchSize": {
-    "__name": "TASKS_BATCH_SIZE",
-    "__format": "number"
+  "ingestionTilesSplittingTiles": {
+    "bboxSizeTiles": {
+      "__name": "BBOX_SIZE_TILES",
+      "__format": "number"
+    },
+
+    "tasksBatchSize": {
+      "__name": "TASKS_BATCH_SIZE",
+      "__format": "number"
+    }
   }
 }

@@ -35,13 +35,18 @@ export interface IMergeParameters {
   destPath: string;
   maxZoom: number;
 }
+
 export interface IMergeOverlaps {
   layers: ILayerMergeData[];
   intersection: GeoJSON;
 }
 
+export interface IMergeSources {
+  type: string;
+  path: string;
+}
+
 export interface IMergeTaskParams {
-  sourcePaths: string[];
-  destPath: string;
+  sources: IMergeSources[];
   batch: ITileRange[];
 }

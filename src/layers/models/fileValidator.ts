@@ -22,4 +22,12 @@ export class FileValidator {
     const allValid = (await Promise.all(filePromises)).every((value) => value);
     return allValid;
   }
+
+  public validateGpkgFiles(files: string[]): boolean {
+    const validGpkgExt = '.gpkg';
+    const allValid = files.every((file) => {
+      return path.extname(file) === validGpkgExt;
+    });
+    return allValid;
+  }
 }

@@ -1,7 +1,7 @@
-import config, { IConfig } from 'config';
+import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
-import { ILogger } from '../common/interfaces';
+import { ILogger, IMergeTaskParams } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
 import { ICompletedTasks } from '../tasks/interfaces';
@@ -10,7 +10,7 @@ import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpCli
 
 interface ICreateTaskBody {
   description?: string;
-  parameters: ITaskParameters;
+  parameters: ITaskParameters | IMergeTaskParams;
   reason?: string;
   type?: string;
   status?: OperationStatus;
@@ -76,8 +76,6 @@ interface IGetJobResponse {
   abortedTasks: number;
 }
 
-const jobType = config.get<string>('jobType');
-const taskType = config.get<string>('taskType');
 @injectable()
 export class JobManagerClient extends HttpClient {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -89,7 +87,13 @@ export class JobManagerClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
   }
 
-  public async createLayerJob(data: IngestionParams, layerRelativePath: string, taskParams?: ITaskParameters[]): Promise<string> {
+  public async createLayerJob(
+    data: IngestionParams,
+    layerRelativePath: string,
+    jobType: string,
+    taskType: string,
+    taskParams?: (ITaskParameters | IMergeTaskParams)[]
+  ): Promise<string> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const createLayerTasksUrl = `/jobs`;
@@ -114,9 +118,10 @@ export class JobManagerClient extends HttpClient {
     return res.id;
   }
 
-  public async createTasks(jobId: string, taskParams: ITaskParameters[]): Promise<void> {
+  public async createTasks(jobId: string, taskParams: ITaskParameters[] | IMergeTaskParams[], taskType: string): Promise<void> {
     const createTasksUrl = `/jobs/${jobId}/tasks`;
-    const req = taskParams.map((params) => {
+    const parmas = taskParams as unknown as (IMergeTaskParams | IMergeTaskParams)[];
+    const req = parmas.map((params) => {
       return {
         type: taskType,
         parameters: params,
@@ -149,9 +154,9 @@ export class JobManagerClient extends HttpClient {
     });
   }
 
-  public async findJobs(resourceId: string, version: string, productType: ProductType): Promise<IGetJobResponse[]> {
+  public async findJobs(resourceId: string, productType: ProductType): Promise<IGetJobResponse[]> {
     const getLayerUrl = `/jobs`;
-    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, version, type: jobType, productType: productType });
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, productType: productType });
     if (typeof res === 'string' || res.length === 0) {
       return [];
     }
