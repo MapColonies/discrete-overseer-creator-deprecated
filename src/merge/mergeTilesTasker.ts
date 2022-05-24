@@ -147,7 +147,7 @@ export class MergeTilesTasker {
     }
     if (mergeTaskBatch.length !== 0) {
       if (jobId === undefined) {
-        jobId = await this.db.createLayerJob(data, layerRelativePath, this.jobType, taskType, mergeTaskBatch);
+        await this.db.createLayerJob(data, layerRelativePath, this.jobType, taskType, mergeTaskBatch);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {

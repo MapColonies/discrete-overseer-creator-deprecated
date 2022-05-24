@@ -49,7 +49,7 @@ export class SplitTilesTasker {
     }
     if (taskBatch.length !== 0) {
       if (jobId === undefined) {
-        jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, taskBatch);
+        await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, taskBatch);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {
