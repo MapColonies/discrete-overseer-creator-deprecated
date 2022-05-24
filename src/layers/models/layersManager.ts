@@ -51,12 +51,16 @@ export class LayersManager {
 
     await this.validateFiles(data);
     await this.validateJobNotRunning(resourceId, productType);
+    const existsInMapProxy = await this.isExistsInMapProxy(resourceId, productType);
 
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
 
     if (jobType === JobType.NEW) {
       await this.validateNotExistsInCatalog(resourceId, version, productType);
-      await this.validateNotExistsInMapServer(resourceId, productType);
+      if (existsInMapProxy) {
+        throw new ConflictError(`layer '${resourceId}-${productType}', is already exists on MapProxy`);
+      }
+
       const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
 
       this.setDefaultValues(data);
@@ -64,6 +68,10 @@ export class LayersManager {
       await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (jobType === JobType.UPDATE) {
+      if (!existsInMapProxy) {
+        throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
+      }
+
       await this.validateExistsInMapServer(resourceId, productType);
 
       await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType);
@@ -129,6 +137,12 @@ export class LayersManager {
     if (!existsInMapServer) {
       throw new BadRequestError(`layer ${layerName}, is not exists on MapProxy`);
     }
+  }
+
+  private async isExistsInMapProxy(productId: string, productType: ProductType): Promise<boolean> {
+    const layerName = getMapServingLayerName(productId, productType);
+    const existsInMapServer = await this.mapPublisher.exists(layerName);
+    return existsInMapServer;
   }
 
   private async validateJobNotRunning(resourceId: string, productType: ProductType): Promise<void> {

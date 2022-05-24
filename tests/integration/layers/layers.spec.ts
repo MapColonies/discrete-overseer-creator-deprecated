@@ -218,7 +218,7 @@ describe('layers', function () {
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
       expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
-      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
       expect(catalogExistsMock).toHaveBeenCalledTimes(1);
       expect(createLayerJobMock).toHaveBeenCalledTimes(0);
       expect(createTasksMock).toHaveBeenCalledTimes(0);
