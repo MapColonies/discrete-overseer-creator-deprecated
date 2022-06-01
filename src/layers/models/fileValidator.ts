@@ -1,14 +1,16 @@
-import { promises as fsPromises, constants as fsConstants } from 'fs';
 import path from 'path';
+import { promises as fsPromises, constants as fsConstants } from 'fs';
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../../common/constants';
+import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { IConfig } from '../../common/interfaces';
+import { SQLiteClient } from '../../serviceClients/sqliteClient';
 
 @singleton()
 export class FileValidator {
   private readonly sourceMount: string;
   public constructor(@inject(Services.CONFIG) config: IConfig) {
-    this.sourceMount = config.get('LayerSourceDir');
+    this.sourceMount = config.get('layerSourceDir');
   }
 
   public async validateExists(srcDir: string, files: string[]): Promise<boolean> {
@@ -24,6 +26,24 @@ export class FileValidator {
   }
 
   public validateGpkgFiles(files: string[]): boolean {
+    this.validateGpkgIndex(files);
+
+    const allValid = this.validateGpkgExtension(files);
+    return allValid;
+  }
+
+  public validateGpkgIndex(files: string[]): void {
+    files.forEach((file) => {
+      const sqliteClient = new SQLiteClient(file);
+      const index = sqliteClient.getGpkgIndex();
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+      if (!index) {
+        throw new BadRequestError(`Geopackage name: ${file} does not have a tiles index`);
+      }
+    });
+  }
+
+  private validateGpkgExtension(files: string[]): boolean {
     const validGpkgExt = '.gpkg';
     const allValid = files.every((file) => {
       return path.extname(file) === validGpkgExt;

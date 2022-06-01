@@ -46,10 +46,10 @@ export class LayersManager {
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }
+    await this.validateFiles(data);
     const jobType = await this.getJobType(data);
     const taskType = this.getTaskType(jobType, data.fileNames);
 
-    await this.validateFiles(data);
     await this.validateJobNotRunning(resourceId, productType);
     const existsInMapProxy = await this.isExistsInMapProxy(resourceId, productType);
 
