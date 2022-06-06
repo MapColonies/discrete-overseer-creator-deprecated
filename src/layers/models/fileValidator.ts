@@ -25,16 +25,18 @@ export class FileValidator {
     return allValid;
   }
 
-  public validateGpkgFiles(files: string[]): boolean {
-    this.validateGpkgIndex(files);
-
-    const allValid = this.validateGpkgExtension(files);
-    return allValid;
+  public validateGpkgFiles(files: string[], originDirectory: string): boolean {
+    const isExtensionValid = this.validateGpkgExtension(files);
+    if (!isExtensionValid) {
+      return false;
+    }
+    this.validateGpkgIndex(files, originDirectory);
+    return true;
   }
 
-  public validateGpkgIndex(files: string[]): void {
+  public validateGpkgIndex(files: string[], originDirectory: string): void {
     files.forEach((file) => {
-      const sqliteClient = new SQLiteClient(file);
+      const sqliteClient = new SQLiteClient(file, originDirectory);
       const index = sqliteClient.getGpkgIndex();
       // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (!index) {
