@@ -42,15 +42,17 @@ export class LayersManager {
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
+    const originDirectory = data.originDirectory;
 
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }
-    const jobType = await this.getJobType(data);
-    const taskType = this.getTaskType(jobType, data.fileNames);
-
     await this.validateFiles(data);
     await this.validateJobNotRunning(resourceId, productType);
+
+    const jobType = await this.getJobType(data);
+    const taskType = this.getTaskType(jobType, data.fileNames, originDirectory);
+
     const existsInMapProxy = await this.isExistsInMapProxy(resourceId, productType);
 
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
@@ -82,7 +84,6 @@ export class LayersManager {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
-
     const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
 
     if (!(Array.isArray(existsLayerVersions) && existsLayerVersions.length > 0)) {
@@ -98,8 +99,8 @@ export class LayersManager {
     );
   }
 
-  private getTaskType(jobType: JobType, files: string[]): string {
-    const validGpkgFiles = this.fileValidator.validateGpkgFiles(files);
+  private getTaskType(jobType: JobType, files: string[], originDirectory: string): string {
+    const validGpkgFiles = this.fileValidator.validateGpkgFiles(files, originDirectory);
 
     if (jobType === JobType.NEW) {
       if (validGpkgFiles) {

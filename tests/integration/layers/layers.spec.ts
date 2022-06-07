@@ -71,6 +71,7 @@ describe('layers', function () {
     console.warn = jest.fn();
     setValue('tiling.zoomGroups', '0,1,2,3,4,5,6,7,8,9,10');
     setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+    setValue('layerSourceDir', 'tests/mocks');
     registerTestValues();
     requestSender.init();
     createLayerJobMock.mockResolvedValue('jobId');
@@ -94,6 +95,30 @@ describe('layers', function () {
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
       expect(createTasksMock).toHaveBeenCalledTimes(3);
     });
+  });
+
+  it('should return 200 status code for indexed gpkg', async function () {
+    getLayerVersionsMock.mockResolvedValue([]);
+    findJobsMock.mockResolvedValue([]);
+    mapExistsMock.mockResolvedValue(false);
+    catalogExistsMock.mockResolvedValue(false);
+
+    const testData = {
+      fileNames: ['indexed.gpkg'],
+      metadata: validTestImageMetadata,
+      originDirectory: 'files',
+    };
+
+    const response = await requestSender.createLayer(testData);
+
+    expect(response).toSatisfyApiSpec();
+    expect(response.status).toBe(httpStatusCodes.OK);
+    expect(findJobsMock).toHaveBeenCalledTimes(1);
+    expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+    expect(mapExistsMock).toHaveBeenCalledTimes(1);
+    expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+    expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+    expect(createTasksMock).toHaveBeenCalledTimes(3);
   });
 
   describe('Bad Path', function () {
@@ -132,12 +157,37 @@ describe('layers', function () {
       invalidTestMetaDataHasLowerVersion = { ...invalidTestMetaDataHasLowerVersion, productVersion: '1.0' };
       const invalidTestData = { ...validTestData, metadata: invalidTestMetaDataHasLowerVersion };
       getLayerVersionsMock.mockResolvedValue([2.0]);
+      findJobsMock.mockResolvedValue([]);
       const response = await requestSender.createLayer(invalidTestData);
       expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
-      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 400 status code for unindexed gpkg', async function () {
+      getLayerVersionsMock.mockResolvedValue([]);
+      findJobsMock.mockResolvedValue([]);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+
+      const testData = {
+        fileNames: ['unindexed.gpkg'],
+        metadata: validTestImageMetadata,
+        originDirectory: 'files',
+      };
+
+      const response = await requestSender.createLayer(testData);
+
+      expect(response).toSatisfyApiSpec();
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
       expect(catalogExistsMock).toHaveBeenCalledTimes(0);
       expect(createLayerJobMock).toHaveBeenCalledTimes(0);
@@ -171,8 +221,8 @@ describe('layers', function () {
       expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.CONFLICT);
-      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
       expect(catalogExistsMock).toHaveBeenCalledTimes(0);
       expect(createLayerJobMock).toHaveBeenCalledTimes(0);
@@ -186,8 +236,8 @@ describe('layers', function () {
       expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
-      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
       expect(catalogExistsMock).toHaveBeenCalledTimes(0);
       expect(createLayerJobMock).toHaveBeenCalledTimes(0);

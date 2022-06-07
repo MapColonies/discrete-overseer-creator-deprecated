@@ -31,7 +31,7 @@ export class MergeTilesTasker {
   ) {
     this.batchSize = config.get('ingestionMergeTiles.mergeBatchSize');
     this.mergeTaskBatchSize = config.get<number>('ingestionMergeTiles.mergeBatchSize');
-    this.sourceDir = this.config.get<string>('LayerSourceDir');
+    this.sourceDir = this.config.get<string>('layerSourceDir');
     this.jobType = this.config.get<string>('ingestionUpdateJobType');
     this.tileRanger = new TileRanger();
   }
