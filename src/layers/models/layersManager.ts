@@ -3,7 +3,7 @@ import { GeoJSON } from 'geojson';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
-import { JobType, OperationStatus } from '../../common/enums';
+import { JobType, OperationStatus, TaskType } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { ILogger } from '../../common/interfaces';
@@ -63,18 +63,21 @@ export class LayersManager {
         throw new ConflictError(`layer '${resourceId}-${productType}', is already exists on MapProxy`);
       }
 
-      const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
-
       this.setDefaultValues(data);
 
-      await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
+      if (taskType === TaskType.MERGE_TILES) {
+        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType);
+      } else {
+        const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
+        await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
+      }
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (jobType === JobType.UPDATE) {
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
 
-      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType);
+      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType);
     } else {
       throw new BadRequestError('Unsupported job type');
     }

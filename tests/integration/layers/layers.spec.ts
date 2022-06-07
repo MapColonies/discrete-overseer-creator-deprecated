@@ -52,7 +52,7 @@ const validTestImageMetadata: LayerMetadata = {
   rawProductData: undefined,
 };
 const validTestData = {
-  fileNames: [],
+  fileNames: [] as string[],
   metadata: validTestImageMetadata,
   originDirectory: '/here',
 };
@@ -118,7 +118,7 @@ describe('layers', function () {
     expect(mapExistsMock).toHaveBeenCalledTimes(1);
     expect(catalogExistsMock).toHaveBeenCalledTimes(1);
     expect(createLayerJobMock).toHaveBeenCalledTimes(1);
-    expect(createTasksMock).toHaveBeenCalledTimes(3);
+    expect(createTasksMock).toHaveBeenCalledTimes(0);
   });
 
   describe('Bad Path', function () {
