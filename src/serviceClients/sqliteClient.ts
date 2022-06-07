@@ -1,5 +1,5 @@
 import { join } from 'path';
-import Database, { Database as SQLiteDB }from 'better-sqlite3';
+import Database, { Database as SQLiteDB } from 'better-sqlite3';
 import { IConfig } from 'config';
 import { container } from 'tsyringe';
 import { Services } from '../common/constants';
@@ -41,7 +41,7 @@ export class SQLiteClient {
       throw new Error(`Failed to validate GPKG index: ${error}`);
     } finally {
       this.logger.log('debug', `Closing connection to GPKG in path ${this.fullPath}`);
-      if(db !== undefined) {
+      if (db !== undefined) {
         db.close();
       }
     }
