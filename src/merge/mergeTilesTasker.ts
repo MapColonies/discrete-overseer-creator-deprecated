@@ -90,7 +90,7 @@ export class MergeTilesTasker {
         const batches = tileBatchGenerator(this.batchSize, rangeGen);
         for (const batch of batches) {
           yield {
-            batch,
+            batches: batch,
             sources: [
               {
                 type: sourceType,
