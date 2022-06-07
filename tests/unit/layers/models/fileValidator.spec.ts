@@ -24,7 +24,7 @@ describe('FileValidator', () => {
       const getGpkgIndexFn = jest.spyOn(SQLiteClient.prototype as unknown as { getGpkgIndex: () => unknown }, 'getGpkgIndex');
       getGpkgIndexFn.mockReturnValue(undefined);
       setValue({ layerSourceDir: 'tests/mocks' });
-      const testData: string[] = ['unndexed.gpkg'];
+      const testData: string[] = ['unindexed.gpkg'];
       const fileValidator = new FileValidator(configMock);
 
       const action = () => fileValidator.validateGpkgIndex(testData, 'files');

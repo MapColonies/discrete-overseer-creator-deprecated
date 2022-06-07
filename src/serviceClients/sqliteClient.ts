@@ -1,5 +1,5 @@
 import { join } from 'path';
-import Database from 'better-sqlite3';
+import Database, { Database as SQLiteDB }from 'better-sqlite3';
 import { IConfig } from 'config';
 import { container } from 'tsyringe';
 import { Services } from '../common/constants';
@@ -12,6 +12,7 @@ export class SQLiteClient {
   private readonly layerSourcesPath: string;
   private readonly logger: ILogger;
   private readonly config: IConfig;
+  private db?: SQLiteDB;
 
   public constructor(packageName: string, originDirectory: string) {
     this.logger = container.resolve(Services.LOGGER);
@@ -23,8 +24,8 @@ export class SQLiteClient {
   }
 
   public getGpkgIndex(): unknown {
-    const db = new Database(this.fullPath, { fileMustExist: true });
     try {
+      this.db = new Database(this.fullPath, { fileMustExist: true });
       const sql = `SELECT * 
       FROM sqlite_master 
         WHERE type = 'index' AND tbl_name='${this.packageNameWithoutExtension}' AND sql LIKE '%zoom_level%'
@@ -33,14 +34,16 @@ export class SQLiteClient {
 
       this.logger.log('debug', `Executing query ${sql} on DB ${this.fullPath}`);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const index = db.prepare(sql).get();
+      const index = this.db.prepare(sql).get();
       return index;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       throw new Error(`Failed to validate GPKG index: ${error}`);
     } finally {
       this.logger.log('debug', `Closing connection to GPKG in path ${this.fullPath}`);
-      db.close();
+      if(this.db) {
+        this.db.close();
+      }
     }
   }
 }
