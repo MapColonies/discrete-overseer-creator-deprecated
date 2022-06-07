@@ -52,7 +52,7 @@ const validTestImageMetadata: LayerMetadata = {
   rawProductData: undefined,
 };
 const validTestData = {
-  fileNames: [] as string[],
+  fileNames: [],
   metadata: validTestImageMetadata,
   originDirectory: '/here',
 };
