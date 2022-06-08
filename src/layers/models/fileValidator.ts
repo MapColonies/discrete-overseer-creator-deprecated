@@ -46,6 +46,9 @@ export class FileValidator {
   }
 
   private validateGpkgExtension(files: string[]): boolean {
+    if (!Array.isArray(files) || !files.length) {
+      return false;
+    }
     const validGpkgExt = '.gpkg';
     const allValid = files.every((file) => {
       return path.extname(file) === validGpkgExt;
