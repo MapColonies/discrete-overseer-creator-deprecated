@@ -1,5 +1,5 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
-import { JobType, TaskType } from '../../../../src/common/enums';
+import { JobAction, TaskAction } from '../../../../src/common/enums';
 import { SplitTilesTasker } from '../../../../src/layers/models/splitTilesTasker';
 import { jobManagerClientMock } from '../../../mocks/clients/jobManagerClient';
 import { configMock, init as initConfig, setValue } from '../../../mocks/config';
@@ -81,8 +81,8 @@ describe('SplitTilesTasker', () => {
           { minZoom: 5, maxZoom: 8 },
           { minZoom: 2, maxZoom: 2 },
         ],
-        JobType.NEW,
-        TaskType.SPLIT_TILES
+        JobAction.NEW,
+        TaskAction.SPLIT_TILES
       );
 
       expect(generateTasksParametersSpy).toHaveBeenCalledTimes(1);

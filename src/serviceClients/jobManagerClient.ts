@@ -4,7 +4,7 @@ import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { ILogger, IMergeTaskParams } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
-import { ICompletedTasks } from '../tasks/interfaces';
+import { ICompletedTasks, IGetTaskResponse } from '../tasks/interfaces';
 import { ITaskParameters } from '../layers/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
@@ -37,19 +37,6 @@ interface ICreateJobResponse {
   taskIds: string[];
 }
 
-interface IGetTaskResponse {
-  id: string;
-  jobId: string;
-  description?: string;
-  parameters?: Record<string, unknown>;
-  created: Date;
-  updated: Date;
-  status: OperationStatus;
-  percentage?: number;
-  reason?: string;
-  attempts: number;
-}
-
 interface IGetJobResponse {
   id: string;
   resourceId?: string;
@@ -61,6 +48,7 @@ interface IGetJobResponse {
   created: Date;
   updated: Date;
   status?: OperationStatus;
+  type: string;
   percentage?: number;
   isCleaned: boolean;
   internalId?: string;
@@ -130,19 +118,28 @@ export class JobManagerClient extends HttpClient {
     await this.post(createTasksUrl, req);
   }
 
-  public async getCompletedZoomLevels(jobId: string): Promise<ICompletedTasks> {
+  public async getJob(jobId: string): Promise<ICompletedTasks> {
     const getJobUrl = `/jobs/${jobId}`;
     const query = {
       shouldReturnTasks: false,
     };
     const res = await this.get<IGetJobResponse>(getJobUrl, query);
     return {
+      id: res.id,
       status: res.status as OperationStatus,
-      completed: res.completedTasks + res.failedTasks + res.expiredTasks + res.abortedTasks == res.taskCount,
+      completed: res.completedTasks + res.failedTasks + res.expiredTasks + res.abortedTasks === res.taskCount,
       successful: res.completedTasks === res.taskCount,
       metadata: (res.parameters as unknown as IngestionParams).metadata,
       relativePath: (res.parameters as unknown as { layerRelativePath: string }).layerRelativePath,
+      completedTasksCount: res.completedTasks,
+      type: res.type,
     };
+  }
+
+  public async getTask(jobId: string, taskId: string): Promise<IGetTaskResponse> {
+    const getTaskUrl = `/jobs/${jobId}/tasks/${taskId}`;
+    const res = await this.get<IGetTaskResponse>(getTaskUrl);
+    return res;
   }
 
   public async updateJobStatus(jobId: string, status: OperationStatus, reason?: string, catalogId?: string): Promise<void> {
@@ -161,5 +158,10 @@ export class JobManagerClient extends HttpClient {
       return [];
     }
     return res;
+  }
+
+  public async abortJob(jobId: string): Promise<void> {
+    const abortJobUrl = `/tasks/abort/${jobId}`;
+    await this.post(abortJobUrl);
   }
 }

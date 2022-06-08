@@ -31,7 +31,7 @@ export class TocManager {
 
     if (params.operation != TocOperation.REMOVE) {
       // Get metadata
-      const data = await this.client.getMetadata(params.productId, params.productVersion, params.productType);
+      const data = await this.client.findRecord(params.productId, params.productVersion, params.productType);
       if (data === undefined) {
         throw new NotFoundError(
           `record not found in catalog with params: productType: ${params.productType}, productId: ${params.productId}, productVersion: ${params.productVersion}`

@@ -18,6 +18,11 @@ export interface OpenApiConfig {
   uiPath: string;
 }
 
+export interface IUpdateRecordResponse {
+  id: string;
+  status: string;
+}
+
 export interface IFindResponseRecord extends IRasterCatalogUpsertRequestBody {
   id: string;
 }

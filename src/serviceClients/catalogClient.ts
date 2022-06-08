@@ -1,7 +1,7 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../common/constants';
-import { FindRecordResponse, IConfig, ILogger } from '../common/interfaces';
+import { FindRecordResponse, IConfig, IFindResponseRecord, ILogger, IUpdateRecordResponse } from '../common/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientsBase/httpClient';
 
 interface ICreateRecordResponse {
@@ -33,7 +33,7 @@ export class CatalogClient extends HttpClient {
     return res.length > 0;
   }
 
-  public async getMetadata(productId: string, productVersion: string, productType: string): Promise<LayerMetadata | undefined> {
+  public async findRecord(productId: string, productVersion: string, productType: string): Promise<IFindResponseRecord | undefined> {
     const req = {
       metadata: {
         productId,
@@ -51,7 +51,7 @@ export class CatalogClient extends HttpClient {
     }
 
     // Return metadata
-    return res[0].metadata;
+    return res[0];
   }
 
   public async getLayerVersions(productId: string, productType: string): Promise<number[] | undefined> {
@@ -72,5 +72,13 @@ export class CatalogClient extends HttpClient {
   public async publish(record: IRasterCatalogUpsertRequestBody): Promise<string> {
     const res = await this.post<ICreateRecordResponse>('/records', record);
     return res.id;
+  }
+
+  public async update(id: string, metadata: LayerMetadata): Promise<IUpdateRecordResponse> {
+    const req = {
+      metadata,
+    };
+    const res = await this.put<IUpdateRecordResponse>(`/records/${id}`, req);
+    return res;
   }
 }

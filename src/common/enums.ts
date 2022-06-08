@@ -13,12 +13,12 @@ export enum MapServerCacheType {
   S3 = 'S3',
 }
 
-export enum JobType {
+export enum JobAction {
   NEW = 'Ingestion_New',
   UPDATE = 'Ingestion_Update',
 }
 
-export enum TaskType {
+export enum TaskAction {
   SPLIT_TILES = 'tilesSplitting',
   MERGE_TILES = 'tilesMerging',
 }
