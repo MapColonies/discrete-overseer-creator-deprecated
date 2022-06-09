@@ -1,6 +1,6 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
-import { getCompletedZoomLevelsMock } from '../../mocks/clients/jobManagerClient';
+import { getJob } from '../../mocks/clients/jobManagerClient';
 import { publishLayerMock } from '../../mocks/clients/mapPublisherClient';
 import { publishToCatalogMock } from '../../mocks/clients/catalogClient';
 import { registerTestValues } from '../testContainerConfig';
@@ -24,7 +24,7 @@ describe('layers', function () {
 
   describe('Happy Path', function () {
     it('should return 200 status code when all completed', async function () {
-      getCompletedZoomLevelsMock.mockReturnValue({
+      getJob.mockReturnValue({
         allCompleted: true,
       });
       const response = await requestSender.completeTask(jobId, taskId);
@@ -34,7 +34,7 @@ describe('layers', function () {
     });
 
     it('should return 200 status code when not all completed', async function () {
-      getCompletedZoomLevelsMock.mockReturnValue({
+      getJob.mockReturnValue({
         allCompleted: false,
       });
       const response = await requestSender.completeTask(jobId, taskId);
@@ -51,7 +51,7 @@ describe('layers', function () {
   describe('Sad Path', function () {
     // All requests with status code 4XX-5XX
     it('should return 500 if failed to get completed zoom levels', async function () {
-      getCompletedZoomLevelsMock.mockImplementation(() => {
+      getJob.mockImplementation(() => {
         throw new Error('test error');
       });
       const response = await requestSender.completeTask(jobId, taskId);

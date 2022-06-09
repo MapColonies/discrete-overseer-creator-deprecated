@@ -26,7 +26,6 @@ export class TasksManager {
   private readonly ingestionNewJobType: string;
   private readonly ingestionUpdateJobType: string;
   private readonly ingestionTaskType: IngestionTaskTypes;
-  private readonly metadataMerger: MetadataMerger;
 
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
@@ -35,7 +34,8 @@ export class TasksManager {
     private readonly jobManager: JobManagerClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly catalogClient: CatalogClient,
-    private readonly linkBuilder: LinkBuilder
+    private readonly linkBuilder: LinkBuilder,
+    private readonly metadataMerger: MetadataMerger
   ) {
     this.mapServerUrl = config.get<string>('publicMapServerURL');
     const mapServerCacheType = config.get<string>('mapServerCacheType');
@@ -43,7 +43,6 @@ export class TasksManager {
     this.ingestionNewJobType = config.get<string>('ingestionNewJobType');
     this.ingestionUpdateJobType = config.get<string>('ingestionUpdateJobType');
     this.ingestionTaskType = config.get<IngestionTaskTypes>('ingestionTaskType');
-    this.metadataMerger = container.resolve(MetadataMerger);
     this.cacheType = this.getCacheType(mapServerCacheType);
   }
 
@@ -52,12 +51,10 @@ export class TasksManager {
     const job = await this.jobManager.getJob(jobId);
     const task = await this.jobManager.getTask(jobId, taskId);
 
-    if (job.type === this.ingestionNewJobType || job.type === this.ingestionUpdateJobType) {
-      if (task.type === this.ingestionTaskType.tileMergeTask) {
-        await this.handleMergeTask(job, task);
-      } else if (task.type === this.ingestionTaskType.tileSplitTask) {
-        await this.handleSplitTask(job, task);
-      }
+    if ((job.type === this.ingestionNewJobType || job.type === this.ingestionUpdateJobType) && task.type === this.ingestionTaskType.tileMergeTask) {
+      await this.handleMergeTask(job, task);
+    } else if (job.type === this.ingestionNewJobType && task.type === this.ingestionTaskType.tileSplitTask) {
+      await this.handleSplitTask(job, task);
     }
   }
 
@@ -120,23 +117,21 @@ export class TasksManager {
     if (task.status === OperationStatus.FAILED) {
       await this.jobManager.abortJob(job.id);
       await this.jobManager.updateJobStatus(job.id, OperationStatus.FAILED);
-    }
+    } else if (task.status === OperationStatus.COMPLETED) {
+      const catalogRecord = await this.catalogClient.findRecord(
+        job.metadata.productId as string,
+        job.metadata.productVersion as string,
+        job.metadata.productType as string
+      );
 
-    const catalogRecord = await this.catalogClient.findRecord(
-      job.metadata.productId as string,
-      job.metadata.productVersion as string,
-      job.metadata.productType as string
-    );
-
-    if (task.status === OperationStatus.COMPLETED) {
       if (job.completedTasksCount === 0) {
         const mergedData = this.metadataMerger.merge(job.metadata, catalogRecord?.metadata as LayerMetadata);
         await this.catalogClient.update(catalogRecord?.id as string, mergedData);
       }
-    }
 
-    if (job.successful) {
-      await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, undefined, catalogRecord?.id);
+      if (job.successful) {
+        await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, undefined, catalogRecord?.id);
+      }
     }
   }
 

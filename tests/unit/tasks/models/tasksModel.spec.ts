@@ -1,13 +1,15 @@
 import { ProductType } from '@map-colonies/mc-model-types';
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
-import { jobManagerClientMock, getCompletedZoomLevelsMock } from '../../../mocks/clients/jobManagerClient';
+import { jobManagerClientMock, getJob, getTask, abortJobMock, updateJobStatusMock } from '../../../mocks/clients/jobManagerClient';
 import { mapPublisherClientMock, publishLayerMock } from '../../../mocks/clients/mapPublisherClient';
-import { catalogClientMock, publishToCatalogMock } from '../../../mocks/clients/catalogClient';
+import { catalogClientMock, findRecordMock, publishToCatalogMock, updateMock } from '../../../mocks/clients/catalogClient';
 import { syncClientMock, triggerSyncMock } from '../../../mocks/clients/syncClient';
 import { configMock, init as initMockConfig, setValue } from '../../../mocks/config';
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
 import { OperationTypeEnum } from '../../../../src/serviceClients/syncClient';
+import { OperationStatus } from '../../../../src/common/enums';
+import { mergeMock, metadataMergerMock } from '../../../mocks/metadataMerger';
 
 let tasksManager: TasksManager;
 
@@ -15,6 +17,10 @@ const jobId = 'c3e8d0c6-6663-49e5-9257-323674161725';
 const taskId = '517059cc-f60b-4542-8a41-fdd163358d74';
 
 describe('TasksManager', () => {
+  const ingestionNewJobType = 'IngestionNew';
+  const ingestionUpdateJobType = 'MeregNew';
+  const tileSplitTask = 'SplitNew';
+  const tileMergeTask = 'MergeNew';
   beforeEach(function () {
     jest.resetAllMocks();
     initMockConfig();
@@ -44,14 +50,23 @@ describe('TasksManager', () => {
 
     it('publish layer to catalog twice if all tasks are done for ORTHOPHOTO_HISTORY', async function () {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      setValue({ mapServerCacheType: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18,19' });
+      setValue({ mapServerCacheType: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
       setValue('shouldSync', true);
+      setValue('ingestionNewJobType', ingestionNewJobType);
+      setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });
 
-      getCompletedZoomLevelsMock.mockReturnValue({
+      getJob.mockReturnValue({
         completed: true,
         successful: true,
         metadata: testMetadata,
         relativePath: `test/${ProductType.ORTHOPHOTO_HISTORY}`,
+        type: ingestionNewJobType,
+      });
+
+      getTask.mockReturnValue({
+        id: taskId,
+        jobId: jobId,
+        type: tileSplitTask,
       });
 
       tasksManager = new TasksManager(
@@ -61,12 +76,13 @@ describe('TasksManager', () => {
         jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
-        linkBuilderMock
+        linkBuilderMock,
+        metadataMergerMock
       );
 
       await tasksManager.taskComplete(jobId, taskId);
 
-      expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
+      expect(getJob).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
 
@@ -80,15 +96,24 @@ describe('TasksManager', () => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       setValue({ mapServerCacheType: 'fs', 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18' });
       setValue('shouldSync', true);
+      setValue('ingestionNewJobType', ingestionNewJobType);
+      setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });
 
       const rasterMapTestData = { ...testMetadata };
       rasterMapTestData.productType = ProductType.RASTER_MAP;
 
-      getCompletedZoomLevelsMock.mockReturnValue({
+      getJob.mockReturnValue({
         completed: true,
         successful: true,
         metadata: rasterMapTestData,
         relativePath: `test/${ProductType.RASTER_MAP}`,
+        type: ingestionNewJobType,
+      });
+
+      getTask.mockReturnValue({
+        id: taskId,
+        jobId: jobId,
+        type: tileSplitTask,
       });
 
       tasksManager = new TasksManager(
@@ -98,12 +123,13 @@ describe('TasksManager', () => {
         jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
-        linkBuilderMock
+        linkBuilderMock,
+        metadataMergerMock
       );
 
       await tasksManager.taskComplete(jobId, taskId);
 
-      expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
+      expect(getJob).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
 
@@ -123,7 +149,7 @@ describe('TasksManager', () => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       setValue({ mapServerCacheType: 'fs', 'tiling.zoomGroups': '' });
 
-      getCompletedZoomLevelsMock.mockReturnValue({
+      getJob.mockReturnValue({
         allCompleted: false,
       });
 
@@ -134,15 +160,106 @@ describe('TasksManager', () => {
         jobManagerClientMock,
         mapPublisherClientMock,
         catalogClientMock,
-        linkBuilderMock
+        linkBuilderMock,
+        metadataMergerMock
       );
 
       await tasksManager.taskComplete(jobId, taskId);
 
-      expect(getCompletedZoomLevelsMock).toHaveBeenCalledTimes(1);
+      expect(getJob).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(0);
       expect(publishLayerMock).toHaveBeenCalledTimes(0);
       expect(triggerSyncMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should abort all merge tasks and make job failed on task failure', async function () {
+      setValue('ingestionUpdateJobType', ingestionUpdateJobType);
+      setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });
+
+      const rasterMapTestData = { ...testMetadata };
+      rasterMapTestData.productType = ProductType.RASTER_MAP;
+
+      getJob.mockReturnValue({
+        id: jobId,
+        completed: true,
+        successful: true,
+        relativePath: `test/${ProductType.RASTER_MAP}`,
+        metadata: rasterMapTestData,
+        type: ingestionUpdateJobType,
+      });
+
+      getTask.mockReturnValue({
+        id: taskId,
+        jobId: jobId,
+        type: tileMergeTask,
+        status: OperationStatus.FAILED
+      });
+
+      tasksManager = new TasksManager(
+        logger,
+        configMock,
+        syncClientMock,
+        jobManagerClientMock,
+        mapPublisherClientMock,
+        catalogClientMock,
+        linkBuilderMock,
+        metadataMergerMock
+      );
+      
+      await tasksManager.taskComplete(jobId, taskId);
+
+      expect(abortJobMock).toHaveBeenCalledTimes(1);
+      expect(updateJobStatusMock).toHaveBeenCalledTimes(1);
+      expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.FAILED);
+    });
+
+    it('should complete job once all tasks are successful', async function () {
+      setValue('ingestionUpdateJobType', ingestionUpdateJobType);
+      setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });
+
+      const rasterMapTestData = { ...testMetadata };
+      rasterMapTestData.productType = ProductType.RASTER_MAP;
+
+      getJob.mockReturnValue({
+        id: jobId,
+        completed: true,
+        successful: true,
+        relativePath: `test/${ProductType.RASTER_MAP}`,
+        metadata: rasterMapTestData,
+        type: ingestionUpdateJobType,
+        completedTasksCount: 0
+      });
+
+      getTask.mockReturnValue({
+        id: taskId,
+        jobId: jobId,
+        type: tileMergeTask,
+        status: OperationStatus.COMPLETED
+      });
+
+      const catalogRecordId = 'a6fbf0dc-d82c-4c8d-ad28-b8f56c685a23';
+      findRecordMock.mockResolvedValue({
+        id: catalogRecordId,
+        metadata: {}
+      })
+
+      tasksManager = new TasksManager(
+        logger,
+        configMock,
+        syncClientMock,
+        jobManagerClientMock,
+        mapPublisherClientMock,
+        catalogClientMock,
+        linkBuilderMock,
+        metadataMergerMock
+      );
+
+      await tasksManager.taskComplete(jobId, taskId);
+
+      expect(updateJobStatusMock).toHaveBeenCalledTimes(1);
+      expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.COMPLETED, undefined, catalogRecordId);
+      expect(mergeMock).toHaveBeenCalledTimes(1);
+      expect(updateMock).toHaveBeenCalledTimes(1);
     });
   });
 });
