@@ -199,8 +199,8 @@ describe('LayersManager', () => {
       };
 
       await expect(action).rejects.toThrow(BadRequestError);
-      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
-      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(0);
+      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
       expect(findJobsMock).toHaveBeenCalledTimes(0);
       expect(createSplitTilesTasksMock).toHaveBeenCalledTimes(0);
     });

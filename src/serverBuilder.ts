@@ -47,7 +47,7 @@ export class ServerBuilder {
     const ignorePathRegex = new RegExp(`^(${this.config.get<string>('openapiConfig.basePath')})|(explorer)/.*`, 'i');
     const apiSpecPath = this.config.get<string>('openapiConfig.filePath');
     this.serverInstance.use(OpenApiMiddleware({ apiSpec: apiSpecPath, validateRequests: true, ignorePaths: ignorePathRegex }));
-    const physicalDirPath = this.config.get<string>('LayerSourceDir');
+    const physicalDirPath = this.config.get<string>('layerSourceDir');
     const displayNameDir = this.config.get<string>('displayNameDir');
     const mountDirs = [
       {

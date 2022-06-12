@@ -16,7 +16,7 @@
       }
     }
   },
-  "LayerSourceDir": "/layerSources",
+  "layerSourceDir": "/layerSources",
   "mapServerCacheType": "FS",
   "displayNameDir": "\\layerSources",
   "validFileExtensions": "tif,tiff,gpkg,jp2,jpc,j2k",

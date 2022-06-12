@@ -42,15 +42,17 @@ export class LayersManager {
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
+    const originDirectory = data.originDirectory;
 
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }
-    const jobType = await this.getJobType(data);
-    const taskType = this.getTaskType(jobType, data.fileNames);
-
     await this.validateFiles(data);
     await this.validateJobNotRunning(resourceId, productType);
+
+    const jobType = await this.getJobType(data);
+    const taskType = this.getTaskType(jobType, data.fileNames, originDirectory);
+
     const existsInMapProxy = await this.isExistsInMapProxy(resourceId, productType);
 
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
@@ -61,18 +63,21 @@ export class LayersManager {
         throw new ConflictError(`layer '${resourceId}-${productType}', is already exists on MapProxy`);
       }
 
-      const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
-
       this.setDefaultValues(data);
 
-      await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
+      if (taskType === TaskType.MERGE_TILES) {
+        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType);
+      } else {
+        const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
+        await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
+      }
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (jobType === JobAction.UPDATE) {
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
 
-      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType);
+      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType);
     } else {
       throw new BadRequestError('Unsupported job type');
     }
@@ -82,7 +87,6 @@ export class LayersManager {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
-
     const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
 
     if (!(Array.isArray(existsLayerVersions) && existsLayerVersions.length > 0)) {
