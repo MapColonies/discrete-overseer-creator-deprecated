@@ -15,6 +15,7 @@ rasterCommon:
       new: 
         jobType: Ingestion_New
         splitTilesTaskType: tilesSplitting
+        mergeTilesTaskType: tilesMerging
       update: 
         jobType: Ingestion_Update
         mergeTilesTaskType: tilesMerging
