@@ -11,11 +11,6 @@ rasterCommon:
     catalogManager: http://localhost:8083
     jobManager: http://localhost:8084
   jobManagement:
-    # ingestion:
-    #   newJobType: Ingestion_New
-    #   splitTilesTaskType: tilesSplitting
-    #   updateJobType: Ingestion_Update
-    #   mergeTilesTaskType: tilesMerging
     ingestion:
       new: 
         jobType: Ingestion_New
