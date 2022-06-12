@@ -3,12 +3,12 @@ import { OperationStatus } from '../common/enums';
 
 export interface ICompletedTasks {
   id: string;
-  completed: boolean;
-  successful: boolean;
+  isCompleted: boolean;
+  isSuccessful: boolean;
   metadata: LayerMetadata;
   relativePath: string;
   status: OperationStatus;
-  completedTasksCount: number;
+  successTasksCount: number;
   type: string;
 }
 

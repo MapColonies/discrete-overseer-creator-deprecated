@@ -1,5 +1,5 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
-import { container, inject, injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import { degreesPerPixelToZoomLevel } from '@map-colonies/mc-utils';
 import { Services } from '../../common/constants';
 import { OperationStatus, MapServerCacheType } from '../../common/enums';
@@ -12,12 +12,14 @@ import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { OperationTypeEnum, SyncClient } from '../../serviceClients/syncClient';
 import { MetadataMerger } from '../../update/metadataMerger';
 import { ICompletedTasks, IGetTaskResponse } from '../interfaces';
+import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
 
 interface IngestionTaskTypes {
   tileMergeTask: string;
   tileSplitTask: string;
 }
+
 @injectable()
 export class TasksManager {
   private readonly mapServerUrl: string;
@@ -47,14 +49,23 @@ export class TasksManager {
   }
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
-    this.logger.log('info', `[TasksManager][taskComplete] checking tiling status of job ${jobId} task ${taskId}`);
-    const job = await this.jobManager.getJob(jobId);
+    const job = await this.jobManager.getJobStatus(jobId);
     const task = await this.jobManager.getTask(jobId, taskId);
 
-    if ((job.type === this.ingestionNewJobType || job.type === this.ingestionUpdateJobType) && task.type === this.ingestionTaskType.tileMergeTask) {
+    if (job.type === this.ingestionUpdateJobType && task.type === this.ingestionTaskType.tileMergeTask) {
+      this.logger.log(`info`, `[TasksManager][taskComplete] Completing merge task with jobId ${jobId} and taskId ${taskId}.`);
       await this.handleMergeTask(job, task);
-    } else if (job.type === this.ingestionNewJobType && task.type === this.ingestionTaskType.tileSplitTask) {
+    } else if (
+      (this.ingestionTaskType.tileMergeTask || job.type === this.ingestionNewJobType) &&
+      task.type === this.ingestionTaskType.tileSplitTask
+    ) {
+      this.logger.log(`info`, `[TasksManager][taskComplete] Completing tiles-splitting task with jobId ${jobId} and taskId ${taskId}.`);
       await this.handleSplitTask(job, task);
+    } else {
+      console.log(`got here, bad request`);
+      throw new BadRequestError(
+        `[TasksManager][taskComplete] Could not complete task. Job type "${job.type}" and task type "${task.type}" combination isn't supported.`
+      );
     }
   }
 
@@ -115,7 +126,9 @@ export class TasksManager {
 
   private async handleMergeTask(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
     if (task.status === OperationStatus.FAILED) {
+      this.logger.log(`info`, `Aborting job with ID ${job.id}`);
       await this.jobManager.abortJob(job.id);
+      this.logger.log(`info`, `Updating job ${job.id} with status ${OperationStatus.FAILED}`);
       await this.jobManager.updateJobStatus(job.id, OperationStatus.FAILED);
     } else if (task.status === OperationStatus.COMPLETED) {
       const catalogRecord = await this.catalogClient.findRecord(
@@ -124,20 +137,22 @@ export class TasksManager {
         job.metadata.productType as string
       );
 
-      if (job.completedTasksCount === 0) {
+      if (job.successTasksCount === 0) {
         const mergedData = this.metadataMerger.merge(job.metadata, catalogRecord?.metadata as LayerMetadata);
+        this.logger.log(`info`, `Merging metadata of ${job.id} with metadata from catalog record ${catalogRecord?.id as string}`);
         await this.catalogClient.update(catalogRecord?.id as string, mergedData);
       }
 
-      if (job.successful) {
+      if (job.isSuccessful) {
+        this.logger.log(`info`, `Updating status of job ${job.id} to be ${OperationStatus.COMPLETED}`);
         await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, undefined, catalogRecord?.id);
       }
     }
   }
 
   private async handleSplitTask(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
-    if (job.status != OperationStatus.FAILED && job.completed) {
-      if (job.successful) {
+    if (job.status != OperationStatus.FAILED && job.isCompleted) {
+      if (job.isSuccessful) {
         const layerName = getMapServingLayerName(job.metadata.productId as string, job.metadata.productType as ProductType);
         await this.publishToMappingServer(job.id, job.metadata, layerName, job.relativePath);
         const catalogId = await this.publishToCatalog(job.id, job.metadata, layerName);

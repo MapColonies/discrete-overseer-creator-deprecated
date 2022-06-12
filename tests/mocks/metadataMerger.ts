@@ -1,4 +1,4 @@
-import { MetadataMerger } from '../../src/update/metadataMerger'
+import { MetadataMerger } from '../../src/update/metadataMerger';
 
 const mergeMock = jest.fn();
 

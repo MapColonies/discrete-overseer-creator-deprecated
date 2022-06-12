@@ -1,6 +1,6 @@
 import { ProductType } from '@map-colonies/mc-model-types';
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
-import { jobManagerClientMock, getJob, getTask, abortJobMock, updateJobStatusMock } from '../../../mocks/clients/jobManagerClient';
+import { jobManagerClientMock, getJobStatusMock, getTaskMock, abortJobMock, updateJobStatusMock } from '../../../mocks/clients/jobManagerClient';
 import { mapPublisherClientMock, publishLayerMock } from '../../../mocks/clients/mapPublisherClient';
 import { catalogClientMock, findRecordMock, publishToCatalogMock, updateMock } from '../../../mocks/clients/catalogClient';
 import { syncClientMock, triggerSyncMock } from '../../../mocks/clients/syncClient';
@@ -55,15 +55,15 @@ describe('TasksManager', () => {
       setValue('ingestionNewJobType', ingestionNewJobType);
       setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });
 
-      getJob.mockReturnValue({
-        completed: true,
-        successful: true,
+      getJobStatusMock.mockReturnValue({
+        isCompleted: true,
+        isSuccessful: true,
         metadata: testMetadata,
         relativePath: `test/${ProductType.ORTHOPHOTO_HISTORY}`,
         type: ingestionNewJobType,
       });
 
-      getTask.mockReturnValue({
+      getTaskMock.mockReturnValue({
         id: taskId,
         jobId: jobId,
         type: tileSplitTask,
@@ -82,7 +82,7 @@ describe('TasksManager', () => {
 
       await tasksManager.taskComplete(jobId, taskId);
 
-      expect(getJob).toHaveBeenCalledTimes(1);
+      expect(getJobStatusMock).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
 
@@ -102,15 +102,15 @@ describe('TasksManager', () => {
       const rasterMapTestData = { ...testMetadata };
       rasterMapTestData.productType = ProductType.RASTER_MAP;
 
-      getJob.mockReturnValue({
-        completed: true,
-        successful: true,
+      getJobStatusMock.mockReturnValue({
+        isCompleted: true,
+        isSuccessful: true,
         metadata: rasterMapTestData,
         relativePath: `test/${ProductType.RASTER_MAP}`,
         type: ingestionNewJobType,
       });
 
-      getTask.mockReturnValue({
+      getTaskMock.mockReturnValue({
         id: taskId,
         jobId: jobId,
         type: tileSplitTask,
@@ -129,7 +129,7 @@ describe('TasksManager', () => {
 
       await tasksManager.taskComplete(jobId, taskId);
 
-      expect(getJob).toHaveBeenCalledTimes(1);
+      expect(getJobStatusMock).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(1);
       expect(publishLayerMock).toHaveBeenCalledTimes(1);
 
@@ -148,9 +148,16 @@ describe('TasksManager', () => {
     it('do nothing if some tasks are not done', async function () {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       setValue({ mapServerCacheType: 'fs', 'tiling.zoomGroups': '' });
+      setValue('ingestionNewJobType', ingestionNewJobType);
+      setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });
 
-      getJob.mockReturnValue({
+      getJobStatusMock.mockReturnValue({
         allCompleted: false,
+        type: ingestionUpdateJobType,
+      });
+
+      getTaskMock.mockReturnValue({
+        type: tileSplitTask,
       });
 
       tasksManager = new TasksManager(
@@ -166,7 +173,7 @@ describe('TasksManager', () => {
 
       await tasksManager.taskComplete(jobId, taskId);
 
-      expect(getJob).toHaveBeenCalledTimes(1);
+      expect(getJobStatusMock).toHaveBeenCalledTimes(1);
       expect(publishToCatalogMock).toHaveBeenCalledTimes(0);
       expect(publishLayerMock).toHaveBeenCalledTimes(0);
       expect(triggerSyncMock).toHaveBeenCalledTimes(0);
@@ -179,7 +186,7 @@ describe('TasksManager', () => {
       const rasterMapTestData = { ...testMetadata };
       rasterMapTestData.productType = ProductType.RASTER_MAP;
 
-      getJob.mockReturnValue({
+      getJobStatusMock.mockReturnValue({
         id: jobId,
         completed: true,
         successful: true,
@@ -188,11 +195,11 @@ describe('TasksManager', () => {
         type: ingestionUpdateJobType,
       });
 
-      getTask.mockReturnValue({
+      getTaskMock.mockReturnValue({
         id: taskId,
         jobId: jobId,
         type: tileMergeTask,
-        status: OperationStatus.FAILED
+        status: OperationStatus.FAILED,
       });
 
       tasksManager = new TasksManager(
@@ -205,7 +212,7 @@ describe('TasksManager', () => {
         linkBuilderMock,
         metadataMergerMock
       );
-      
+
       await tasksManager.taskComplete(jobId, taskId);
 
       expect(abortJobMock).toHaveBeenCalledTimes(1);
@@ -220,28 +227,28 @@ describe('TasksManager', () => {
       const rasterMapTestData = { ...testMetadata };
       rasterMapTestData.productType = ProductType.RASTER_MAP;
 
-      getJob.mockReturnValue({
+      getJobStatusMock.mockReturnValue({
         id: jobId,
-        completed: true,
-        successful: true,
+        isCompleted: true,
+        isSuccessful: true,
         relativePath: `test/${ProductType.RASTER_MAP}`,
         metadata: rasterMapTestData,
         type: ingestionUpdateJobType,
-        completedTasksCount: 0
+        successTasksCount: 0,
       });
 
-      getTask.mockReturnValue({
+      getTaskMock.mockReturnValue({
         id: taskId,
         jobId: jobId,
         type: tileMergeTask,
-        status: OperationStatus.COMPLETED
+        status: OperationStatus.COMPLETED,
       });
 
       const catalogRecordId = 'a6fbf0dc-d82c-4c8d-ad28-b8f56c685a23';
       findRecordMock.mockResolvedValue({
         id: catalogRecordId,
-        metadata: {}
-      })
+        metadata: {},
+      });
 
       tasksManager = new TasksManager(
         logger,

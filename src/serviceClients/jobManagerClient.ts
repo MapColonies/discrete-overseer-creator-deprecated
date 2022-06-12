@@ -118,7 +118,7 @@ export class JobManagerClient extends HttpClient {
     await this.post(createTasksUrl, req);
   }
 
-  public async getJob(jobId: string): Promise<ICompletedTasks> {
+  public async getJobStatus(jobId: string): Promise<ICompletedTasks> {
     const getJobUrl = `/jobs/${jobId}`;
     const query = {
       shouldReturnTasks: false,
@@ -127,11 +127,11 @@ export class JobManagerClient extends HttpClient {
     return {
       id: res.id,
       status: res.status as OperationStatus,
-      completed: res.completedTasks + res.failedTasks + res.expiredTasks + res.abortedTasks === res.taskCount,
-      successful: res.completedTasks === res.taskCount,
+      isCompleted: res.completedTasks + res.failedTasks + res.expiredTasks + res.abortedTasks === res.taskCount,
+      isSuccessful: res.completedTasks === res.taskCount,
       metadata: (res.parameters as unknown as IngestionParams).metadata,
       relativePath: (res.parameters as unknown as { layerRelativePath: string }).layerRelativePath,
-      completedTasksCount: res.completedTasks,
+      successTasksCount: res.completedTasks,
       type: res.type,
     };
   }

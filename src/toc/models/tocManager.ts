@@ -37,7 +37,7 @@ export class TocManager {
           `record not found in catalog with params: productType: ${params.productType}, productId: ${params.productId}, productVersion: ${params.productVersion}`
         );
       }
-      metadata = data;
+      metadata = data.metadata;
     } else {
       metadata = {
         productId: params.productId,
