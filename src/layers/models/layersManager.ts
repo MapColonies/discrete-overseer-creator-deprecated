@@ -3,7 +3,7 @@ import { GeoJSON } from 'geojson';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
-import { JobAction, OperationStatus } from '../../common/enums';
+import { JobAction, OperationStatus, TaskAction } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { ILogger } from '../../common/interfaces';
@@ -65,7 +65,7 @@ export class LayersManager {
 
       this.setDefaultValues(data);
 
-      if (taskType === TaskType.MERGE_TILES) {
+      if (taskType === TaskAction.MERGE_TILES) {
         await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType);
       } else {
         const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
@@ -102,8 +102,8 @@ export class LayersManager {
     );
   }
 
-  private getTaskType(jobType: JobAction, files: string[]): string {
-    const validGpkgFiles = this.fileValidator.validateGpkgFiles(files);
+  private getTaskType(jobType: JobAction, files: string[], originDirectory: string): string {
+    const validGpkgFiles = this.fileValidator.validateGpkgFiles(files, originDirectory);
 
     if (jobType === JobAction.NEW) {
       if (validGpkgFiles) {
