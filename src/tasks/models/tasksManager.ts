@@ -54,15 +54,14 @@ export class TasksManager {
 
     if (job.type === this.ingestionUpdateJobType && task.type === this.ingestionTaskType.tileMergeTask) {
       this.logger.log(`info`, `[TasksManager][taskComplete] Completing merge task with jobId ${jobId} and taskId ${taskId}.`);
-      await this.handleMergeTask(job, task);
+      await this.handleUpdateIngestion(job, task);
     } else if (
-      (this.ingestionTaskType.tileMergeTask || job.type === this.ingestionNewJobType) &&
-      task.type === this.ingestionTaskType.tileSplitTask
+      (task.type === this.ingestionTaskType.tileMergeTask || task.type === this.ingestionTaskType.tileSplitTask) &&
+      job.type === this.ingestionNewJobType
     ) {
       this.logger.log(`info`, `[TasksManager][taskComplete] Completing tiles-splitting task with jobId ${jobId} and taskId ${taskId}.`);
-      await this.handleSplitTask(job, task);
+      await this.handleNewIngestion(job, task);
     } else {
-      console.log(`got here, bad request`);
       throw new BadRequestError(
         `[TasksManager][taskComplete] Could not complete task. Job type "${job.type}" and task type "${task.type}" combination isn't supported.`
       );
@@ -124,7 +123,7 @@ export class TasksManager {
     return cacheType;
   }
 
-  private async handleMergeTask(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
+  private async handleUpdateIngestion(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
     if (task.status === OperationStatus.FAILED) {
       this.logger.log(`info`, `Aborting job with ID ${job.id}`);
       await this.jobManager.abortJob(job.id);
@@ -138,8 +137,9 @@ export class TasksManager {
       );
 
       if (job.successTasksCount === 0) {
+        this.logger.log(`debug`, `Merging metadata of ${job.id} with metadata from catalog record ${catalogRecord?.id as string}`);
         const mergedData = this.metadataMerger.merge(job.metadata, catalogRecord?.metadata as LayerMetadata);
-        this.logger.log(`info`, `Merging metadata of ${job.id} with metadata from catalog record ${catalogRecord?.id as string}`);
+        this.logger.log(`info`, `Updating catalog record ${catalogRecord?.id as string} with new metadata`);
         await this.catalogClient.update(catalogRecord?.id as string, mergedData);
       }
 
@@ -150,7 +150,7 @@ export class TasksManager {
     }
   }
 
-  private async handleSplitTask(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
+  private async handleNewIngestion(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
     if (job.status != OperationStatus.FAILED && job.isCompleted) {
       if (job.isSuccessful) {
         const layerName = getMapServingLayerName(job.metadata.productId as string, job.metadata.productType as ProductType);
@@ -171,7 +171,7 @@ export class TasksManager {
           } catch (err) {
             this.logger.log(
               'error',
-              `[TasksManager][handleSplitTask] failed to trigger sync productId ${job.metadata.productId as string} productVersion ${
+              `[TasksManager][handleNewIngestion] failed to trigger sync productId ${job.metadata.productId as string} productVersion ${
                 job.metadata.productVersion as string
               }. error=${(err as Error).message}`
             );
@@ -180,7 +180,7 @@ export class TasksManager {
       } else if (job.status != OperationStatus.ABORTED && job.status != OperationStatus.EXPIRED) {
         this.logger.log(
           'error',
-          `[TasksManager][handleSplitTask] failed to generate tiles for job ${job.id} task ${task.id}. please check discrete worker logs from more info`
+          `[TasksManager][handleNewIngestion] failed to generate tiles for job ${job.id} task ${task.id}. please check discrete worker logs from more info`
         );
         await this.jobManager.updateJobStatus(job.id, OperationStatus.FAILED, 'Failed to generate tiles');
       }

@@ -153,7 +153,7 @@ describe('TasksManager', () => {
 
       getJobStatusMock.mockReturnValue({
         allCompleted: false,
-        type: ingestionUpdateJobType,
+        type: ingestionNewJobType,
       });
 
       getTaskMock.mockReturnValue({
