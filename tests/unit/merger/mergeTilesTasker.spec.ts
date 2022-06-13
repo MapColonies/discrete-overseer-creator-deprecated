@@ -116,7 +116,7 @@ describe('MergeTilesTasker', () => {
       const tiles: Set<string>[] = [new Set<string>(), new Set<string>(), new Set<string>(), new Set<string>(), new Set<string>(), new Set<string>()];
       for (const task of taskGen) {
         expect(task.sources[0].path).toEqual('test/dest');
-        for (const tile of tilesGenerator(task.batch)) {
+        for (const tile of tilesGenerator(task.batches)) {
           const tileStr = `${tile.zoom}/${tile.x}/${tile.y}`;
           expect(tiles[tile.zoom].has(tileStr)).toBeFalsy();
           tiles[tile.zoom].add(tileStr);
@@ -172,7 +172,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
+          batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
         },
         {
           sources: [
@@ -185,7 +185,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 0 }],
+          batches: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 0 }],
         },
         {
           sources: [
@@ -202,7 +202,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
+          batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
           sources: [
@@ -219,7 +219,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
+          batches: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
           sources: [
@@ -232,7 +232,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 2, maxX: 3, minY: 0, maxY: 1, zoom: 1 }],
+          batches: [{ minX: 2, maxX: 3, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
           sources: [
@@ -245,7 +245,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile1',
             },
           ],
-          batch: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
+          batches: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
         },
         {
           sources: [
@@ -258,7 +258,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile1',
             },
           ],
-          batch: [{ minX: 1, maxX: 2, minY: 1, maxY: 2, zoom: 1 }],
+          batches: [{ minX: 1, maxX: 2, minY: 1, maxY: 2, zoom: 1 }],
         },
       ];
 
@@ -307,7 +307,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
+          batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
         },
         {
           sources: [
@@ -324,7 +324,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
+          batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
           sources: [
@@ -341,7 +341,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
+          batches: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
           sources: [
@@ -358,7 +358,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
+          batches: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
         },
         {
           sources: [
@@ -375,7 +375,7 @@ describe('MergeTilesTasker', () => {
               path: 'test/tile2',
             },
           ],
-          batch: [{ minX: 1, maxX: 2, minY: 1, maxY: 2, zoom: 1 }],
+          batches: [{ minX: 1, maxX: 2, minY: 1, maxY: 2, zoom: 1 }],
         },
       ];
 

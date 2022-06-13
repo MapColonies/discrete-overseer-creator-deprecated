@@ -53,5 +53,5 @@ export interface IMergeSources {
 
 export interface IMergeTaskParams {
   sources: IMergeSources[];
-  batch: ITileRange[];
+  batches: ITileRange[];
 }
