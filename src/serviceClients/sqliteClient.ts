@@ -5,6 +5,15 @@ import { container } from 'tsyringe';
 import { Services } from '../common/constants';
 import { ILogger } from '../common/interfaces';
 
+interface IMatrixValues {
+  matrixWidth: number
+  matrixHeight: number
+}
+
+enum ITilingSchemes {
+  INSPIRE_CRS_84_QUAD = 'InspireCRS84Quad',
+  WEB_MERCATOR = 'WebMercator'
+}
 export class SQLiteClient {
   public readonly packageName: string;
   private readonly fullPath: string;
@@ -12,6 +21,7 @@ export class SQLiteClient {
   private readonly layerSourcesPath: string;
   private readonly logger: ILogger;
   private readonly config: IConfig;
+  
 
   public constructor(packageName: string, originDirectory: string) {
     this.logger = container.resolve(Services.LOGGER);
@@ -46,4 +56,32 @@ export class SQLiteClient {
       }
     }
   }
+
+  public getGridType(): ITilingSchemes | undefined {
+    let db: SQLiteDB | undefined = undefined;
+    try {
+      db = new Database(this.fullPath, { fileMustExist: true });
+      
+      // get the matrix_width and matrix_height
+      const matrixQuery = 'SELECT MAX(matrix_width) as matrixWidth, MAX(matrix_height) as matrixHeight FROM gpkg_tile_matrix';
+      const matrixValues = db.prepare(matrixQuery).get() as IMatrixValues;
+      const result = Math.round(matrixValues.matrixWidth / matrixValues.matrixHeight);
+      
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+      if(result === 2) {
+        return ITilingSchemes.INSPIRE_CRS_84_QUAD;
+      } else if (result === 1) {
+        return ITilingSchemes.WEB_MERCATOR
+      }
+    } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        throw new Error(`Failed to get grid type: ${error}`);
+    } finally {
+      this.logger.log('debug', `Closing connection to GPKG in path ${this.fullPath}`);
+      if (db !== undefined) {
+        db.close();
+      }
+    }
+  }
+
 }

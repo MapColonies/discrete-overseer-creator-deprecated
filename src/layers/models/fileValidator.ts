@@ -38,6 +38,8 @@ export class FileValidator {
     files.forEach((file) => {
       const sqliteClient = new SQLiteClient(file, originDirectory);
       const index = sqliteClient.getGpkgIndex();
+      const grid = sqliteClient.getGridType();
+      console.log(grid);
       // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (!index) {
         throw new BadRequestError(`Geopackage name: ${file} does not have a tiles index`);
