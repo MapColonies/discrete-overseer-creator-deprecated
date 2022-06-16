@@ -1,4 +1,4 @@
-import Database, { Statement} from 'better-sqlite3';
+import Database, { Statement } from 'better-sqlite3';
 import { container } from 'tsyringe';
 import { Services } from '../../../src/common/constants';
 import { Grid } from '../../../src/layers/interfaces';
@@ -22,11 +22,11 @@ describe('SQLClient', () => {
   describe('getGrid', () => {
     it('should return 2x1 grid', function () {
       setValue({ layerSourceDir: 'tests/mocks' });
-      const mockMatrixValues = { matrixWidth: 400, matrixHeight: 200 }
+      const mockMatrixValues = { matrixWidth: 400, matrixHeight: 200 };
       const prepareSpy = jest.spyOn(Database.prototype, 'prepare');
       prepareSpy.mockImplementation((test: string) => {
-        return { get: ()=> mockMatrixValues } as Statement
-      })
+        return { get: () => mockMatrixValues } as Statement;
+      });
 
       const testDb = new SQLiteClient('test.gpkg', '/here');
       const result = testDb.getGrid();
@@ -36,11 +36,11 @@ describe('SQLClient', () => {
 
     it('should return 1x1 grid', function () {
       setValue({ layerSourceDir: 'tests/mocks' });
-      const mockMatrixValues = { matrixWidth: 200, matrixHeight: 200 }
+      const mockMatrixValues = { matrixWidth: 200, matrixHeight: 200 };
       const prepareSpy = jest.spyOn(Database.prototype, 'prepare');
       prepareSpy.mockImplementation((test: string) => {
-        return { get: ()=> mockMatrixValues } as Statement
-      })
+        return { get: () => mockMatrixValues } as Statement;
+      });
 
       const testDb = new SQLiteClient('test.gpkg', '/here');
       const result = testDb.getGrid();
@@ -50,11 +50,11 @@ describe('SQLClient', () => {
 
     it('should return undefined grid', function () {
       setValue({ layerSourceDir: 'tests/mocks' });
-      const mockMatrixValues = { matrixWidth: 400, matrixHeight: 1 }
+      const mockMatrixValues = { matrixWidth: 400, matrixHeight: 1 };
       const prepareSpy = jest.spyOn(Database.prototype, 'prepare');
       prepareSpy.mockImplementation((test: string) => {
-        return { get: ()=> mockMatrixValues } as Statement
-      })
+        return { get: () => mockMatrixValues } as Statement;
+      });
 
       const testDb = new SQLiteClient('test.gpkg', '/here');
       const result = testDb.getGrid();
