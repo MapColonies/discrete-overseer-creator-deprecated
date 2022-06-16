@@ -22,3 +22,15 @@ export interface ITaskParameters {
   layerRelativePath: string;
   bbox: BBox;
 }
+
+export interface IBBox {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
+export enum Grid {
+  TWO_ON_ONE = '2X1',
+  ONE_ON_ONE = '1X1',
+}

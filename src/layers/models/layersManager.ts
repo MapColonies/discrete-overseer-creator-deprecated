@@ -14,6 +14,8 @@ import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { MergeTilesTasker } from '../../merge/mergeTilesTasker';
 import { createBBoxString } from '../../utils/bbox';
+import { Grid } from '../interfaces';
+import { getGrids, getExtents } from '../../utils/gpkg';
 import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 import { FileValidator } from './fileValidator';
 import { SplitTilesTasker } from './splitTilesTasker';
@@ -22,6 +24,8 @@ import { SplitTilesTasker } from './splitTilesTasker';
 export class LayersManager {
   private readonly tileSplitTask: string;
   private readonly tileMergeTask: string;
+  private grids: Grid[] = [];
+
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
     private readonly zoomLevelCalculator: ZoomLevelCalculator,
@@ -43,6 +47,9 @@ export class LayersManager {
     const productType = data.metadata.productType as ProductType;
     const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
     const originDirectory = data.originDirectory;
+    const files = data.fileNames;
+    const polygon = data.metadata.footprint;
+    const extent = getExtents(polygon as GeoJSON);
 
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
@@ -51,7 +58,7 @@ export class LayersManager {
     await this.validateJobNotRunning(resourceId, productType);
 
     const jobType = await this.getJobType(data);
-    const taskType = this.getTaskType(jobType, data.fileNames, originDirectory);
+    const taskType = this.getTaskType(jobType, files, originDirectory);
 
     const existsInMapProxy = await this.isExistsInMapProxy(resourceId, productType);
 
@@ -66,7 +73,7 @@ export class LayersManager {
       this.setDefaultValues(data);
 
       if (taskType === TaskType.MERGE_TILES) {
-        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType);
+        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
       } else {
         const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
         await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
@@ -77,7 +84,7 @@ export class LayersManager {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
 
-      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType);
+      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
     } else {
       throw new BadRequestError('Unsupported job type');
     }
@@ -104,6 +111,9 @@ export class LayersManager {
 
   private getTaskType(jobType: JobType, files: string[], originDirectory: string): string {
     const validGpkgFiles = this.fileValidator.validateGpkgFiles(files, originDirectory);
+    if (validGpkgFiles) {
+      this.grids = getGrids(files, originDirectory);
+    }
 
     if (jobType === JobType.NEW) {
       if (validGpkgFiles) {
