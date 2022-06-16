@@ -101,7 +101,12 @@ export class MergeTilesTasker {
                   type: sourceType,
                   path: layer.tilesPath,
                   grid: params.grids[index],
-                  extent: params.extent,
+                  extent: {
+                    minX: params.extent[0],
+                    minY: params.extent[1],
+                    maxX: params.extent[2],
+                    maxY: params.extent[3],
+                  },
                 };
                 return sourceParams;
               })
