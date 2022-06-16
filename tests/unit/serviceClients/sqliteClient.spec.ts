@@ -24,7 +24,7 @@ describe('SQLClient', () => {
       setValue({ layerSourceDir: 'tests/mocks' });
       const mockMatrixValues = { matrixWidth: 400, matrixHeight: 200 };
       const prepareSpy = jest.spyOn(Database.prototype, 'prepare');
-      prepareSpy.mockImplementation((test: string) => {
+      prepareSpy.mockImplementation(() => {
         return { get: () => mockMatrixValues } as Statement;
       });
 
@@ -38,7 +38,7 @@ describe('SQLClient', () => {
       setValue({ layerSourceDir: 'tests/mocks' });
       const mockMatrixValues = { matrixWidth: 200, matrixHeight: 200 };
       const prepareSpy = jest.spyOn(Database.prototype, 'prepare');
-      prepareSpy.mockImplementation((test: string) => {
+      prepareSpy.mockImplementation(() => {
         return { get: () => mockMatrixValues } as Statement;
       });
 
@@ -52,7 +52,7 @@ describe('SQLClient', () => {
       setValue({ layerSourceDir: 'tests/mocks' });
       const mockMatrixValues = { matrixWidth: 400, matrixHeight: 1 };
       const prepareSpy = jest.spyOn(Database.prototype, 'prepare');
-      prepareSpy.mockImplementation((test: string) => {
+      prepareSpy.mockImplementation(() => {
         return { get: () => mockMatrixValues } as Statement;
       });
 
