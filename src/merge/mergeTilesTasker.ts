@@ -9,12 +9,13 @@ import {
   snapBBoxToTileGrid,
   degreesPerPixelToZoomLevel,
 } from '@map-colonies/mc-utils';
-import { difference, union, bbox as toBbox, bboxPolygon, Feature, Polygon } from '@turf/turf';
+import { difference, union, bbox as toBbox, bboxPolygon, Feature, Polygon, BBox } from '@turf/turf';
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
 import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams, ILogger, IMergeSources } from '../common/interfaces';
 import { JobManagerClient } from '../serviceClients/jobManagerClient';
+import { Grid } from '../layers/interfaces';
 
 @singleton()
 export class MergeTilesTasker {
@@ -95,11 +96,14 @@ export class MergeTilesTasker {
                 path: params.destPath,
               },
             ].concat(
-              overlap.layers.map<IMergeSources>((layer) => {
-                return {
+              overlap.layers.map<IMergeSources>((layer, index) => {
+                const sourceParams: IMergeSources = {
                   type: sourceType,
                   path: layer.tilesPath,
+                  grid: params.grids[index],
+                  extent: params.extent,
                 };
+                return sourceParams;
               })
             ),
           };
@@ -108,7 +112,14 @@ export class MergeTilesTasker {
     }
   }
 
-  public async createMergeTilesTasks(data: IngestionParams, layerRelativePath: string, taskType: string, jobType: string): Promise<void> {
+  public async createMergeTilesTasks(
+    data: IngestionParams,
+    layerRelativePath: string,
+    taskType: string,
+    jobType: string,
+    grids: Grid[],
+    extent: BBox
+  ): Promise<void> {
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
       const fileFullPath = join(this.sourceDir, fileName);
       const footprint = data.metadata.footprint;
@@ -123,6 +134,8 @@ export class MergeTilesTasker {
       layers: layers,
       destPath: layerRelativePath,
       maxZoom: maxZoom,
+      grids: grids,
+      extent,
     };
     const mergeTasksParams = this.createBatchedTasks(params);
     let mergeTaskBatch: IMergeTaskParams[] = [];
