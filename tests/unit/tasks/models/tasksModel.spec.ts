@@ -213,14 +213,20 @@ describe('TasksManager', () => {
         metadataMergerMock
       );
 
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      const tasksManagerWithHandlers = tasksManager as unknown as { handleUpdateIngestion: () => {}; handleNewIngestion: () => {} };
+      const handleUpdateIngestionSpy = jest.spyOn(tasksManagerWithHandlers, 'handleUpdateIngestion');
+      const handleNewIngestionSpy = jest.spyOn(tasksManagerWithHandlers, 'handleNewIngestion');
       await tasksManager.taskComplete(jobId, taskId);
 
       expect(abortJobMock).toHaveBeenCalledTimes(1);
       expect(updateJobStatusMock).toHaveBeenCalledTimes(1);
       expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.FAILED, `Failed to update ingestion`);
+      expect(handleUpdateIngestionSpy).toHaveBeenCalledTimes(1);
+      expect(handleNewIngestionSpy).toHaveBeenCalledTimes(0);
     });
 
-    it('should complete job once all tasks are successful', async function () {
+    it('should complete job once all tasks are successful for update-merge job-task', async function () {
       setValue('ingestionUpdateJobType', ingestionUpdateJobType);
       setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });
 
@@ -234,7 +240,7 @@ describe('TasksManager', () => {
         relativePath: `test/${ProductType.RASTER_MAP}`,
         metadata: rasterMapTestData,
         type: ingestionUpdateJobType,
-        successTasksCount: 0,
+        successTasksCount: 3,
       });
 
       getTaskMock.mockReturnValue({
@@ -267,6 +273,7 @@ describe('TasksManager', () => {
       expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.COMPLETED, undefined, catalogRecordId);
       expect(mergeMock).toHaveBeenCalledTimes(1);
       expect(updateMock).toHaveBeenCalledTimes(1);
+      expect(findRecordMock).toHaveBeenCalledTimes(1);
     });
   });
 });
