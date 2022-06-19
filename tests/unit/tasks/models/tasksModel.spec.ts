@@ -217,7 +217,7 @@ describe('TasksManager', () => {
 
       expect(abortJobMock).toHaveBeenCalledTimes(1);
       expect(updateJobStatusMock).toHaveBeenCalledTimes(1);
-      expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.FAILED);
+      expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.FAILED, `Failed to update ingestion`);
     });
 
     it('should complete job once all tasks are successful', async function () {
