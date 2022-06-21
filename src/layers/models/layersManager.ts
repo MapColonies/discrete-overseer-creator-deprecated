@@ -72,7 +72,7 @@ export class LayersManager {
 
       this.setDefaultValues(data);
 
-      if (taskType === TaskType.MERGE_TILES) {
+      if (taskType === TaskAction.MERGE_TILES) {
         await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
       } else {
         const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
