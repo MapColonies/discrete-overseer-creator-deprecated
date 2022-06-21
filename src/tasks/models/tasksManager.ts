@@ -131,7 +131,7 @@ export class TasksManager {
   }
 
   private async handleUpdateIngestion(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
-    if (task.status === OperationStatus.FAILED) {
+    if (task.status === OperationStatus.FAILED && job.status !== OperationStatus.FAILED) {
       await this.abortJobWithStatusFailed(job.id, `Failed to update ingestion`);
     } else if (task.status === OperationStatus.COMPLETED) {
       const catalogRecord = await this.catalogClient.findRecord(

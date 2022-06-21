@@ -193,6 +193,7 @@ describe('TasksManager', () => {
         relativePath: `test/${ProductType.RASTER_MAP}`,
         metadata: rasterMapTestData,
         type: ingestionUpdateJobType,
+        status: OperationStatus.IN_PROGRESS,
       });
 
       getTaskMock.mockReturnValue({
