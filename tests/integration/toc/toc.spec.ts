@@ -1,7 +1,7 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { registerTestValues } from '../testContainerConfig';
-import { getMetadataFromCatalogMock } from '../../mocks/clients/catalogClient';
+import { findRecordMock } from '../../mocks/clients/catalogClient';
 import { NotFoundError } from '../../../src/common/exceptions/http/notFoundError';
 import { InternalServerError } from '../../../src/common/exceptions/http/internalServerError';
 import * as requestSender from './helpers/requestSender';
@@ -24,7 +24,7 @@ describe('toc', function () {
 
   describe('Happy Path', function () {
     it('should return 200 status code when expecting json response', async function () {
-      getMetadataFromCatalogMock.mockImplementation(() => {
+      findRecordMock.mockImplementation(() => {
         return validTestImageMetadata;
       });
 
@@ -37,7 +37,7 @@ describe('toc', function () {
     });
 
     it('should return 200 status code when expecting xml response', async function () {
-      getMetadataFromCatalogMock.mockImplementation(() => {
+      findRecordMock.mockImplementation(() => {
         return validTestImageMetadata;
       });
 
@@ -63,7 +63,7 @@ describe('toc', function () {
   describe('Sad Path', function () {
     // All requests with status code 4XX-5XX
     it('should return 404 if requsted layer does not exist', async function () {
-      getMetadataFromCatalogMock.mockImplementation(() => {
+      findRecordMock.mockImplementation(() => {
         throw new NotFoundError('test error');
       });
 
@@ -74,7 +74,7 @@ describe('toc', function () {
     });
 
     it('should return 500 status code on db error', async function () {
-      getMetadataFromCatalogMock.mockImplementation(() => {
+      findRecordMock.mockImplementation(() => {
         throw new InternalServerError('test error');
       });
       const response = await requestSender.getMetadata(validTestData);

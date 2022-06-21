@@ -10,12 +10,24 @@ import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { OperationTypeEnum, SyncClient } from '../../serviceClients/syncClient';
+import { MetadataMerger } from '../../update/metadataMerger';
+import { ICompletedTasks, IGetTaskResponse } from '../interfaces';
+import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ILinkBuilderData, LinkBuilder } from './linksBuilder';
+
+interface IngestionTaskTypes {
+  tileMergeTask: string;
+  tileSplitTask: string;
+}
 
 @injectable()
 export class TasksManager {
   private readonly mapServerUrl: string;
   private readonly cacheType: PublishedMapLayerCacheType;
+  private readonly shouldSync: boolean;
+  private readonly ingestionNewJobType: string;
+  private readonly ingestionUpdateJobType: string;
+  private readonly ingestionTaskType: IngestionTaskTypes;
 
   public constructor(
     @inject(Services.LOGGER) private readonly logger: ILogger,
@@ -24,51 +36,35 @@ export class TasksManager {
     private readonly jobManager: JobManagerClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly catalogClient: CatalogClient,
-    private readonly linkBuilder: LinkBuilder
+    private readonly linkBuilder: LinkBuilder,
+    private readonly metadataMerger: MetadataMerger
   ) {
     this.mapServerUrl = config.get<string>('publicMapServerURL');
     const mapServerCacheType = config.get<string>('mapServerCacheType');
+    this.shouldSync = config.get<boolean>('shouldSync');
+    this.ingestionNewJobType = config.get<string>('ingestionNewJobType');
+    this.ingestionUpdateJobType = config.get<string>('ingestionUpdateJobType');
+    this.ingestionTaskType = config.get<IngestionTaskTypes>('ingestionTaskType');
     this.cacheType = this.getCacheType(mapServerCacheType);
   }
 
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
-    this.logger.log('info', `[TasksManager][taskComplete] checking tiling status of job ${jobId} task  ${taskId}`);
-    const res = await this.jobManager.getCompletedZoomLevels(jobId);
-    if (res.status != OperationStatus.FAILED && res.completed) {
-      if (res.successful) {
-        const layerName = getMapServingLayerName(res.metadata.productId as string, res.metadata.productType as ProductType);
-        await this.publishToMappingServer(jobId, res.metadata, layerName, res.relativePath);
-        const catalogId = await this.publishToCatalog(jobId, res.metadata, layerName);
+    const job = await this.jobManager.getJobStatus(jobId);
+    const task = await this.jobManager.getTask(jobId, taskId);
 
-        await this.jobManager.updateJobStatus(jobId, OperationStatus.COMPLETED, undefined, catalogId);
-
-        const shouldSync = this.config.get<boolean>('shouldSync');
-
-        if (shouldSync) {
-          try {
-            await this.syncClient.triggerSync(
-              res.metadata.productId as string,
-              res.metadata.productVersion as string,
-              res.metadata.productType as ProductType,
-              OperationTypeEnum.ADD,
-              res.relativePath
-            );
-          } catch (err) {
-            this.logger.log(
-              'error',
-              `[TasksManager][taskComplete] failed to trigger sync productId ${res.metadata.productId as string} productVersion ${
-                res.metadata.productVersion as string
-              }. error=${(err as Error).message}`
-            );
-          }
-        }
-      } else if (res.status != OperationStatus.ABORTED && res.status != OperationStatus.EXPIRED) {
-        this.logger.log(
-          'error',
-          `[TasksManager][taskComplete] failed to generate tiles for job ${jobId} task  ${taskId}. please check discrete worker logs from more info`
-        );
-        await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to generate tiles');
-      }
+    if (job.type === this.ingestionUpdateJobType && task.type === this.ingestionTaskType.tileMergeTask) {
+      this.logger.log(`info`, `[TasksManager][taskComplete] Completing Ingestion-Update job with jobId ${jobId} and taskId ${taskId}.`);
+      await this.handleUpdateIngestion(job, task);
+    } else if (
+      (task.type === this.ingestionTaskType.tileMergeTask || task.type === this.ingestionTaskType.tileSplitTask) &&
+      job.type === this.ingestionNewJobType
+    ) {
+      this.logger.log(`info`, `[TasksManager][taskComplete] Completing Ingestion-New job with jobId ${jobId} and taskId ${taskId}.`);
+      await this.handleNewIngestion(job, task);
+    } else {
+      throw new BadRequestError(
+        `[TasksManager][taskComplete] Could not complete task. Job type "${job.type}" and task type "${task.type}" combination isn't supported.`
+      );
     }
   }
 
@@ -125,5 +121,71 @@ export class TasksManager {
       }
     }
     return cacheType;
+  }
+
+  private async abortJobWithStatusFailed(jobId: string, reason?: string): Promise<void> {
+    this.logger.log(`info`, `Aborting job with ID ${jobId}`);
+    await this.jobManager.abortJob(jobId);
+    this.logger.log(`info`, `Updating job ${jobId} with status ${OperationStatus.FAILED}`);
+    await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, reason);
+  }
+
+  private async handleUpdateIngestion(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
+    if (task.status === OperationStatus.FAILED && job.status !== OperationStatus.FAILED) {
+      await this.abortJobWithStatusFailed(job.id, `Failed to update ingestion`);
+    } else if (task.status === OperationStatus.COMPLETED) {
+      const catalogRecord = await this.catalogClient.findRecord(
+        job.metadata.productId as string,
+        job.metadata.productVersion as string,
+        job.metadata.productType as string
+      );
+
+      this.logger.log(
+        `debug`,
+        `Merging metadata of ${job.id}: ${JSON.stringify(job.metadata)} with metadata from catalog record ${
+          catalogRecord?.id as string
+        }: ${JSON.stringify(catalogRecord?.metadata)}`
+      );
+      const mergedData = this.metadataMerger.merge(job.metadata, catalogRecord?.metadata as LayerMetadata);
+      this.logger.log(`info`, `Updating catalog record ${catalogRecord?.id as string} with new metadata`);
+      await this.catalogClient.update(catalogRecord?.id as string, mergedData);
+
+      if (job.isSuccessful) {
+        this.logger.log(`info`, `Updating status of job ${job.id} to be ${OperationStatus.COMPLETED}`);
+        await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, undefined, catalogRecord?.id);
+      }
+    }
+  }
+
+  private async handleNewIngestion(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
+    if (task.status === OperationStatus.FAILED && job.status !== OperationStatus.FAILED) {
+      await this.abortJobWithStatusFailed(job.id, `Failed to generate tiles`);
+    } else if (job.isSuccessful) {
+      const layerName = getMapServingLayerName(job.metadata.productId as string, job.metadata.productType as ProductType);
+      this.logger.log(`debug`, `[TasksManager][handleNewIngestion] Layer name to be published to map serveris "${layerName}"`);
+      await this.publishToMappingServer(job.id, job.metadata, layerName, job.relativePath);
+      const catalogId = await this.publishToCatalog(job.id, job.metadata, layerName);
+
+      await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, undefined, catalogId);
+
+      if (this.shouldSync) {
+        try {
+          await this.syncClient.triggerSync(
+            job.metadata.productId as string,
+            job.metadata.productVersion as string,
+            job.metadata.productType as ProductType,
+            OperationTypeEnum.ADD,
+            job.relativePath
+          );
+        } catch (err) {
+          this.logger.log(
+            'error',
+            `[TasksManager][handleNewIngestion] failed to trigger sync productId ${job.metadata.productId as string} productVersion ${
+              job.metadata.productVersion as string
+            }. error=${(err as Error).message}`
+          );
+        }
+      }
+    }
   }
 }

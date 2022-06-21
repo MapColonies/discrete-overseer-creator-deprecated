@@ -3,7 +3,7 @@ import { GeoJSON } from 'geojson';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
-import { JobType, OperationStatus, TaskType } from '../../common/enums';
+import { JobAction, OperationStatus, TaskAction } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { ILogger } from '../../common/interfaces';
@@ -64,7 +64,7 @@ export class LayersManager {
 
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
 
-    if (jobType === JobType.NEW) {
+    if (jobType === JobAction.NEW) {
       await this.validateNotExistsInCatalog(resourceId, version, productType);
       if (existsInMapProxy) {
         throw new ConflictError(`layer '${resourceId}-${productType}', is already exists on MapProxy`);
@@ -72,14 +72,14 @@ export class LayersManager {
 
       this.setDefaultValues(data);
 
-      if (taskType === TaskType.MERGE_TILES) {
+      if (taskType === TaskAction.MERGE_TILES) {
         await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
       } else {
         const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
         await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
       }
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (jobType === JobType.UPDATE) {
+    } else if (jobType === JobAction.UPDATE) {
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
@@ -90,32 +90,32 @@ export class LayersManager {
     }
   }
 
-  private async getJobType(data: IngestionParams): Promise<JobType> {
+  private async getJobType(data: IngestionParams): Promise<JobAction> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
     const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
 
     if (!(Array.isArray(existsLayerVersions) && existsLayerVersions.length > 0)) {
-      return JobType.NEW;
+      return JobAction.NEW;
     }
     const highestExistsLayerVersion = Math.max(...existsLayerVersions);
     const requestedLayerVersion = parseFloat(version);
     if (requestedLayerVersion > highestExistsLayerVersion) {
-      return JobType.UPDATE;
+      return JobAction.UPDATE;
     }
     throw new BadRequestError(
       `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same or higher version (${highestExistsLayerVersion}) in catalog`
     );
   }
 
-  private getTaskType(jobType: JobType, files: string[], originDirectory: string): string {
+  private getTaskType(jobType: JobAction, files: string[], originDirectory: string): string {
     const validGpkgFiles = this.fileValidator.validateGpkgFiles(files, originDirectory);
     if (validGpkgFiles) {
       this.grids = getGrids(files, originDirectory);
     }
 
-    if (jobType === JobType.NEW) {
+    if (jobType === JobAction.NEW) {
       if (validGpkgFiles) {
         return this.tileMergeTask;
       } else {
