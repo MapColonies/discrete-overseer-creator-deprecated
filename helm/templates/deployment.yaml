@@ -48,6 +48,9 @@ spec:
           {{- if .Values.rasterCommon.storage.fs.ingestionSourcePvc.enabled }}
             - name: ingestion-storage
               mountPath: /layerSources
+              {{- if .Values.rasterCommon.storage.fs.ingestionSourcePvc.subPath }}
+              subPath: {{ .Values.rasterCommon.storage.fs.ingestionSourcePvc.subPath }}
+              {{- end }}
           {{- end }}
             - name: link-templates
               mountPath: {{ .Values.env.linksTemplate.mountPath }}/{{ .Values.env.linksTemplate.fileName }}
