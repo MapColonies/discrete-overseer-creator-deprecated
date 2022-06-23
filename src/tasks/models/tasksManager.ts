@@ -1,6 +1,5 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
-import { degreesPerPixelToZoomLevel } from '@map-colonies/mc-utils';
 import { Services } from '../../common/constants';
 import { OperationStatus, MapServerCacheType } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
@@ -91,10 +90,8 @@ export class TasksManager {
     const version = metadata.productVersion as string;
     try {
       this.logger.log('info', `[TasksManager][publishToMappingServer] layer ${id} version  ${version}`);
-      const maxZoom = degreesPerPixelToZoomLevel(metadata.maxResolutionDeg as number);
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
-        maxZoomLevel: maxZoom,
         tilesPath: relativePath,
         cacheType: this.cacheType,
       };

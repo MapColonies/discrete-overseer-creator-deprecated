@@ -3,7 +3,6 @@ import { BBox } from '@turf/helpers';
 export interface IPublishMapLayerRequest {
   name: string;
   tilesPath: string;
-  maxZoomLevel: number;
   cacheType: PublishedMapLayerCacheType;
 }
 
