@@ -37,7 +37,6 @@ describe('TasksManager', () => {
     };
 
     const mapPublishReq = {
-      maxZoomLevel: 18,
       name: `test-${testMetadata.productType}`,
       tilesPath: `test/${testMetadata.productType}`,
       cacheType: 'file',

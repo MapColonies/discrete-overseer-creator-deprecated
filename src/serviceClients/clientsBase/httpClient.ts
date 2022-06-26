@@ -37,7 +37,8 @@ export abstract class HttpClient {
       const res = await this.axiosClient.get<T>(url, reqConfig);
       return res.data;
     } catch (err) {
-      const error = this.wrapError(url, err);
+      const baseError = err as AxiosError;
+      const error = this.wrapError(url, baseError);
       throw error;
     }
   }
@@ -48,7 +49,8 @@ export abstract class HttpClient {
       const res = await this.axiosClient.post<T>(url, body, reqConfig);
       return res.data;
     } catch (err) {
-      const error = this.wrapError(url, err, body);
+      const baseError = err as AxiosError;
+      const error = this.wrapError(url, baseError, body);
       throw error;
     }
   }
@@ -59,7 +61,8 @@ export abstract class HttpClient {
       const res = await this.axiosClient.put<T>(url, body, reqConfig);
       return res.data;
     } catch (err) {
-      const error = this.wrapError(url, err, body);
+      const baseError = err as AxiosError;
+      const error = this.wrapError(url, baseError, body);
       throw error;
     }
   }
