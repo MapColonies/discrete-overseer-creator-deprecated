@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.4](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.1.3...v3.1.4) (2022-06-26)
+
+
+### Bug Fixes
+
+* remove maxZoomLevel param ([#147](https://github.com/MapColonies/discrete-overseer-creator/issues/147)) ([b3ede12](https://github.com/MapColonies/discrete-overseer-creator/commit/b3ede122f492692df7cc756183b180bd264ee029))
+
 ### [3.1.3](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.1.2...v3.1.3) (2022-06-26)
 
 ### [3.1.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.1.1...v3.1.2) (2022-06-26)
