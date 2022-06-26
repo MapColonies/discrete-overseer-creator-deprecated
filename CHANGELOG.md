@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.3](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.1.2...v3.1.3) (2022-06-26)
+
+### [3.1.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.1.1...v3.1.2) (2022-06-26)
+
+### [3.1.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.1.0...v3.1.1) (2022-06-26)
+
+
+### Bug Fixes
+
+* fix dependencies ([#143](https://github.com/MapColonies/discrete-overseer-creator/issues/143)) ([06ef0f3](https://github.com/MapColonies/discrete-overseer-creator/commit/06ef0f34a0d1653f14f349326dfcb520630170a0))
+* job-management configuration ([#144](https://github.com/MapColonies/discrete-overseer-creator/issues/144)) ([80e8e97](https://github.com/MapColonies/discrete-overseer-creator/commit/80e8e976b37309686ffa1c701414c41bbc36dfc8))
+* merge api ([#141](https://github.com/MapColonies/discrete-overseer-creator/issues/141)) ([3c23220](https://github.com/MapColonies/discrete-overseer-creator/commit/3c232205a80dc6ded091cd9836a10283e1065734))
+
 ## [3.1.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.0.2...v3.1.0) (2022-04-27)
 
 ### [3.0.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.0.1...v3.0.2) (2022-04-25)
