@@ -47,6 +47,7 @@ image:
   repository: discrete-overseer-creator
   tag: 'latest'
 
+enableWMS: false
 env:
   port: 80
   targetPort: 8080

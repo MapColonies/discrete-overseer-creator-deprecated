@@ -1,20 +1,22 @@
 [
+  {{- if .Values.enableWMS }}
   {
-    "name": "{{layerName}}",
+    "name": "{{ "{{layerName}}" }}",
     "description": "",
     "protocol": "WMS",
-    "url": "{{serverUrl}}/service?REQUEST=GetCapabilities"
+    "url": "{{ "{{serverUrl}}" }}/service?REQUEST=GetCapabilities"
   },
+  {{- end }}
   {
-    "name": "{{layerName}}",
+    "name": "{{ "{{layerName}}" }}",
     "description": "",
     "protocol": "WMTS",
-    "url": "{{serverUrl}}/wmts/1.0.0/WMTSCapabilities.xml"
+    "url": "{{ "{{serverUrl}}" }}/wmts/1.0.0/WMTSCapabilities.xml"
   },
   {
-    "name": "{{layerName}}",
+    "name": "{{ "{{layerName}}" }}",
     "description": "",
     "protocol": "WMTS_LAYER",
-    "url": "{{serverUrl}}/wmts/{{layerName}}/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}.png"
+    "url": "{{ "{{serverUrl}}" }}/wmts/{{ "{{layerName}}" }}/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}.png"
   }
 ]
