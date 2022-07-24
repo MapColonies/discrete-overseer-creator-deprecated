@@ -12,7 +12,6 @@ export class MetadataMerger {
     const newMetadata: LayerMetadata = {
       ...oldMetadata,
       productVersion: updateMetadata.productVersion,
-      updateDate: new Date(),
       sourceDateStart:
         (oldMetadata.sourceDateStart as Date) <= (updateMetadata.sourceDateStart as Date)
           ? oldMetadata.sourceDateStart
