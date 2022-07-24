@@ -10,7 +10,7 @@ import { setValue, clear as clearConfig } from '../../mocks/config';
 import { OperationStatus } from '../../../src/common/enums';
 import * as requestSender from './helpers/requestSender';
 
-const validTestImageMetadata: LayerMetadata = {
+const validTestImageMetadata = {
   productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   productVersion: '1.23',
   productName: 'test layer',
@@ -30,7 +30,6 @@ const validTestImageMetadata: LayerMetadata = {
   },
   scale: 100,
   rms: 2.6,
-  updateDate: new Date('11/16/2017'),
   maxResolutionDeg: 0.007,
   sensors: ['RGB'],
   classification: 'test',
@@ -50,7 +49,7 @@ const validTestImageMetadata: LayerMetadata = {
   maxResolutionMeter: 0.2,
   productBoundingBox: undefined,
   rawProductData: undefined,
-};
+} as unknown as LayerMetadata;
 const validTestData = {
   fileNames: [],
   metadata: validTestImageMetadata,

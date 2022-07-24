@@ -22,7 +22,6 @@ export const layerMetadataToPolygonParts = (metadata: LayerMetadata): GeoJSON =>
           Resolution: metadata.maxResolutionDeg?.toString(),
           SensorType: metadata.sensors?.join(',') ?? '',
           SourceName: metadata.productName,
-          UpdateDate: new Date(metadata.sourceDateEnd as Date).toLocaleDateString('en-GB'),
           /* eslint-enable @typescript-eslint/naming-convention */
         },
       },

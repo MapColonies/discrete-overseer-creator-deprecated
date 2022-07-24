@@ -15,7 +15,7 @@ import { createMergeTilesTasksMock, mergeTilesTasker } from '../../../mocks/merg
 
 let layersManager: LayersManager;
 
-const testImageMetadata: LayerMetadata = {
+const testImageMetadata = {
   productId: 'test',
   productVersion: '3.0',
   productName: 'test name',
@@ -25,7 +25,6 @@ const testImageMetadata: LayerMetadata = {
   rms: 0.5,
   scale: 3,
   sensors: ['OTHER', 'Test'],
-  updateDate: new Date('01/01/2020'),
   footprint: {
     type: 'Polygon',
     coordinates: [
@@ -55,7 +54,7 @@ const testImageMetadata: LayerMetadata = {
   maxResolutionMeter: 0.2,
   productBoundingBox: undefined,
   rawProductData: undefined,
-};
+} as unknown as LayerMetadata;
 const layerRelativePath = 'test/OrthophotoHistory';
 const testData: IngestionParams = {
   fileNames: [],

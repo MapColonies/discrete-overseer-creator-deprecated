@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { ProductType, RecordType } from '@map-colonies/mc-model-types';
+import { LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import xmlbuilder from 'xmlbuilder';
 import { IFindResponseRecord } from '../../../../src/common/interfaces';
 import { ITocParams, TocOperation } from '../../../../src/toc/interfaces';
@@ -37,7 +37,6 @@ export const validTestImageMetadata: IFindResponseRecord = {
     producerName: 'testProducer',
     creationDate: new Date('11/16/2017'),
     ingestionDate: new Date('11/16/2017'),
-    updateDate: new Date('11/16/2017'),
     sourceDateEnd: new Date('11/16/2017'),
     sourceDateStart: new Date('11/16/2017'),
     layerPolygonParts: undefined,
@@ -46,7 +45,7 @@ export const validTestImageMetadata: IFindResponseRecord = {
     maxResolutionMeter: 0.2,
     productBoundingBox: undefined,
     rawProductData: undefined,
-  },
+  } as unknown as LayerMetadata,
 };
 
 export const validTestData: ITocParams = {

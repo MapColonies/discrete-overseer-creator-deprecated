@@ -8,7 +8,7 @@ describe('SplitTilesTasker', () => {
   let splitTilesTasker: SplitTilesTasker;
   let generateTasksParametersSpy: jest.SpyInstance;
 
-  const testImageMetadata: LayerMetadata = {
+  const testImageMetadata = {
     productId: 'test',
     productVersion: '1.22',
     productName: 'test name',
@@ -18,7 +18,6 @@ describe('SplitTilesTasker', () => {
     rms: 0.5,
     scale: 3,
     sensors: ['OTHER', 'Test'],
-    updateDate: new Date('01/01/2020'),
     footprint: {
       type: 'Polygon',
       coordinates: [
@@ -48,7 +47,7 @@ describe('SplitTilesTasker', () => {
     maxResolutionMeter: 0.2,
     productBoundingBox: undefined,
     rawProductData: undefined,
-  };
+  } as unknown as LayerMetadata;
 
   const testData: IngestionParams = {
     fileNames: ['file.test'],
