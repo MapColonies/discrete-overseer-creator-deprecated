@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.1.4...v3.2.0) (2022-07-24)
+
+
+### Features
+
+* allowed removing wms from links ([#149](https://github.com/MapColonies/discrete-overseer-creator/issues/149)) ([12910b4](https://github.com/MapColonies/discrete-overseer-creator/commit/12910b4c1885ce3048a95973d264f604644e1564))
+
+
+### Bug Fixes
+
+* node extra certs value ([#148](https://github.com/MapColonies/discrete-overseer-creator/issues/148)) ([0ee0c19](https://github.com/MapColonies/discrete-overseer-creator/commit/0ee0c193d8d5c0e827493fc0d54c0e157af67e88))
+* remove unused updateDate param ([#151](https://github.com/MapColonies/discrete-overseer-creator/issues/151)) ([ce58564](https://github.com/MapColonies/discrete-overseer-creator/commit/ce58564afb274f64ea24949db382caa7ec02f84b))
+
 ### [3.1.4](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.1.3...v3.1.4) (2022-06-26)
 
 

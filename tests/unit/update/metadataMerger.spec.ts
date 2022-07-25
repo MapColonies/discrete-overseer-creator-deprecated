@@ -34,7 +34,7 @@ describe('MetadataMerger', () => {
     delete feat.bbox;
   });
   const baseRawProductData = featureCollection([bboxPolygon([0, 0, 5, 5])]);
-  const baseMetadata: LayerMetadata = {
+  const baseMetadata = {
     minHorizontalAccuracyCE90: 5,
     classification: '4',
     creationDate: new Date(1, 1, 1),
@@ -60,10 +60,9 @@ describe('MetadataMerger', () => {
     srsId: 'EPSG:4326',
     srsName: 'wgs84',
     type: RecordType.RECORD_RASTER,
-    updateDate: new Date(1, 1, 5),
     rms: undefined,
     scale: undefined,
-  };
+  } as unknown as LayerMetadata;
 
   const updateFootprint = bboxPolygon([4, 3, 7, 7]);
   delete updateFootprint.bbox;
@@ -80,7 +79,7 @@ describe('MetadataMerger', () => {
     delete feat.bbox;
   });
   const updateRawProductData = featureCollection([bboxPolygon([4, 4, 7, 7])]);
-  const updateMetadata: LayerMetadata = {
+  const updateMetadata = {
     minHorizontalAccuracyCE90: 3,
     classification: '6',
     creationDate: new Date(2, 1, 1),
@@ -106,10 +105,9 @@ describe('MetadataMerger', () => {
     srsId: 'EPSG:4326',
     srsName: 'wgs84',
     type: RecordType.RECORD_RASTER,
-    updateDate: new Date(2, 1, 5),
     rms: undefined,
     scale: undefined,
-  };
+  } as unknown as LayerMetadata;
 
   const expectedFootprint = polygon([
     [
@@ -151,7 +149,7 @@ describe('MetadataMerger', () => {
   expectedPolygonParts.features.forEach((feat) => {
     delete feat.bbox;
   });
-  const expectedMetadata: LayerMetadata = {
+  const expectedMetadata = {
     minHorizontalAccuracyCE90: 5,
     classification: '4',
     creationDate: new Date(1, 1, 1),
@@ -177,10 +175,9 @@ describe('MetadataMerger', () => {
     srsId: 'EPSG:4326',
     srsName: 'wgs84',
     type: RecordType.RECORD_RASTER,
-    updateDate: new Date(3, 2, 1),
     rms: undefined,
     scale: undefined,
-  };
+  } as unknown as LayerMetadata;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date(3, 2, 1));
