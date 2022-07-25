@@ -14,6 +14,9 @@ metadata:
     component: {{ $chartName }}
     environment: {{ include "discrete-overseer-creator.environment" . }}
     release: {{ $releaseName }}
+    {{- if .Values.rasterCommon.useNodeAffinity }}
+    nodeAffinity: nodeAffinityPod
+    {{- end }}
     {{- include "discrete-overseer-creator.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -22,6 +25,9 @@ spec:
       app: {{ $chartName }}
       release: {{ $releaseName }}
       run: {{ $releaseName }}-{{ $chartName }}
+      {{- if .Values.rasterCommon.useNodeAffinity }}
+      nodeAffinity: nodeAffinityPod
+      {{- end }}
       {{- include "discrete-overseer-creator.selectorLabels" . | nindent 6 }}
   template:
     metadata:
@@ -29,6 +35,9 @@ spec:
         app: {{ $chartName }}
         release: {{ $releaseName }}
         run: {{ $releaseName }}-{{ $chartName }}
+        {{- if .Values.rasterCommon.useNodeAffinity }}
+        nodeAffinity: nodeAffinityPod
+        {{- end }}
         {{- include "discrete-overseer-creator.selectorLabels" . | nindent 8 }}
       {{- if .Values.resetOnConfigChange }}
       annotations:
