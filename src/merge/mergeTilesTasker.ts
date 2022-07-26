@@ -126,7 +126,7 @@ export class MergeTilesTasker {
     extent: BBox
   ): Promise<void> {
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
-      const fileFullPath = join(this.sourceDir, fileName);
+      const fileFullPath = join(data.originDirectory, fileName);
       const footprint = data.metadata.footprint;
       return {
         id: fileName,
