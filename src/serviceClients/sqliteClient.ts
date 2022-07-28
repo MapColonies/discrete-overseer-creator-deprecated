@@ -28,20 +28,11 @@ export class SQLiteClient {
     this.packageNameWithoutExtension = this.packageName.substring(0, this.packageName.indexOf('.'));
   }
 
-  public getGpkgIndex(): unknown {
+  public getGpkgIndex(): boolean {
     let db: SQLiteDB | undefined = undefined;
     try {
       db = new Database(this.fullPath, { fileMustExist: true });
-      const sql = `SELECT * 
-      FROM sqlite_master 
-        WHERE type = 'index' AND tbl_name='${this.packageNameWithoutExtension}' AND sql LIKE '%zoom_level%'
-         AND sql LIKE '%tile_column%'
-          AND sql LIKE '%tile_row%';`;
-
-      this.logger.log('debug', `Executing query ${sql} on DB ${this.fullPath}`);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const index = db.prepare(sql).get();
-      return index;
+      return this.getGpkgUniqueConstraintIndex(db) || this.getGpkgManualIndex(db);
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       throw new Error(`Failed to validate GPKG index: ${error}`);
@@ -77,5 +68,32 @@ export class SQLiteClient {
         db.close();
       }
     }
+  }
+
+  private getGpkgManualIndex(db: SQLiteDB): boolean {
+    const sql = `SELECT count(*) as count
+      FROM sqlite_master 
+        WHERE type = 'index' AND tbl_name='${this.packageNameWithoutExtension}' AND sql LIKE '%zoom_level%'
+         AND sql LIKE '%tile_column%'
+          AND sql LIKE '%tile_row%';`;
+
+    this.logger.log('debug', `Executing query ${sql} on DB ${this.fullPath}`);
+    const indexCount = (db.prepare(sql).get() as { count: number }).count;
+    return indexCount != 0;
+  }
+
+  private getGpkgUniqueConstraintIndex(db: SQLiteDB): boolean {
+    let sql = `SELECT name FROM pragma_index_list('${this.packageNameWithoutExtension}') WHERE "unique" = 1 AND origin = 'u';`;
+    this.logger.log('debug', `Executing query ${sql} on DB ${this.fullPath}`);
+    const indexes = db.prepare(sql).all() as { name: string }[];
+    for (const index of indexes) {
+      sql = `SELECT name FROM pragma_index_info('${index.name}');`;
+      this.logger.log('debug', `Executing query ${sql} on DB ${this.fullPath}`);
+      const cols = (db.prepare(sql).all() as { name: string }[]).map((c) => c.name);
+      if (cols.includes('tile_column') && cols.includes('tile_row') && cols.includes('zoom_level')) {
+        return true;
+      }
+    }
+    return false;
   }
 }
