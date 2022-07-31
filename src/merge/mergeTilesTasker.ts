@@ -70,6 +70,9 @@ export class MergeTilesTasker {
 
   public *createBatchedTasks(params: IMergeParameters): Generator<IMergeTaskParams> {
     const sourceType = this.config.get<string>('mapServerCacheType');
+    
+
+    // TODO: check files types here
     const bboxedLayers = params.layers.map((layer) => {
       const bbox = toBbox(layer.footprint) as [number, number, number, number];
       return {
