@@ -96,6 +96,41 @@ describe('layers', function () {
     });
   });
 
+  it('should return 200 status code for sending request with extra metadata fields', async function () {
+    findJobsMock.mockResolvedValue([]);
+    let exrtraFieldTestMetaData = { ...validTestData.metadata } as Record<string, unknown>;
+    exrtraFieldTestMetaData = { ...exrtraFieldTestMetaData, id: 'test id' };
+    const extraTestData = { ...validTestData, metadata: exrtraFieldTestMetaData };
+    const response = await requestSender.createLayer(extraTestData);
+    expect(response).toSatisfyApiSpec();
+    expect(response.status).toBe(httpStatusCodes.OK);
+    expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+    expect(findJobsMock).toHaveBeenCalledTimes(1);
+    expect(mapExistsMock).toHaveBeenCalledTimes(1);
+    expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+    expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+    expect(createLayerJobMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: {
+          ...validTestData.metadata,
+          productBoundingBox: '100,0,101,1',
+          layerPolygonParts: expect.anything(),
+          sourceDateEnd: expect.anything(),
+          sourceDateStart: expect.anything(),
+          ingestionDate: expect.anything(),
+          creationDate: expect.anything(),
+        },
+      }),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    );
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment */
+    expect(createTasksMock).toHaveBeenCalledTimes(3);
+  });
+
   it('should return 200 status code for indexed gpkg', async function () {
     getLayerVersionsMock.mockResolvedValue([]);
     findJobsMock.mockResolvedValue([]);
@@ -123,22 +158,6 @@ describe('layers', function () {
   describe('Bad Path', function () {
     // All requests with status code of 400
     it('should return 400 status code for invalid Test Data', async function () {
-      const response = await requestSender.createLayer(invalidTestData);
-      expect(response).toSatisfyApiSpec();
-
-      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
-      expect(findJobsMock).toHaveBeenCalledTimes(0);
-      expect(mapExistsMock).toHaveBeenCalledTimes(0);
-      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
-      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
-      expect(createTasksMock).toHaveBeenCalledTimes(0);
-    });
-
-    it('should return 400 status code for id field', async function () {
-      let invalidTestMetaDataHasId = { ...validTestData.metadata } as Record<string, unknown>;
-      invalidTestMetaDataHasId = { ...invalidTestMetaDataHasId, id: 'test id' };
-      const invalidTestData = { ...validTestData, metadata: invalidTestMetaDataHasId };
       const response = await requestSender.createLayer(invalidTestData);
       expect(response).toSatisfyApiSpec();
 
