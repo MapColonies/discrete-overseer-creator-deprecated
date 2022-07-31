@@ -46,7 +46,7 @@
     "@map-colonies/mc-logger": "^2.0.2",
     "@map-colonies/mc-model-types": "^12.1.0",
     "@map-colonies/mc-probe": "^1.0.0",
-    "@map-colonies/mc-utils": "^1.4.3",
+    "@map-colonies/mc-utils": "^1.4.6",
     "@map-colonies/storage-explorer-middleware": "^1.2.3",
     "@turf/turf": "^6.5.0",
     "axios": "^0.27.2",

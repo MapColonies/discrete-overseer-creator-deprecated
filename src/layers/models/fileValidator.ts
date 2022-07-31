@@ -51,7 +51,7 @@ export class FileValidator {
     }
     const validGpkgExt = '.gpkg';
     const allValid = files.every((file) => {
-      return path.extname(file) === validGpkgExt;
+      return path.extname(file).toLowerCase() === validGpkgExt;
     });
     return allValid;
   }
