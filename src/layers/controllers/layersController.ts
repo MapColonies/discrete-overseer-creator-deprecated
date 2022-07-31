@@ -16,8 +16,11 @@ export class LayersController {
 
   public createLayer: CreateLayerHandler = async (req, res, next) => {
     try {
-      const sourceRequest: IngestionParams = { fileNames: req.body.fileNames, originDirectory: req.body.originDirectory, metadata: req.body.metadata };
-      sourceRequest.metadata = filterLayerMetadata(sourceRequest.metadata);
+      const sourceRequest: IngestionParams = {
+        metadata: filterLayerMetadata(req.body.metadata),
+        originDirectory: req.body.originDirectory,
+        fileNames: req.body.fileNames,
+      };
       await this.manager.createLayer(sourceRequest);
       return res.sendStatus(httpStatus.OK);
     } catch (err) {
