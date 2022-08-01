@@ -97,8 +97,9 @@ export class MergeTilesTasker {
               },
             ].concat(
               overlap.layers.map<IMergeSources>((layer, index) => {
+                const fileType = layer.id.split('.').pop() as string;
                 const sourceParams: IMergeSources = {
-                  type: sourceType,
+                  type: fileType.toUpperCase(),
                   path: layer.tilesPath,
                   grid: params.grids[index],
                   extent: {
@@ -126,11 +127,11 @@ export class MergeTilesTasker {
     extent: BBox
   ): Promise<void> {
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
-      const fileFullPath = join(this.sourceDir, fileName);
+      const fileRelativePath = join(data.originDirectory, fileName);
       const footprint = data.metadata.footprint;
       return {
         id: fileName,
-        tilesPath: fileFullPath,
+        tilesPath: fileRelativePath,
         footprint: footprint,
       };
     });
