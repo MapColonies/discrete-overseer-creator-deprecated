@@ -151,7 +151,7 @@ export class JobManagerClient extends HttpClient {
       status: status,
       reason: reason,
       internalId: catalogId,
-      percentage: jobPercentage
+      percentage: jobPercentage,
     });
   }
 

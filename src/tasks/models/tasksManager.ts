@@ -50,9 +50,9 @@ export class TasksManager {
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
     const job = await this.jobManager.getJobStatus(jobId);
     const task = await this.jobManager.getTask(jobId, taskId);
-    
+
     await this.jobManager.updateJobStatus(job.id, OperationStatus.IN_PROGRESS, job.percentage);
-    
+
     if (job.type === this.ingestionUpdateJobType && task.type === this.ingestionTaskType.tileMergeTask) {
       this.logger.log(`info`, `[TasksManager][taskComplete] Completing Ingestion-Update job with jobId ${jobId} and taskId ${taskId}.`);
       await this.handleUpdateIngestion(job, task);
