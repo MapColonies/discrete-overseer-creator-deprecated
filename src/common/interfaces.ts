@@ -32,7 +32,7 @@ export interface IFindResponseRecord extends IRasterCatalogUpsertRequestBody {
 export type FindRecordResponse = IFindResponseRecord[];
 
 export interface ILayerMergeData {
-  id: string;
+  fileName: string;
   tilesPath: string;
   footprint?: GeoJSON;
 }

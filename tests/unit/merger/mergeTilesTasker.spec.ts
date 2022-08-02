@@ -1,6 +1,6 @@
 import { tilesGenerator } from '@map-colonies/mc-utils';
 import { bboxPolygon, polygon } from '@turf/turf';
-import { IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
+import { ILayerMergeData, IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
 import { Grid } from '../../../src/layers/interfaces';
 import { MergeTilesTasker } from '../../../src/merge/mergeTilesTasker';
 import { jobManagerClientMock } from '../../mocks/clients/jobManagerClient';
@@ -23,19 +23,19 @@ describe('MergeTilesTasker', () => {
 
   describe('createLayerOverLaps', () => {
     it('properly creates all overlaps', () => {
-      const layers = [
+      const layers: ILayerMergeData[] = [
         {
-          id: 'test1',
+          fileName: 'test1',
           tilesPath: 'test/tile1',
           footprint: bboxPolygon([-180, -90, 0, 90]),
         },
         {
-          id: 'test2',
+          fileName: 'test2',
           tilesPath: 'test/tile2',
           footprint: bboxPolygon([-180, -90, 90, 0]),
         },
         {
-          id: 'test3',
+          fileName: 'test3',
           tilesPath: 'test/tile3',
           footprint: bboxPolygon([-90, -90, 180, 90]),
         },
@@ -94,14 +94,14 @@ describe('MergeTilesTasker', () => {
 
   describe('createBatchedTasks', () => {
     it('has no duplicate tiles when tile is split to multiple sources', () => {
-      const layers = [
+      const layers: ILayerMergeData[] = [
         {
-          id: 'test1',
+          fileName: 'test1',
           tilesPath: 'test/tile1',
           footprint: bboxPolygon([-180, -90, 2.8125, 90]),
         },
         {
-          id: 'test2',
+          fileName: 'test2',
           tilesPath: 'test/tile2',
           footprint: bboxPolygon([2.8125, -90, 180, 90]),
         },
@@ -135,15 +135,15 @@ describe('MergeTilesTasker', () => {
     });
 
     it('generates all and only expected tiles', () => {
-      const layers = [
+      const layers: ILayerMergeData[] = [
         {
-          id: 'test1',
-          tilesPath: 'test/tile1',
+          fileName: 'test1.gpkg',
+          tilesPath: 'test/tile1.gpkg',
           footprint: bboxPolygon([-180, -90, 0, 90]),
         },
         {
-          id: 'test2',
-          tilesPath: 'test/tile2',
+          fileName: 'test2.gpkg',
+          tilesPath: 'test/tile2.gpkg',
           footprint: bboxPolygon([-180, -90, 90, 0]),
         },
       ];
@@ -160,23 +160,25 @@ describe('MergeTilesTasker', () => {
       for (const task of taskGen) {
         tasks.push(task);
       }
-      const mockSourceType = 'FS';
+
+      const destSourcePath = 'FS';
+      const filesSourceType = 'GPKG';
       const expectedTasks: IMergeTaskParams[] = [
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -186,12 +188,12 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -201,18 +203,18 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -222,18 +224,18 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -243,12 +245,12 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -258,12 +260,12 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -273,12 +275,12 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -292,15 +294,15 @@ describe('MergeTilesTasker', () => {
     });
 
     it('same footprint', () => {
-      const layers = [
+      const layers: ILayerMergeData[] = [
         {
-          id: 'test1',
-          tilesPath: 'test/tile1',
+          fileName: 'test1.gpkg',
+          tilesPath: 'test/tile1.gpkg',
           footprint: bboxPolygon([-180, -90, 0, 90]),
         },
         {
-          id: 'test2',
-          tilesPath: 'test/tile2',
+          fileName: 'test2.gpkg',
+          tilesPath: 'test/tile2.gpkg',
           footprint: bboxPolygon([-180, -90, 0, 90]),
         },
       ];
@@ -317,23 +319,24 @@ describe('MergeTilesTasker', () => {
       for (const task of taskGen) {
         tasks.push(task);
       }
-      const mockSourceType = 'FS';
+      const destSourcePath = 'FS';
+      const filesSourceType = 'GPKG';
       const expectedTasks: IMergeTaskParams[] = [
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -343,18 +346,18 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -364,18 +367,18 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -385,18 +388,18 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -406,18 +409,18 @@ describe('MergeTilesTasker', () => {
         {
           sources: [
             {
-              type: mockSourceType,
+              type: destSourcePath,
               path: 'test/dest',
             },
             {
-              type: mockSourceType,
-              path: 'test/tile1',
+              type: filesSourceType,
+              path: layers[0].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
-              type: mockSourceType,
-              path: 'test/tile2',
+              type: filesSourceType,
+              path: layers[1].tilesPath,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
