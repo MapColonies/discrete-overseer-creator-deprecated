@@ -1,6 +1,6 @@
 import { tilesGenerator } from '@map-colonies/mc-utils';
 import { bboxPolygon, polygon } from '@turf/turf';
-import { IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
+import { ILayerMergeData, IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
 import { Grid } from '../../../src/layers/interfaces';
 import { MergeTilesTasker } from '../../../src/merge/mergeTilesTasker';
 import { jobManagerClientMock } from '../../mocks/clients/jobManagerClient';
@@ -23,19 +23,19 @@ describe('MergeTilesTasker', () => {
 
   describe('createLayerOverLaps', () => {
     it('properly creates all overlaps', () => {
-      const layers = [
+      const layers: ILayerMergeData[] = [
         {
-          id: 'test1',
+          fileName: 'test1',
           tilesPath: 'test/tile1',
           footprint: bboxPolygon([-180, -90, 0, 90]),
         },
         {
-          id: 'test2',
+          fileName: 'test2',
           tilesPath: 'test/tile2',
           footprint: bboxPolygon([-180, -90, 90, 0]),
         },
         {
-          id: 'test3',
+          fileName: 'test3',
           tilesPath: 'test/tile3',
           footprint: bboxPolygon([-90, -90, 180, 90]),
         },
@@ -94,14 +94,14 @@ describe('MergeTilesTasker', () => {
 
   describe('createBatchedTasks', () => {
     it('has no duplicate tiles when tile is split to multiple sources', () => {
-      const layers = [
+      const layers: ILayerMergeData[] = [
         {
-          id: 'test1',
+          fileName: 'test1',
           tilesPath: 'test/tile1',
           footprint: bboxPolygon([-180, -90, 2.8125, 90]),
         },
         {
-          id: 'test2',
+          fileName: 'test2',
           tilesPath: 'test/tile2',
           footprint: bboxPolygon([2.8125, -90, 180, 90]),
         },
@@ -135,14 +135,14 @@ describe('MergeTilesTasker', () => {
     });
 
     it('generates all and only expected tiles', () => {
-      const layers = [
+      const layers: ILayerMergeData[] = [
         {
-          id: 'test1.gpkg',
+          fileName: 'test1.gpkg',
           tilesPath: 'test/tile1.gpkg',
           footprint: bboxPolygon([-180, -90, 0, 90]),
         },
         {
-          id: 'test2.gpkg',
+          fileName: 'test2.gpkg',
           tilesPath: 'test/tile2.gpkg',
           footprint: bboxPolygon([-180, -90, 90, 0]),
         },
@@ -294,14 +294,14 @@ describe('MergeTilesTasker', () => {
     });
 
     it('same footprint', () => {
-      const layers = [
+      const layers: ILayerMergeData[] = [
         {
-          id: 'test1.gpkg',
+          fileName: 'test1.gpkg',
           tilesPath: 'test/tile1.gpkg',
           footprint: bboxPolygon([-180, -90, 0, 90]),
         },
         {
-          id: 'test2.gpkg',
+          fileName: 'test2.gpkg',
           tilesPath: 'test/tile2.gpkg',
           footprint: bboxPolygon([-180, -90, 0, 90]),
         },

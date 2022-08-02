@@ -73,7 +73,7 @@ export class MergeTilesTasker {
     const bboxedLayers = params.layers.map((layer) => {
       const bbox = toBbox(layer.footprint) as [number, number, number, number];
       return {
-        id: layer.id,
+        fileName: layer.fileName,
         tilesPath: layer.tilesPath,
         footprint: bbox,
       };
@@ -97,9 +97,9 @@ export class MergeTilesTasker {
               },
             ].concat(
               overlap.layers.map<IMergeSources>((layer, index) => {
-                const fileType = layer.id.split('.').pop() as string;
+                const fileName = layer.fileName.split('.').pop() as string;
                 const sourceParams: IMergeSources = {
-                  type: fileType.toUpperCase(),
+                  type: fileName.toUpperCase(),
                   path: layer.tilesPath,
                   grid: params.grids[index],
                   extent: {
@@ -130,7 +130,7 @@ export class MergeTilesTasker {
       const fileRelativePath = join(data.originDirectory, fileName);
       const footprint = data.metadata.footprint;
       return {
-        id: fileName,
+        fileName: fileName,
         tilesPath: fileRelativePath,
         footprint: footprint,
       };
