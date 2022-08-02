@@ -97,9 +97,9 @@ export class MergeTilesTasker {
               },
             ].concat(
               overlap.layers.map<IMergeSources>((layer, index) => {
-                const fileName = layer.fileName.split('.').pop() as string;
+                const filenameExtension = layer.fileName.split('.').pop() as string;
                 const sourceParams: IMergeSources = {
-                  type: fileName.toUpperCase(),
+                  type: filenameExtension.toUpperCase(),
                   path: layer.tilesPath,
                   grid: params.grids[index],
                   extent: {
