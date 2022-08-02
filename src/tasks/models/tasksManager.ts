@@ -50,7 +50,9 @@ export class TasksManager {
   public async taskComplete(jobId: string, taskId: string): Promise<void> {
     const job = await this.jobManager.getJobStatus(jobId);
     const task = await this.jobManager.getTask(jobId, taskId);
-
+    
+    await this.jobManager.updateJobStatus(job.id, OperationStatus.IN_PROGRESS, job.percentage);
+    
     if (job.type === this.ingestionUpdateJobType && task.type === this.ingestionTaskType.tileMergeTask) {
       this.logger.log(`info`, `[TasksManager][taskComplete] Completing Ingestion-Update job with jobId ${jobId} and taskId ${taskId}.`);
       await this.handleUpdateIngestion(job, task);
@@ -80,7 +82,7 @@ export class TasksManager {
       };
       return await this.catalogClient.publish(publishModel);
     } catch (err) {
-      await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer to catalog');
+      await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, undefined, 'Failed to publish layer to catalog');
       throw err;
     }
   }
@@ -97,7 +99,7 @@ export class TasksManager {
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
-      await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, 'Failed to publish layer to mapping server');
+      await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, undefined, 'Failed to publish layer to mapping server');
       throw err;
     }
   }
@@ -124,7 +126,7 @@ export class TasksManager {
     this.logger.log(`info`, `Aborting job with ID ${jobId}`);
     await this.jobManager.abortJob(jobId);
     this.logger.log(`info`, `Updating job ${jobId} with status ${OperationStatus.FAILED}`);
-    await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, reason);
+    await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, undefined, reason);
   }
 
   private async handleUpdateIngestion(job: ICompletedTasks, task: IGetTaskResponse): Promise<void> {
