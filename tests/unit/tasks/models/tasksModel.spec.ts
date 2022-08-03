@@ -273,9 +273,8 @@ describe('TasksManager', () => {
       await tasksManager.taskComplete(jobId, taskId);
 
       expect(updateJobStatusMock).toHaveBeenCalledTimes(2);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(updateJobStatusMock.mock.calls[0]).toEqual([jobId, OperationStatus.IN_PROGRESS, 90]);
-      expect(updateJobStatusMock.mock.calls[1]).toEqual([jobId, OperationStatus.COMPLETED, undefined, catalogRecordId]);
+      expect(updateJobStatusMock.mock.calls[1]).toEqual([jobId, OperationStatus.COMPLETED, undefined, undefined, catalogRecordId]);
       expect(mergeMock).toHaveBeenCalledTimes(1);
       expect(updateMock).toHaveBeenCalledTimes(1);
       expect(findRecordMock).toHaveBeenCalledTimes(1);

@@ -151,7 +151,7 @@ export class TasksManager {
 
       if (job.isSuccessful) {
         this.logger.log(`info`, `Updating status of job ${job.id} to be ${OperationStatus.COMPLETED}`);
-        await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, undefined, catalogRecord?.id);
+        await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, undefined, undefined, catalogRecord?.id);
       }
     }
   }
@@ -165,7 +165,7 @@ export class TasksManager {
       await this.publishToMappingServer(job.id, job.metadata, layerName, job.relativePath);
       const catalogId = await this.publishToCatalog(job.id, job.metadata, layerName);
 
-      await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, undefined, catalogId);
+      await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, undefined, undefined, catalogId);
 
       if (this.shouldSync) {
         try {
