@@ -124,11 +124,14 @@ export class JobManagerClient extends HttpClient {
       shouldReturnTasks: false,
     };
     const res = await this.get<IGetJobResponse>(getJobUrl, query);
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    const jobPercentage = Math.trunc((res.completedTasks / res.taskCount) * 100);
     return {
       id: res.id,
       status: res.status as OperationStatus,
       isCompleted: res.completedTasks + res.failedTasks + res.expiredTasks + res.abortedTasks === res.taskCount,
       isSuccessful: res.completedTasks === res.taskCount,
+      percentage: jobPercentage,
       metadata: (res.parameters as unknown as IngestionParams).metadata,
       relativePath: (res.parameters as unknown as { layerRelativePath: string }).layerRelativePath,
       successTasksCount: res.completedTasks,
@@ -142,12 +145,13 @@ export class JobManagerClient extends HttpClient {
     return res;
   }
 
-  public async updateJobStatus(jobId: string, status: OperationStatus, reason?: string, catalogId?: string): Promise<void> {
+  public async updateJobStatus(jobId: string, status: OperationStatus, jobPercentage?: number, reason?: string, catalogId?: string): Promise<void> {
     const updateTaskUrl = `/jobs/${jobId}`;
     await this.put(updateTaskUrl, {
       status: status,
       reason: reason,
       internalId: catalogId,
+      percentage: jobPercentage,
     });
   }
 

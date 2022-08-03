@@ -10,6 +10,7 @@ export interface ICompletedTasks {
   status: OperationStatus;
   successTasksCount: number;
   type: string;
+  percentage: number;
 }
 
 export interface ITaskZoomRange {

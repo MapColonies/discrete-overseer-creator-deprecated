@@ -190,6 +190,7 @@ describe('TasksManager', () => {
         completed: true,
         successful: true,
         relativePath: `test/${ProductType.RASTER_MAP}`,
+        percentage: 80,
         metadata: rasterMapTestData,
         type: ingestionUpdateJobType,
         status: OperationStatus.IN_PROGRESS,
@@ -220,8 +221,9 @@ describe('TasksManager', () => {
       await tasksManager.taskComplete(jobId, taskId);
 
       expect(abortJobMock).toHaveBeenCalledTimes(1);
-      expect(updateJobStatusMock).toHaveBeenCalledTimes(1);
-      expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.FAILED, `Failed to update ingestion`);
+      expect(updateJobStatusMock).toHaveBeenCalledTimes(2);
+      expect(updateJobStatusMock.mock.calls[0]).toEqual([jobId, OperationStatus.IN_PROGRESS, 80]);
+      expect(updateJobStatusMock.mock.calls[1]).toEqual([jobId, OperationStatus.FAILED, undefined, `Failed to update ingestion`]);
       expect(handleUpdateIngestionSpy).toHaveBeenCalledTimes(1);
       expect(handleNewIngestionSpy).toHaveBeenCalledTimes(0);
     });
@@ -237,6 +239,7 @@ describe('TasksManager', () => {
         id: jobId,
         isCompleted: true,
         isSuccessful: true,
+        percentage: 90,
         relativePath: `test/${ProductType.RASTER_MAP}`,
         metadata: rasterMapTestData,
         type: ingestionUpdateJobType,
@@ -269,8 +272,9 @@ describe('TasksManager', () => {
 
       await tasksManager.taskComplete(jobId, taskId);
 
-      expect(updateJobStatusMock).toHaveBeenCalledTimes(1);
-      expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.COMPLETED, undefined, catalogRecordId);
+      expect(updateJobStatusMock).toHaveBeenCalledTimes(2);
+      expect(updateJobStatusMock.mock.calls[0]).toEqual([jobId, OperationStatus.IN_PROGRESS, 90]);
+      expect(updateJobStatusMock.mock.calls[1]).toEqual([jobId, OperationStatus.COMPLETED, undefined, undefined, catalogRecordId]);
       expect(mergeMock).toHaveBeenCalledTimes(1);
       expect(updateMock).toHaveBeenCalledTimes(1);
       expect(findRecordMock).toHaveBeenCalledTimes(1);
