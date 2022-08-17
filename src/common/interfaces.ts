@@ -2,7 +2,7 @@ import { IRasterCatalogUpsertRequestBody } from '@map-colonies/mc-model-types';
 import { ITileRange } from '@map-colonies/mc-utils';
 import { BBox } from '@turf/helpers';
 import { GeoJSON } from 'geojson';
-import { Grid, IBBox } from '../layers/interfaces';
+import { Grid, IBBox, Origin } from '../layers/interfaces';
 
 export interface ILogger {
   log: (level: string, message: string) => void;
@@ -53,6 +53,7 @@ export interface IMergeOverlaps {
 export interface IMergeSources {
   type: string;
   path: string;
+  origin: Origin;
   grid?: Grid;
   extent?: IBBox;
 }
