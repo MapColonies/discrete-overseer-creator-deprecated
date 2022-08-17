@@ -1,8 +1,9 @@
 import { tilesGenerator } from '@map-colonies/mc-utils';
 import { bboxPolygon, polygon } from '@turf/turf';
 import { ILayerMergeData, IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
-import { Grid } from '../../../src/layers/interfaces';
+import { Grid, Origin } from '../../../src/layers/interfaces';
 import { MergeTilesTasker } from '../../../src/merge/mergeTilesTasker';
+import { getOrigin } from '../../../src/utils/origin';
 import { jobManagerClientMock } from '../../mocks/clients/jobManagerClient';
 import { configMock, init as initConfig, setValue as setConfigValue, clear as clearConfig } from '../../mocks/config';
 import { logger } from '../../mocks/logger';
@@ -169,16 +170,19 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -190,10 +194,12 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -205,16 +211,19 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -226,16 +235,19 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -247,10 +259,12 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -262,10 +276,12 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -277,10 +293,12 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -327,16 +345,19 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -348,16 +369,19 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -369,16 +393,19 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -390,16 +417,19 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
@@ -411,16 +441,19 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
+              origin: Origin.UPPER_LEFT,
               grid: Grid.TWO_ON_ONE,
               extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
             },
