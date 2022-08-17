@@ -16,6 +16,7 @@ import { OperationStatus } from '../common/enums';
 import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams, ILogger, IMergeSources } from '../common/interfaces';
 import { JobManagerClient } from '../serviceClients/jobManagerClient';
 import { Grid } from '../layers/interfaces';
+import { getOrigin } from '../utils/origin';
 
 @singleton()
 export class MergeTilesTasker {
@@ -94,6 +95,7 @@ export class MergeTilesTasker {
               {
                 type: sourceType,
                 path: params.destPath,
+                origin: getOrigin(sourceType),
               },
             ].concat(
               overlap.layers.map<IMergeSources>((layer, index) => {
@@ -101,6 +103,7 @@ export class MergeTilesTasker {
                 const sourceParams: IMergeSources = {
                   type: filenameExtension.toUpperCase(),
                   path: layer.tilesPath,
+                  origin: getOrigin(filenameExtension),
                   grid: params.grids[index],
                   extent: {
                     minX: params.extent[0],
