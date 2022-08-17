@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.2.0...v3.3.0) (2022-08-16)
+
+
+### Features
+
+* added job percentage support ([#160](https://github.com/MapColonies/discrete-overseer-creator/issues/160)) ([5a6ffe8](https://github.com/MapColonies/discrete-overseer-creator/commit/5a6ffe83243ea4b61ce880a0784e741592e75f7a))
+* costraing index validation support ([#156](https://github.com/MapColonies/discrete-overseer-creator/issues/156)) ([aac4b67](https://github.com/MapColonies/discrete-overseer-creator/commit/aac4b6729859b4744e4f00e047d922267a59c1b8))
+
+
+### Bug Fixes
+
+* Filter overseer incoming request data ([#157](https://github.com/MapColonies/discrete-overseer-creator/issues/157)) ([e3c1cb9](https://github.com/MapColonies/discrete-overseer-creator/commit/e3c1cb9f42828619523dc8ebd429f7c6df417a1e))
+* fixed source type and layer relative path for merge tasks ([#159](https://github.com/MapColonies/discrete-overseer-creator/issues/159)) ([f6905fb](https://github.com/MapColonies/discrete-overseer-creator/commit/f6905fb1c4c0b916d31a95fa922e7d4cd93fd31b))
+* gpkg extension is now valid in all captilization cases ([#154](https://github.com/MapColonies/discrete-overseer-creator/issues/154)) ([450ae90](https://github.com/MapColonies/discrete-overseer-creator/commit/450ae90a4033d508c9dc273f83913d02e690db0b))
+* merge tasks bounds ([#155](https://github.com/MapColonies/discrete-overseer-creator/issues/155)) ([d1bca14](https://github.com/MapColonies/discrete-overseer-creator/commit/d1bca140aa67534624b6509748cf69f9b49f8e33))
+* remove unused map config ([#152](https://github.com/MapColonies/discrete-overseer-creator/issues/152)) ([427a2e1](https://github.com/MapColonies/discrete-overseer-creator/commit/427a2e17bab67ae768d5fd3b06ebf00ed9625151))
+
 ## [3.2.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.1.4...v3.2.0) (2022-07-24)
 
 
