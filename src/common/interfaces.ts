@@ -42,6 +42,8 @@ export interface IMergeParameters {
   destPath: string;
   maxZoom: number;
   grids: Grid[];
+  origin?: Origin;
+  targetGrid?: Grid;
   extent: BBox;
 }
 
@@ -53,7 +55,7 @@ export interface IMergeOverlaps {
 export interface IMergeSources {
   type: string;
   path: string;
-  origin: Origin;
+  origin?: Origin;
   grid?: Grid;
   extent?: IBBox;
 }

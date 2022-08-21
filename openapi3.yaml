@@ -151,7 +151,7 @@ components:
     errorMessage:
       type: object
       properties:
-        message::
+        message:
           type: string
         stacktrace:
           type: string
@@ -165,6 +165,12 @@ components:
           properties:
             productType:
               $ref: '#/components/schemas/productType'
+            origin:
+              $ref: '#/components/schemas/origin'
+            grid:
+              $ref: '#/components/schemas/grid'
+          required:
+            - productType
     tocResponse:
       type: object
       properties:
@@ -196,3 +202,15 @@ components:
         - RasterAid
         - RasterVector
       description: valid product types for ingestion
+    origin:
+      type: string
+      enum:
+        - UL
+        - LL
+      description: valid origin types for ingestion
+    grid:
+      type: string
+      enum:
+        - 2X1
+        - 1X1
+      description: valid grid types for ingestion

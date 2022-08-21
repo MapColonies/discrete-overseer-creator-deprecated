@@ -1,14 +1,13 @@
 import { RequestHandler } from 'express';
 import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
-import { IngestionParams } from '@map-colonies/mc-model-types';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
-
 import { LayersManager } from '../models/layersManager';
 import { filterLayerMetadata } from '../../common/utills/ingestionParamExtractor';
+import { IngestionMetadata, LayerIngestionParams } from '../interfaces';
 
-type CreateLayerHandler = RequestHandler<undefined, undefined, IngestionParams>;
+type CreateLayerHandler = RequestHandler<undefined, undefined, LayerIngestionParams>;
 
 @injectable()
 export class LayersController {
@@ -16,10 +15,12 @@ export class LayersController {
 
   public createLayer: CreateLayerHandler = async (req, res, next) => {
     try {
-      const sourceRequest: IngestionParams = {
+      const sourceRequest: IngestionMetadata = {
         metadata: filterLayerMetadata(req.body.metadata),
         originDirectory: req.body.originDirectory,
         fileNames: req.body.fileNames,
+        origin: req.body.metadata.origin,
+        grid: req.body.metadata.grid,
       };
       await this.manager.createLayer(sourceRequest);
       return res.sendStatus(httpStatus.OK);
