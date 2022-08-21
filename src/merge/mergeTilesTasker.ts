@@ -86,23 +86,23 @@ export class MergeTilesTasker {
         const rangeGen = this.tileRanger.encodeFootprint(overlap.intersection as Feature<Polygon>, zoom);
         const batches = tileBatchGenerator(this.batchSize, rangeGen);
 
-        const target: IMergeSources = {
+        const targetLayer: IMergeSources = {
           type: sourceType,
           path: params.destPath,
         };
         // Add origin to target if provided
         if (params.origin !== undefined) {
-          target.origin = params.origin;
+          targetLayer.origin = params.origin;
         }
         // Add grid to target if provided
         if (params.targetGrid !== undefined) {
-          target.grid = params.targetGrid;
+          targetLayer.grid = params.targetGrid;
         }
 
         for (const batch of batches) {
           yield {
             batches: batch,
-            sources: [target].concat(
+            sources: [targetLayer].concat(
               overlap.layers.map<IMergeSources>((layer, index) => {
                 const filenameExtension = layer.fileName.split('.').pop() as string;
                 const sourceParams: IMergeSources = {
