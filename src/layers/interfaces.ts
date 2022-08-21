@@ -13,13 +13,9 @@ export enum PublishedMapLayerCacheType {
   GPKG = 'geopackage',
 }
 
-export declare class ExtendedLayerMetadata extends LayerMetadata {
-  public origin?: Origin;
-  public grid?: Grid;
-}
-
-export interface LayerIngestionParams extends Omit<IngestionParams, 'metadata'> {
-  metadata: ExtendedLayerMetadata;
+export interface LayerIngestionParams extends IngestionParams {
+  origin?: Origin;
+  grid?: Grid;
 }
 
 export interface IngestionMetadata extends IngestionParams {

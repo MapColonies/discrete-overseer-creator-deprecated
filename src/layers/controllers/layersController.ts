@@ -19,8 +19,8 @@ export class LayersController {
         metadata: filterLayerMetadata(req.body.metadata),
         originDirectory: req.body.originDirectory,
         fileNames: req.body.fileNames,
-        origin: req.body.metadata.origin,
-        grid: req.body.metadata.grid,
+        origin: req.body.origin,
+        grid: req.body.grid,
       };
       await this.manager.createLayer(sourceRequest);
       return res.sendStatus(httpStatus.OK);
