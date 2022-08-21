@@ -98,7 +98,6 @@ export class MergeTilesTasker {
         if (params.targetGrid !== undefined) {
           target.grid = params.targetGrid;
         }
-        console.log(JSON.stringify(target));
 
         for (const batch of batches) {
           yield {
