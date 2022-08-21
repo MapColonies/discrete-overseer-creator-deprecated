@@ -1,7 +1,7 @@
 import { tilesGenerator } from '@map-colonies/mc-utils';
 import { bboxPolygon, polygon } from '@turf/turf';
 import { ILayerMergeData, IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
-import { Grid } from '../../../src/layers/interfaces';
+import { Grid, Origin } from '../../../src/layers/interfaces';
 import { MergeTilesTasker } from '../../../src/merge/mergeTilesTasker';
 import { jobManagerClientMock } from '../../mocks/clients/jobManagerClient';
 import { configMock, init as initConfig, setValue as setConfigValue, clear as clearConfig } from '../../mocks/config';
@@ -134,6 +134,68 @@ describe('MergeTilesTasker', () => {
       expect(tiles[5].size).toBe(2048);
     });
 
+    it('has no origin or grid when not supplied', () => {
+      const layers: ILayerMergeData[] = [
+        {
+          fileName: 'test1',
+          tilesPath: 'test/tile1',
+          footprint: bboxPolygon([-180, -90, 2.8125, 90]),
+        },
+        {
+          fileName: 'test2',
+          tilesPath: 'test/tile2',
+          footprint: bboxPolygon([2.8125, -90, 180, 90]),
+        },
+      ];
+      const params: IMergeParameters = {
+        layers: layers,
+        destPath: 'test/dest',
+        maxZoom: 5,
+        extent: [0, 0, 1, 1],
+        grids: [Grid.TWO_ON_ONE, Grid.TWO_ON_ONE],
+      };
+
+      const taskGen = mergeTilesTasker.createBatchedTasks(params);
+
+      for (const task of taskGen) {
+        expect(task.sources[0].path).toEqual('test/dest');
+        expect(task.sources[0].origin).toBeUndefined();
+        expect(task.sources[0].grid).toBeUndefined();
+      }
+    });
+
+    it('has origin and grid when supplied', () => {
+      const layers: ILayerMergeData[] = [
+        {
+          fileName: 'test1',
+          tilesPath: 'test/tile1',
+          footprint: bboxPolygon([-180, -90, 2.8125, 90]),
+        },
+        {
+          fileName: 'test2',
+          tilesPath: 'test/tile2',
+          footprint: bboxPolygon([2.8125, -90, 180, 90]),
+        },
+      ];
+      const params: IMergeParameters = {
+        layers: layers,
+        destPath: 'test/dest',
+        maxZoom: 5,
+        origin: Origin.LOWER_LEFT,
+        targetGrid: Grid.TWO_ON_ONE,
+        extent: [0, 0, 1, 1],
+        grids: [Grid.TWO_ON_ONE, Grid.TWO_ON_ONE],
+      };
+
+      const taskGen = mergeTilesTasker.createBatchedTasks(params);
+
+      for (const task of taskGen) {
+        expect(task.sources[0].path).toEqual('test/dest');
+        expect(task.sources[0].origin).toEqual(Origin.LOWER_LEFT);
+        expect(task.sources[0].grid).toEqual(Grid.TWO_ON_ONE);
+      }
+    });
+
     it('generates all and only expected tiles', () => {
       const layers: ILayerMergeData[] = [
         {
@@ -151,6 +213,7 @@ describe('MergeTilesTasker', () => {
         layers: layers,
         destPath: 'test/dest',
         maxZoom: 1,
+        origin: Origin.LOWER_LEFT,
         extent: [0, 0, 1, 1],
         grids: [Grid.TWO_ON_ONE, Grid.TWO_ON_ONE],
       };
@@ -169,6 +232,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -190,6 +254,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -205,6 +270,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -226,6 +292,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -247,6 +314,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -262,6 +330,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -277,6 +346,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -310,6 +380,7 @@ describe('MergeTilesTasker', () => {
         layers: layers,
         destPath: 'test/dest',
         maxZoom: 1,
+        origin: Origin.LOWER_LEFT,
         extent: [0, 0, 1, 1],
         grids: [Grid.TWO_ON_ONE, Grid.TWO_ON_ONE],
       };
@@ -327,6 +398,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -348,6 +420,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -369,6 +442,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -390,6 +464,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,
@@ -411,6 +486,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              origin: Origin.LOWER_LEFT,
             },
             {
               type: filesSourceType,

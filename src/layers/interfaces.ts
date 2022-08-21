@@ -1,4 +1,5 @@
 import { BBox } from '@turf/helpers';
+import { IngestionParams } from '@map-colonies/mc-model-types';
 
 export interface IPublishMapLayerRequest {
   name: string;
@@ -10,6 +11,11 @@ export enum PublishedMapLayerCacheType {
   FS = 'file',
   S3 = 's3',
   GPKG = 'geopackage',
+}
+
+export interface LayerIngestionParams extends IngestionParams {
+  origin?: Origin;
+  grid?: Grid;
 }
 
 export interface ITaskParameters {
@@ -32,4 +38,9 @@ export interface IBBox {
 export enum Grid {
   TWO_ON_ONE = '2X1',
   ONE_ON_ONE = '1X1',
+}
+
+export enum Origin {
+  UPPER_LEFT = 'UL',
+  LOWER_LEFT = 'LL',
 }

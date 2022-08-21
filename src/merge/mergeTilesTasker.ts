@@ -15,14 +15,13 @@ import { Services } from '../common/constants';
 import { OperationStatus } from '../common/enums';
 import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams, ILogger, IMergeSources } from '../common/interfaces';
 import { JobManagerClient } from '../serviceClients/jobManagerClient';
-import { Grid } from '../layers/interfaces';
+import { Grid, Origin } from '../layers/interfaces';
 
 @singleton()
 export class MergeTilesTasker {
   private readonly tileRanger: TileRanger;
   private readonly batchSize: number;
   private readonly mergeTaskBatchSize: number;
-  private readonly sourceDir: string;
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
@@ -31,7 +30,6 @@ export class MergeTilesTasker {
   ) {
     this.batchSize = config.get('ingestionMergeTiles.mergeBatchSize');
     this.mergeTaskBatchSize = config.get<number>('ingestionMergeTiles.mergeBatchSize');
-    this.sourceDir = this.config.get<string>('layerSourceDir');
     this.tileRanger = new TileRanger();
   }
 
@@ -87,15 +85,24 @@ export class MergeTilesTasker {
       for (const overlap of overlaps) {
         const rangeGen = this.tileRanger.encodeFootprint(overlap.intersection as Feature<Polygon>, zoom);
         const batches = tileBatchGenerator(this.batchSize, rangeGen);
+
+        const targetLayer: IMergeSources = {
+          type: sourceType,
+          path: params.destPath,
+        };
+        // Add origin to target if provided
+        if (params.origin !== undefined) {
+          targetLayer.origin = params.origin;
+        }
+        // Add grid to target if provided
+        if (params.targetGrid !== undefined) {
+          targetLayer.grid = params.targetGrid;
+        }
+
         for (const batch of batches) {
           yield {
             batches: batch,
-            sources: [
-              {
-                type: sourceType,
-                path: params.destPath,
-              },
-            ].concat(
+            sources: [targetLayer].concat(
               overlap.layers.map<IMergeSources>((layer, index) => {
                 const filenameExtension = layer.fileName.split('.').pop() as string;
                 const sourceParams: IMergeSources = {
@@ -124,6 +131,8 @@ export class MergeTilesTasker {
     taskType: string,
     jobType: string,
     grids: Grid[],
+    origin: Origin | undefined,
+    targetGrid: Grid | undefined,
     extent: BBox
   ): Promise<void> {
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
@@ -141,6 +150,8 @@ export class MergeTilesTasker {
       destPath: layerRelativePath,
       maxZoom: maxZoom,
       grids: grids,
+      origin: origin,
+      targetGrid: targetGrid,
       extent,
     };
     const mergeTasksParams = this.createBatchedTasks(params);
