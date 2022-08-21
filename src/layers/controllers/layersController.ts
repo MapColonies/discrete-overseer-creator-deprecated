@@ -5,7 +5,7 @@ import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
 import { LayersManager } from '../models/layersManager';
 import { filterLayerMetadata } from '../../common/utills/ingestionParamExtractor';
-import { IngestionMetadata, LayerIngestionParams } from '../interfaces';
+import { LayerIngestionParams } from '../interfaces';
 
 type CreateLayerHandler = RequestHandler<undefined, undefined, LayerIngestionParams>;
 
@@ -15,7 +15,7 @@ export class LayersController {
 
   public createLayer: CreateLayerHandler = async (req, res, next) => {
     try {
-      const sourceRequest: IngestionMetadata = {
+      const sourceRequest: LayerIngestionParams = {
         metadata: filterLayerMetadata(req.body.metadata),
         originDirectory: req.body.originDirectory,
         fileNames: req.body.fileNames,

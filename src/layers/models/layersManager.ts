@@ -14,7 +14,7 @@ import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { MergeTilesTasker } from '../../merge/mergeTilesTasker';
 import { createBBoxString } from '../../utils/bbox';
-import { Grid, IngestionMetadata } from '../interfaces';
+import { Grid, LayerIngestionParams } from '../interfaces';
 import { getGrids, getExtents } from '../../utils/gpkg';
 import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 import { FileValidator } from './fileValidator';
@@ -40,7 +40,7 @@ export class LayersManager {
     this.tileMergeTask = config.get<string>('ingestionTaskType.tileMergeTask');
   }
 
-  public async createLayer(data: IngestionMetadata): Promise<void> {
+  public async createLayer(data: LayerIngestionParams): Promise<void> {
     const convertedData: Record<string, unknown> = data.metadata as unknown as Record<string, unknown>;
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;

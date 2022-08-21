@@ -1,5 +1,5 @@
 import { BBox } from '@turf/helpers';
-import { IngestionParams, LayerMetadata } from '@map-colonies/mc-model-types';
+import { IngestionParams } from '@map-colonies/mc-model-types';
 
 export interface IPublishMapLayerRequest {
   name: string;
@@ -14,11 +14,6 @@ export enum PublishedMapLayerCacheType {
 }
 
 export interface LayerIngestionParams extends IngestionParams {
-  origin?: Origin;
-  grid?: Grid;
-}
-
-export interface IngestionMetadata extends IngestionParams {
   origin?: Origin;
   grid?: Grid;
 }
