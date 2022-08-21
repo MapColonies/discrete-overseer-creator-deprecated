@@ -160,15 +160,15 @@ components:
     IngestionParams:
       type: object
       properties:
+        origin:
+          $ref: '#/components/schemas/origin'
+        grid:
+          $ref: '#/components/schemas/grid'
         metadata:
           type: object
           properties:
             productType:
               $ref: '#/components/schemas/productType'
-            origin:
-              $ref: '#/components/schemas/origin'
-            grid:
-              $ref: '#/components/schemas/grid'
           required:
             - productType
     tocResponse:
