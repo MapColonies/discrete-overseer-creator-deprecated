@@ -38,6 +38,7 @@ replicaCount: 1
 initialDelaySeconds: 60
 nodePort: 30030 #for minikube deployment only
 resetOnConfigChange: true
+imagePullPolicy: Always
 
 cloudProvider:
   dockerRegistryUrl: my-registry-url.io
