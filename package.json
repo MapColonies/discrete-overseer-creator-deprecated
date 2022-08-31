@@ -48,6 +48,7 @@
     "@map-colonies/mc-probe": "^1.0.0",
     "@map-colonies/mc-utils": "^1.4.6",
     "@map-colonies/storage-explorer-middleware": "^1.2.7",
+    "@turf/boolean-valid": "^6.5.0",
     "@turf/turf": "^6.5.0",
     "axios": "^0.27.2",
     "axios-retry": "^3.2.5",
