@@ -1,6 +1,8 @@
 import config from 'config';
 import { GeoJSON } from 'geojson';
-import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
+import isValidGeoJson from '@turf/boolean-valid';
+import { FeatureCollection, Geometry, geojsonType } from '@turf/turf';
+import { IngestionParams, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { JobAction, OperationStatus, TaskAction } from '../../common/enums';
@@ -49,6 +51,8 @@ export class LayersManager {
     const originDirectory = data.originDirectory;
     const files = data.fileNames;
     const polygon = data.metadata.footprint;
+
+    this.validateGeoJsons(data.metadata);
     const extent = getExtents(polygon as GeoJSON);
 
     if (convertedData.id !== undefined) {
@@ -163,6 +167,32 @@ export class LayersManager {
     data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
     if (!data.metadata.layerPolygonParts) {
       data.metadata.layerPolygonParts = layerMetadataToPolygonParts(data.metadata);
+    }
+  }
+
+  private validateGeoJsons(metadata: LayerMetadata): void {
+    const footprint = metadata.footprint as Geometry;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if ((footprint.type != 'Polygon' && footprint.type != 'MultiPolygon') || footprint.coordinates == undefined || !isValidGeoJson(footprint)) {
+      throw new BadRequestError(`received invalid footprint`);
+    }
+    if (metadata.layerPolygonParts != undefined) {
+      const featureCollection = metadata.layerPolygonParts as FeatureCollection;
+      try {
+        geojsonType(featureCollection, 'FeatureCollection', 'validateGeoJsons');
+      } catch {
+        throw new BadRequestError(`received invalid layerPolygonParts, layerPolygonParts must be feature collection`);
+      }
+      featureCollection.features.forEach((feature) => {
+        if (
+          (feature.geometry.type != 'Polygon' && feature.geometry.type != 'MultiPolygon') ||
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          feature.geometry.coordinates == undefined ||
+          !isValidGeoJson(feature)
+        ) {
+          throw new BadRequestError(`received invalid footprint for layerPolygonParts feature, it must be valid Polygon or MultiPolygon`);
+        }
+      });
     }
   }
 }

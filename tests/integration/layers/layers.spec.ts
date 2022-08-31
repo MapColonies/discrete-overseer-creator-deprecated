@@ -1,6 +1,9 @@
 import { LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
+import _ from 'lodash';
+import { GeoJSON } from 'geojson';
+import { FeatureCollection, LineString } from '@turf/turf';
 import { RecordType } from '@map-colonies/mc-model-types/Schema/models/pycsw/coreEnums';
 import { registerTestValues } from '../testContainerConfig';
 import { findJobsMock, createLayerJobMock, createTasksMock } from '../../mocks/clients/jobManagerClient';
@@ -10,15 +13,22 @@ import { setValue, clear as clearConfig } from '../../mocks/config';
 import { OperationStatus } from '../../../src/common/enums';
 import * as requestSender from './helpers/requestSender';
 
-const validTestImageMetadata = {
-  productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  productVersion: '1.23',
-  productName: 'test layer',
-  description: 'test layer desc',
-  minHorizontalAccuracyCE90: 0.7,
-  footprint: {
-    type: 'Polygon',
-    coordinates: [
+const validPolygon = {
+  type: 'Polygon',
+  coordinates: [
+    [
+      [100, 0],
+      [101, 0],
+      [101, 1],
+      [100, 1],
+      [100, 0],
+    ],
+  ],
+};
+const validMultiPolygon = {
+  type: 'MultiPolygon',
+  coordinates: [
+    [
       [
         [100, 0],
         [101, 0],
@@ -27,7 +37,41 @@ const validTestImageMetadata = {
         [100, 0],
       ],
     ],
-  },
+  ],
+};
+const invalidPolygon = {
+  type: 'Polygon',
+  coordinates: [
+    [
+      [
+        [100, 0],
+        [101, 0],
+        [101, 1],
+        [100, 1],
+        [100, 0],
+      ],
+    ],
+  ],
+};
+const invalidMultiPolygon = {
+  type: 'MultiPolygon',
+  coordinates: [
+    [
+      [100, 0],
+      [101, 0],
+      [101, 1],
+      [100, 1],
+      [100, 0],
+    ],
+  ],
+};
+const validTestImageMetadata = {
+  productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+  productVersion: '1.23',
+  productName: 'test layer',
+  description: 'test layer desc',
+  minHorizontalAccuracyCE90: 0.7,
+  footprint: validPolygon,
   scale: 100,
   rms: 2.6,
   maxResolutionDeg: 0.007,
@@ -64,6 +108,54 @@ const invalidTestData = {
   metadata: invalidTestImageMetadata,
   originDirectory: '/here',
 };
+const validLayerPolygonParts: FeatureCollection = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      properties: {
+        /* eslint-disable @typescript-eslint/naming-convention */
+        Dsc: 'a',
+        Rms: null,
+        Ep90: null,
+        Scale: null,
+        Cities: null,
+        Source: `testid-testversion`,
+        Countries: '',
+        Resolution: 0.072,
+        SensorType: 'a,b',
+        SourceName: 'test',
+        /* eslint-enable @typescript-eslint/naming-convention */
+      },
+      geometry: validPolygon,
+    },
+    {
+      type: 'Feature',
+      properties: {
+        /* eslint-disable @typescript-eslint/naming-convention */
+        Dsc: 'b',
+        Rms: null,
+        Ep90: null,
+        Scale: null,
+        Cities: null,
+        Source: `testid-testversion`,
+        Countries: '',
+        Resolution: 0.072,
+        SensorType: 'a,b',
+        SourceName: 'test',
+        /* eslint-enable @typescript-eslint/naming-convention */
+      },
+      geometry: validMultiPolygon,
+    },
+  ],
+};
+const validLine: LineString = {
+  type: 'LineString',
+  coordinates: [
+    [0, 0],
+    [10, 10],
+  ],
+};
 
 describe('layers', function () {
   beforeEach(function () {
@@ -94,65 +186,83 @@ describe('layers', function () {
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
       expect(createTasksMock).toHaveBeenCalledTimes(3);
     });
-  });
 
-  it('should return 200 status code for sending request with extra metadata fields', async function () {
-    findJobsMock.mockResolvedValue([]);
-    let exrtraFieldTestMetaData = { ...validTestData.metadata } as Record<string, unknown>;
-    exrtraFieldTestMetaData = { ...exrtraFieldTestMetaData, id: 'test id' };
-    const extraTestData = { ...validTestData, metadata: exrtraFieldTestMetaData };
-    const response = await requestSender.createLayer(extraTestData);
-    expect(response).toSatisfyApiSpec();
-    expect(response.status).toBe(httpStatusCodes.OK);
-    expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
-    expect(findJobsMock).toHaveBeenCalledTimes(1);
-    expect(mapExistsMock).toHaveBeenCalledTimes(1);
-    expect(catalogExistsMock).toHaveBeenCalledTimes(1);
-    expect(createLayerJobMock).toHaveBeenCalledTimes(1);
-    /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-    expect(createLayerJobMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        metadata: {
-          ...validTestData.metadata,
-          productBoundingBox: '100,0,101,1',
-          layerPolygonParts: expect.anything(),
-          sourceDateEnd: expect.anything(),
-          sourceDateStart: expect.anything(),
-          ingestionDate: expect.anything(),
-          creationDate: expect.anything(),
-        },
-      }),
-      expect.anything(),
-      expect.anything(),
-      expect.anything(),
-      expect.anything()
-    );
-    /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-    expect(createTasksMock).toHaveBeenCalledTimes(3);
-  });
+    it('should return 200 status code with valid layer polygon parts', async function () {
+      findJobsMock.mockResolvedValue([]);
+      const testData = _.cloneDeep(validTestData);
+      testData.metadata.layerPolygonParts = validLayerPolygonParts as GeoJSON;
+      testData.metadata.footprint = validMultiPolygon as GeoJSON;
 
-  it('should return 200 status code for indexed gpkg', async function () {
-    getLayerVersionsMock.mockResolvedValue([]);
-    findJobsMock.mockResolvedValue([]);
-    mapExistsMock.mockResolvedValue(false);
-    catalogExistsMock.mockResolvedValue(false);
+      const response = await requestSender.createLayer(testData);
+      expect(response).toSatisfyApiSpec();
 
-    const testData = {
-      fileNames: ['indexed.gpkg'],
-      metadata: validTestImageMetadata,
-      originDirectory: 'files',
-    };
+      expect(response.status).toBe(httpStatusCodes.OK);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+      expect(createTasksMock).toHaveBeenCalledTimes(3);
+    });
 
-    const response = await requestSender.createLayer(testData);
+    it('should return 200 status code for sending request with extra metadata fields', async function () {
+      findJobsMock.mockResolvedValue([]);
+      let exrtraFieldTestMetaData = { ...validTestData.metadata } as Record<string, unknown>;
+      exrtraFieldTestMetaData = { ...exrtraFieldTestMetaData, id: 'test id' };
+      const extraTestData = { ...validTestData, metadata: exrtraFieldTestMetaData };
+      const response = await requestSender.createLayer(extraTestData);
+      expect(response).toSatisfyApiSpec();
+      expect(response.status).toBe(httpStatusCodes.OK);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+      expect(createLayerJobMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: {
+            ...validTestData.metadata,
+            productBoundingBox: '100,0,101,1',
+            layerPolygonParts: expect.anything(),
+            sourceDateEnd: expect.anything(),
+            sourceDateStart: expect.anything(),
+            ingestionDate: expect.anything(),
+            creationDate: expect.anything(),
+          },
+        }),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+      /* eslint-enable @typescript-eslint/no-unsafe-assignment */
+      expect(createTasksMock).toHaveBeenCalledTimes(3);
+    });
 
-    expect(response).toSatisfyApiSpec();
-    expect(response.status).toBe(httpStatusCodes.OK);
-    expect(findJobsMock).toHaveBeenCalledTimes(1);
-    expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
-    expect(mapExistsMock).toHaveBeenCalledTimes(1);
-    expect(catalogExistsMock).toHaveBeenCalledTimes(1);
-    expect(createLayerJobMock).toHaveBeenCalledTimes(1);
-    expect(createTasksMock).toHaveBeenCalledTimes(0);
+    it('should return 200 status code for indexed gpkg', async function () {
+      getLayerVersionsMock.mockResolvedValue([]);
+      findJobsMock.mockResolvedValue([]);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+
+      const testData = {
+        fileNames: ['indexed.gpkg'],
+        metadata: validTestImageMetadata,
+        originDirectory: 'files',
+      };
+
+      const response = await requestSender.createLayer(testData);
+
+      expect(response).toSatisfyApiSpec();
+      expect(response.status).toBe(httpStatusCodes.OK);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('Bad Path', function () {
@@ -217,6 +327,108 @@ describe('layers', function () {
       invalidTestMetaDataProductType.productType = ProductType.PHOTO_REALISTIC_3D;
       const invalidTestDataForProductType = { ...validTestData, metadata: invalidTestMetaDataProductType };
       const response = await requestSender.createLayer(invalidTestDataForProductType);
+      expect(response).toSatisfyApiSpec();
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 400 status code for invalid footprint polygon', async function () {
+      const testData = _.cloneDeep(validTestData);
+      testData.metadata.footprint = invalidPolygon as GeoJSON;
+
+      const response = await requestSender.createLayer(testData);
+      expect(response).toSatisfyApiSpec();
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 400 status code for invalid footprint multiPolygon', async function () {
+      const testData = _.cloneDeep(validTestData);
+      testData.metadata.footprint = invalidMultiPolygon as GeoJSON;
+
+      const response = await requestSender.createLayer(testData);
+      expect(response).toSatisfyApiSpec();
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 400 status code for invalid layerPolygonParts multiPolygon', async function () {
+      const testData = _.cloneDeep(validTestData);
+      testData.metadata.layerPolygonParts = _.cloneDeep(validLayerPolygonParts) as GeoJSON;
+      const polygonParts = testData.metadata.layerPolygonParts as FeatureCollection;
+      polygonParts.features[1].geometry = invalidMultiPolygon;
+
+      const response = await requestSender.createLayer(testData);
+      expect(response).toSatisfyApiSpec();
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 400 status code for invalid layerPolygonParts polygon', async function () {
+      const testData = _.cloneDeep(validTestData);
+      testData.metadata.layerPolygonParts = _.cloneDeep(validLayerPolygonParts) as GeoJSON;
+      const polygonParts = testData.metadata.layerPolygonParts as FeatureCollection;
+      polygonParts.features[1].geometry = invalidPolygon;
+
+      const response = await requestSender.createLayer(testData);
+      expect(response).toSatisfyApiSpec();
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 400 status code for invalid layerPolygonParts geometry type', async function () {
+      const testData = _.cloneDeep(validTestData);
+      testData.metadata.layerPolygonParts = _.cloneDeep(validLayerPolygonParts) as GeoJSON;
+      const polygonParts = testData.metadata.layerPolygonParts as FeatureCollection;
+      polygonParts.features[1].geometry = validLine;
+
+      const response = await requestSender.createLayer(testData);
+      expect(response).toSatisfyApiSpec();
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 400 status code for invalid footprint geometry type', async function () {
+      const testData = _.cloneDeep(validTestData);
+      testData.metadata.footprint = validLine;
+
+      const response = await requestSender.createLayer(testData);
       expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
