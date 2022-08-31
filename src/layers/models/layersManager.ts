@@ -1,6 +1,6 @@
 import config from 'config';
 import { GeoJSON } from 'geojson';
-import isValidGeoJson  from '@turf/boolean-valid';
+import isValidGeoJson from '@turf/boolean-valid';
 import { Geometry } from '@turf/turf';
 import { IngestionParams, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
@@ -51,7 +51,7 @@ export class LayersManager {
     const originDirectory = data.originDirectory;
     const files = data.fileNames;
     const polygon = data.metadata.footprint as Geometry;
-    if(!isValidGeoJson(polygon)){
+    if (!isValidGeoJson(polygon)) {
       throw new BadRequestError(`received invalid footprint`);
     }
     const extent = getExtents(polygon as GeoJSON);
