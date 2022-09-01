@@ -49,10 +49,10 @@ describe('LinkBuilder', () => {
           url: 'https://testUrl/wmts/1.0.0/WMTSCapabilities.xml',
         },
         {
-          "name": "b",
-          "description": "",
-          "protocol": "WMTS_BASE",
-          "url": "https://testUrl/wmts"
+          name: 'b',
+          description: '',
+          protocol: 'WMTS_BASE',
+          url: 'https://testUrl/wmts',
         },
         {
           name: 'a',
