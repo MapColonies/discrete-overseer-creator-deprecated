@@ -6,7 +6,19 @@
     "protocol": "WMS",
     "url": "{{ "{{serverUrl}}" }}/service?REQUEST=GetCapabilities"
   },
+  {
+    "name": "{{layerName}}",
+    "description": "",
+    "protocol": "WMS_BASE",
+    "url": "{{serverUrl}}/wms"
+  },
   {{- end }}
+  {
+    "name": "{{layerName}}",
+    "description": "",
+    "protocol": "WMTS_BASE",
+    "url": "{{serverUrl}}/wmts"
+  },
   {
     "name": "{{ "{{layerName}}" }}",
     "description": "",
