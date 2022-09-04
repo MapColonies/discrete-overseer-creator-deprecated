@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.4.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.3.3...v3.4.0) (2022-09-04)
+
+
+### Features
+
+* add base wms and wmts links ([#165](https://github.com/MapColonies/discrete-overseer-creator/issues/165)) ([abbaf7c](https://github.com/MapColonies/discrete-overseer-creator/commit/abbaf7c55493f60db2cc0ec822c4160867ed1a73))
+
 ### [3.3.3](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.3.2...v3.3.3) (2022-08-31)
 
 
