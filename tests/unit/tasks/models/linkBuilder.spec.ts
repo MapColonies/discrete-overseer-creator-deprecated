@@ -19,6 +19,12 @@ describe('LinkBuilder', () => {
             "url": "{{serverUrl}}/wmts/1.0.0/WMTSCapabilities.xml"
           },
           {
+            "name": "b",
+            "description": "",
+            "protocol": "WMTS_BASE",
+            "url": "{{serverUrl}}/wmts"
+          },
+          {
             "name": "a",
             "description": "{{layerName}}",
             "protocol": "WMTS_tile",
@@ -41,6 +47,12 @@ describe('LinkBuilder', () => {
           description: '',
           protocol: 'WMTS',
           url: 'https://testUrl/wmts/1.0.0/WMTSCapabilities.xml',
+        },
+        {
+          name: 'b',
+          description: '',
+          protocol: 'WMTS_BASE',
+          url: 'https://testUrl/wmts',
         },
         {
           name: 'a',
