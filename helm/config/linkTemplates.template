@@ -7,17 +7,17 @@
     "url": "{{ "{{serverUrl}}" }}/service?REQUEST=GetCapabilities"
   },
   {
-    "name": "{{layerName}}",
+    "name": "{{ "{{layerName}}" }}",
     "description": "",
     "protocol": "WMS_BASE",
-    "url": "{{serverUrl}}/wms"
+    "url": "{{ "{{serverUrl}}" }}/wms"
   },
   {{- end }}
   {
-    "name": "{{layerName}}",
+    "name": "{{ "{{layerName}}" }}",
     "description": "",
     "protocol": "WMTS_BASE",
-    "url": "{{serverUrl}}/wmts"
+    "url": "{{ "{{serverUrl}}" }}/wmts"
   },
   {
     "name": "{{ "{{layerName}}" }}",
