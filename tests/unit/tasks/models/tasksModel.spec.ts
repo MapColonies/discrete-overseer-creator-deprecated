@@ -221,9 +221,8 @@ describe('TasksManager', () => {
       await tasksManager.taskComplete(jobId, taskId);
 
       expect(abortJobMock).toHaveBeenCalledTimes(1);
-      expect(updateJobStatusMock).toHaveBeenCalledTimes(2);
-      expect(updateJobStatusMock.mock.calls[0]).toEqual([jobId, OperationStatus.IN_PROGRESS, 80]);
-      expect(updateJobStatusMock.mock.calls[1]).toEqual([jobId, OperationStatus.FAILED, undefined, `Failed to update ingestion`]);
+      expect(updateJobStatusMock).toHaveBeenCalledTimes(1);
+      expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.FAILED, undefined, `Failed to update ingestion`);
       expect(handleUpdateIngestionSpy).toHaveBeenCalledTimes(1);
       expect(handleNewIngestionSpy).toHaveBeenCalledTimes(0);
     });
@@ -244,6 +243,7 @@ describe('TasksManager', () => {
         metadata: rasterMapTestData,
         type: ingestionUpdateJobType,
         successTasksCount: 3,
+        status: OperationStatus.IN_PROGRESS,
       });
 
       getTaskMock.mockReturnValue({
@@ -272,9 +272,110 @@ describe('TasksManager', () => {
 
       await tasksManager.taskComplete(jobId, taskId);
 
-      expect(updateJobStatusMock).toHaveBeenCalledTimes(2);
-      expect(updateJobStatusMock.mock.calls[0]).toEqual([jobId, OperationStatus.IN_PROGRESS, 90]);
-      expect(updateJobStatusMock.mock.calls[1]).toEqual([jobId, OperationStatus.COMPLETED, undefined, undefined, catalogRecordId]);
+      expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.COMPLETED, 100, undefined, catalogRecordId);
+      expect(mergeMock).toHaveBeenCalledTimes(1);
+      expect(updateMock).toHaveBeenCalledTimes(1);
+      expect(findRecordMock).toHaveBeenCalledTimes(1);
+    });
+    
+    it('should update job status to "Failed" if task status is "Failed"', async function () {
+      setValue('ingestionUpdateJobType', ingestionUpdateJobType);
+      setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });
+
+      const rasterMapTestData = { ...testMetadata };
+      rasterMapTestData.productType = ProductType.RASTER_MAP;
+
+      getJobStatusMock.mockReturnValue({
+        id: jobId,
+        isCompleted: false,
+        isSuccessful: false,
+        percentage: 90,
+        relativePath: `test/${ProductType.RASTER_MAP}`,
+        metadata: rasterMapTestData,
+        type: ingestionUpdateJobType,
+        successTasksCount: 3,
+        status: OperationStatus.IN_PROGRESS,
+      });
+
+      getTaskMock.mockReturnValue({
+        id: taskId,
+        jobId: jobId,
+        type: tileMergeTask,
+        status: OperationStatus.FAILED,
+      });
+
+      const catalogRecordId = 'a6fbf0dc-d82c-4c8d-ad28-b8f56c685a23';
+      findRecordMock.mockResolvedValue({
+        id: catalogRecordId,
+        metadata: {},
+      });
+
+      tasksManager = new TasksManager(
+        logger,
+        configMock,
+        syncClientMock,
+        jobManagerClientMock,
+        mapPublisherClientMock,
+        catalogClientMock,
+        linkBuilderMock,
+        metadataMergerMock
+      );
+
+      await tasksManager.taskComplete(jobId, taskId);
+
+      expect(updateJobStatusMock).toHaveBeenCalledTimes(1);
+      expect(updateJobStatusMock).toHaveBeenCalledWith(jobId, OperationStatus.FAILED, undefined, 'Failed to update ingestion');
+      expect(mergeMock).toHaveBeenCalledTimes(0);
+      expect(updateMock).toHaveBeenCalledTimes(0);
+      expect(findRecordMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should not update job status if job status is not "In-Progress"', async function () {
+      setValue('ingestionUpdateJobType', ingestionUpdateJobType);
+      setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });
+
+      const rasterMapTestData = { ...testMetadata };
+      rasterMapTestData.productType = ProductType.RASTER_MAP;
+
+      getJobStatusMock.mockReturnValue({
+        id: jobId,
+        isCompleted: false,
+        isSuccessful: false,
+        percentage: 90,
+        relativePath: `test/${ProductType.RASTER_MAP}`,
+        metadata: rasterMapTestData,
+        type: ingestionUpdateJobType,
+        successTasksCount: 3,
+        status: OperationStatus.ABORTED,
+      });
+
+      getTaskMock.mockReturnValue({
+        id: taskId,
+        jobId: jobId,
+        type: tileMergeTask,
+        status: OperationStatus.COMPLETED,
+      });
+
+      const catalogRecordId = 'a6fbf0dc-d82c-4c8d-ad28-b8f56c685a23';
+      findRecordMock.mockResolvedValue({
+        id: catalogRecordId,
+        metadata: {},
+      });
+
+      tasksManager = new TasksManager(
+        logger,
+        configMock,
+        syncClientMock,
+        jobManagerClientMock,
+        mapPublisherClientMock,
+        catalogClientMock,
+        linkBuilderMock,
+        metadataMergerMock
+      );
+
+      await tasksManager.taskComplete(jobId, taskId);
+
+      expect(updateJobStatusMock).toHaveBeenCalledTimes(0);
       expect(mergeMock).toHaveBeenCalledTimes(1);
       expect(updateMock).toHaveBeenCalledTimes(1);
       expect(findRecordMock).toHaveBeenCalledTimes(1);
