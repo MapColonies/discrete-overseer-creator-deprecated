@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: discrete-overseer-creator
-  description: basic template for map colonies service
+  description: service that responsible for validating and ingesting discrete layers
   version: 1.0.0
   license:
     name: MIT
