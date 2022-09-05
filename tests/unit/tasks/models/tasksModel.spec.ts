@@ -277,7 +277,7 @@ describe('TasksManager', () => {
       expect(updateMock).toHaveBeenCalledTimes(1);
       expect(findRecordMock).toHaveBeenCalledTimes(1);
     });
-    
+
     it('should update job status to "Failed" if task status is "Failed"', async function () {
       setValue('ingestionUpdateJobType', ingestionUpdateJobType);
       setValue('ingestionTaskType', { tileMergeTask, tileSplitTask });

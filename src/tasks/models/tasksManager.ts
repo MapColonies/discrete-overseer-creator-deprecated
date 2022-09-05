@@ -65,7 +65,7 @@ export class TasksManager {
         `[TasksManager][taskComplete] Could not complete task. Job type "${job.type}" and task type "${task.type}" combination isn't supported.`
       );
     }
-    
+
     if (job.status === OperationStatus.IN_PROGRESS) {
       await this.jobManager.updateJobStatus(job.id, OperationStatus.IN_PROGRESS, job.percentage);
     }
