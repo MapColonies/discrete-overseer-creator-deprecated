@@ -14,7 +14,6 @@ interface IMatrixValues {
 export class SQLiteClient {
   public readonly packageName: string;
   private readonly fullPath: string;
-  private readonly packageNameWithoutExtension: string;
   private readonly layerSourcesPath: string;
   private readonly logger: ILogger;
   private readonly config: IConfig;
@@ -25,14 +24,14 @@ export class SQLiteClient {
     this.layerSourcesPath = this.config.get<string>('layerSourceDir');
     this.packageName = packageName;
     this.fullPath = join(this.layerSourcesPath, originDirectory, this.packageName);
-    this.packageNameWithoutExtension = this.packageName.substring(0, this.packageName.indexOf('.'));
   }
 
   public getGpkgIndex(): boolean {
     let db: SQLiteDB | undefined = undefined;
     try {
       db = new Database(this.fullPath, { fileMustExist: true });
-      return this.getGpkgUniqueConstraintIndex(db) || this.getGpkgManualIndex(db);
+      const tableName = this.getGpkgTableName(db);
+      return this.getGpkgUniqueConstraintIndex(db, tableName) || this.getGpkgManualIndex(db, tableName);
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       throw new Error(`Failed to validate GPKG index: ${error}`);
@@ -70,10 +69,10 @@ export class SQLiteClient {
     }
   }
 
-  private getGpkgManualIndex(db: SQLiteDB): boolean {
+  private getGpkgManualIndex(db: SQLiteDB, tableName: string): boolean {
     const sql = `SELECT count(*) as count
       FROM sqlite_master 
-        WHERE type = 'index' AND tbl_name='${this.packageNameWithoutExtension}' AND sql LIKE '%zoom_level%'
+        WHERE type = 'index' AND tbl_name='${tableName}' AND sql LIKE '%zoom_level%'
          AND sql LIKE '%tile_column%'
           AND sql LIKE '%tile_row%';`;
 
@@ -82,8 +81,8 @@ export class SQLiteClient {
     return indexCount != 0;
   }
 
-  private getGpkgUniqueConstraintIndex(db: SQLiteDB): boolean {
-    let sql = `SELECT name FROM pragma_index_list('${this.packageNameWithoutExtension}') WHERE "unique" = 1 AND origin = 'u';`;
+  private getGpkgUniqueConstraintIndex(db: SQLiteDB, tableName: string): boolean {
+    let sql = `SELECT name FROM pragma_index_list('${tableName}') WHERE "unique" = 1 AND origin = 'u';`;
     this.logger.log('debug', `Executing query ${sql} on DB ${this.fullPath}`);
     const indexes = db.prepare(sql).all() as { name: string }[];
     for (const index of indexes) {
@@ -95,5 +94,17 @@ export class SQLiteClient {
       }
     }
     return false;
+  }
+
+  private getGpkgTableName(db: SQLiteDB): string {
+    const sql = `SELECT table_name FROM "gpkg_contents";`;
+    this.logger.log('debug', `Executing query ${sql} on DB ${this.fullPath}`);
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const tableNames = db.prepare(sql).all() as { table_name: string }[];
+    if (tableNames.length !== 1) {
+      throw new Error('invalid gpkg, should have single table name');
+    }
+    this.logger.log('debug', `Extract table name: ${tableNames[0].table_name}`);
+    return tableNames[0].table_name;
   }
 }

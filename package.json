@@ -1,7 +1,7 @@
 {
   "name": "discrete-overseer-creator",
   "version": "3.4.0",
-  "description": "This is template for map colonies typescript service",
+  "description": "Service that responsible for validating and ingesting discrete layers",
   "main": "./src/index.ts",
   "scripts": {
     "test:unit": "jest --config=./tests/configurations/unit/jest.config.js",
