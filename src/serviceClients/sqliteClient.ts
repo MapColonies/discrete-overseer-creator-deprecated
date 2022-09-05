@@ -30,7 +30,7 @@ export class SQLiteClient {
     let db: SQLiteDB | undefined = undefined;
     try {
       db = new Database(this.fullPath, { fileMustExist: true });
-      const tableName = this.getGpkgName(db);
+      const tableName = this.getGpkgTableName(db);
       return this.getGpkgUniqueConstraintIndex(db, tableName) || this.getGpkgManualIndex(db, tableName);
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -96,7 +96,7 @@ export class SQLiteClient {
     return false;
   }
 
-  private getGpkgName(db: SQLiteDB): string {
+  private getGpkgTableName(db: SQLiteDB): string {
     const sql = `SELECT table_name FROM "gpkg_contents";`;
     this.logger.log('debug', `Executing query ${sql} on DB ${this.fullPath}`);
     // eslint-disable-next-line @typescript-eslint/naming-convention

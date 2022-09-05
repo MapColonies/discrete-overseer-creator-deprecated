@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: service-name
+  title: discrete-overseer-creator
   description: basic template for map colonies service
   version: 1.0.0
   license:
