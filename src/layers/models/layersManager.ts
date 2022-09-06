@@ -108,9 +108,15 @@ export class LayersManager {
     if (requestedLayerVersion > highestExistsLayerVersion) {
       return JobAction.UPDATE;
     }
-    throw new BadRequestError(
-      `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same or higher version (${highestExistsLayerVersion}) in catalog`
-    );
+    if (requestedLayerVersion === highestExistsLayerVersion) {
+      throw new ConflictError(
+        `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same version (${highestExistsLayerVersion}) in catalog`
+      );
+    } else {
+      throw new BadRequestError(
+        `layer id: ${resourceId} version: ${version} product type: ${productType} has already higher version (${highestExistsLayerVersion}) in catalog`
+      );
+    }
   }
 
   private getTaskType(jobType: JobAction, files: string[], originDirectory: string): string {
@@ -157,6 +163,7 @@ export class LayersManager {
   private async validateNotExistsInCatalog(resourceId: string, version?: string, productType?: string): Promise<void> {
     const existsInCatalog = await this.catalog.exists(resourceId, version, productType);
     if (existsInCatalog) {
+      console.log('blabla**********************')
       throw new ConflictError(`layer id: ${resourceId} version: ${version as string}, already exists in catalog`);
     }
   }
