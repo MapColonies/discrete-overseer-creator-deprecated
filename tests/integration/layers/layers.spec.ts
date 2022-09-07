@@ -187,6 +187,25 @@ describe('layers', function () {
       expect(createTasksMock).toHaveBeenCalledTimes(3);
     });
 
+    it('should return 200 status code for update layer operation with higher version on exists', async function () {
+      findJobsMock.mockResolvedValue([]);
+      getLayerVersionsMock.mockResolvedValue([1.0]);
+      mapExistsMock.mockResolvedValue(true);
+      const higherVersionMetadata = { ...validTestData.metadata, productVersion: '3.0' };
+      const validHigherVersionRecord = { ...validTestData, fileNames: ['indexed.gpkg'], originDirectory: 'files', metadata: higherVersionMetadata };
+
+      const response = await requestSender.createLayer(validHigherVersionRecord);
+
+      expect(response).toSatisfyApiSpec();
+      expect(response.status).toBe(httpStatusCodes.OK);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
     it('should return 200 status code with valid layer polygon parts', async function () {
       findJobsMock.mockResolvedValue([]);
       const testData = _.cloneDeep(validTestData);
@@ -290,6 +309,24 @@ describe('layers', function () {
       expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 409 status code for update / ingest new layer operation with equal exists version on exists', async function () {
+      let invalidTestMetaDataHasLowerVersion = { ...validTestData.metadata } as Record<string, unknown>;
+      invalidTestMetaDataHasLowerVersion = { ...invalidTestMetaDataHasLowerVersion, productVersion: '1.0' };
+      const invalidTestData = { ...validTestData, metadata: invalidTestMetaDataHasLowerVersion };
+      getLayerVersionsMock.mockResolvedValue([1.0]);
+      findJobsMock.mockResolvedValue([]);
+      const response = await requestSender.createLayer(invalidTestData);
+      expect(response).toSatisfyApiSpec();
+
+      expect(response.status).toBe(httpStatusCodes.CONFLICT);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(0);
