@@ -54,21 +54,6 @@ export class CatalogClient extends HttpClient {
     return res[0];
   }
 
-  private async getLayerVersions(productId: string, productType: string): Promise<number[] | undefined> {
-    const req = {
-      metadata: {
-        productId,
-        productType,
-      },
-    };
-    const res = await this.post<string[]>('/records/find/versions', req);
-    const layerVersions = res.map((str) => {
-      return Number(str);
-    });
-
-    return layerVersions;
-  }
-
   public async publish(record: IRasterCatalogUpsertRequestBody): Promise<string> {
     const res = await this.post<ICreateRecordResponse>('/records', record);
     return res.id;
@@ -89,5 +74,20 @@ export class CatalogClient extends HttpClient {
       return highestExistsLayerVersion;
     }
     return undefined;
+  }
+
+  private async getLayerVersions(productId: string, productType: string): Promise<number[] | undefined> {
+    const req = {
+      metadata: {
+        productId,
+        productType,
+      },
+    };
+    const res = await this.post<string[]>('/records/find/versions', req);
+    const layerVersions = res.map((str) => {
+      return Number(str);
+    });
+
+    return layerVersions;
   }
 }
