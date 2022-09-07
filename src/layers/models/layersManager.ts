@@ -96,23 +96,23 @@ export class LayersManager {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
-    const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
+    const highestVersion = await this.catalog.getHighestLayerVersion(resourceId, productType);
 
-    if (!(Array.isArray(existsLayerVersions) && existsLayerVersions.length > 0)) {
+    if (highestVersion === undefined) {
       return JobAction.NEW;
     }
-    const highestExistsLayerVersion = Math.max(...existsLayerVersions);
+
     const requestedLayerVersion = parseFloat(version);
-    if (requestedLayerVersion > highestExistsLayerVersion) {
+    if (requestedLayerVersion > highestVersion) {
       return JobAction.UPDATE;
     }
-    if (requestedLayerVersion === highestExistsLayerVersion) {
+    if (requestedLayerVersion === highestVersion) {
       throw new ConflictError(
-        `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same version (${highestExistsLayerVersion}) in catalog`
+        `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same version (${highestVersion}) in catalog`
       );
     } else {
       throw new BadRequestError(
-        `layer id: ${resourceId} version: ${version} product type: ${productType} has already higher version (${highestExistsLayerVersion}) in catalog`
+        `layer id: ${resourceId} version: ${version} product type: ${productType} has already higher version (${highestVersion}) in catalog`
       );
     }
   }

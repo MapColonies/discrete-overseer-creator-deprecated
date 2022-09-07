@@ -54,7 +54,29 @@ export class CatalogClient extends HttpClient {
     return res[0];
   }
 
-  public async getLayerVersions(productId: string, productType: string): Promise<number[] | undefined> {
+  public async publish(record: IRasterCatalogUpsertRequestBody): Promise<string> {
+    const res = await this.post<ICreateRecordResponse>('/records', record);
+    return res.id;
+  }
+
+  public async update(id: string, metadata: LayerMetadata): Promise<IUpdateRecordResponse> {
+    const req = {
+      metadata,
+    };
+    const res = await this.put<IUpdateRecordResponse>(`/records/${id}`, req);
+    return res;
+  }
+
+  public async getHighestLayerVersion(productId: string, productType: string): Promise<number | undefined> {
+    const existsLayerVersions = await this.getLayerVersions(productId, productType);
+    if (Array.isArray(existsLayerVersions) && existsLayerVersions.length > 0) {
+      const highestExistsLayerVersion = Math.max(...existsLayerVersions);
+      return highestExistsLayerVersion;
+    }
+    return undefined;
+  }
+
+  private async getLayerVersions(productId: string, productType: string): Promise<number[] | undefined> {
     const req = {
       metadata: {
         productId,
@@ -67,18 +89,5 @@ export class CatalogClient extends HttpClient {
     });
 
     return layerVersions;
-  }
-
-  public async publish(record: IRasterCatalogUpsertRequestBody): Promise<string> {
-    const res = await this.post<ICreateRecordResponse>('/records', record);
-    return res.id;
-  }
-
-  public async update(id: string, metadata: LayerMetadata): Promise<IUpdateRecordResponse> {
-    const req = {
-      metadata,
-    };
-    const res = await this.put<IUpdateRecordResponse>(`/records/${id}`, req);
-    return res;
   }
 }

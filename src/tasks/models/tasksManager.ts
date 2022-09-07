@@ -136,9 +136,12 @@ export class TasksManager {
       await this.abortJobWithStatusFailed(job.id, `Failed to update ingestion`);
       job.status = OperationStatus.FAILED;
     } else if (task.status === OperationStatus.COMPLETED) {
+      const highestVersion = await this.catalogClient.getHighestLayerVersion(job.metadata.productId as string, job.metadata.productType as string);
+      const highestVersionToString = Number.isInteger(highestVersion) ? (highestVersion?.toFixed(1) as string) : String(highestVersion);
+
       const catalogRecord = await this.catalogClient.findRecord(
         job.metadata.productId as string,
-        job.metadata.productVersion as string,
+        highestVersionToString,
         job.metadata.productType as string
       );
 
@@ -148,7 +151,7 @@ export class TasksManager {
           catalogRecord?.id as string
         }: ${JSON.stringify(catalogRecord?.metadata)}`
       );
-      const mergedData = this.metadataMerger.merge(job.metadata, catalogRecord?.metadata as LayerMetadata);
+      const mergedData = this.metadataMerger.merge(catalogRecord?.metadata as LayerMetadata, job.metadata);
       this.logger.log(`info`, `Updating catalog record ${catalogRecord?.id as string} with new metadata`);
       await this.catalogClient.update(catalogRecord?.id as string, mergedData);
 
