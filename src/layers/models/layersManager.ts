@@ -63,7 +63,6 @@ export class LayersManager {
 
     const jobType = await this.getJobType(data);
     const taskType = this.getTaskType(jobType, files, originDirectory);
-
     const existsInMapProxy = await this.isExistsInMapProxy(resourceId, productType);
 
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
@@ -87,7 +86,6 @@ export class LayersManager {
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
-
       await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
     } else {
       throw new BadRequestError('Unsupported job type');
@@ -108,9 +106,15 @@ export class LayersManager {
     if (requestedLayerVersion > highestExistsLayerVersion) {
       return JobAction.UPDATE;
     }
-    throw new BadRequestError(
-      `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same or higher version (${highestExistsLayerVersion}) in catalog`
-    );
+    if (requestedLayerVersion === highestExistsLayerVersion) {
+      throw new ConflictError(
+        `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same version (${highestExistsLayerVersion}) in catalog`
+      );
+    } else {
+      throw new BadRequestError(
+        `layer id: ${resourceId} version: ${version} product type: ${productType} has already higher version (${highestExistsLayerVersion}) in catalog`
+      );
+    }
   }
 
   private getTaskType(jobType: JobAction, files: string[], originDirectory: string): string {
@@ -118,7 +122,6 @@ export class LayersManager {
     if (validGpkgFiles) {
       this.grids = getGrids(files, originDirectory);
     }
-
     if (jobType === JobAction.NEW) {
       if (validGpkgFiles) {
         return this.tileMergeTask;
