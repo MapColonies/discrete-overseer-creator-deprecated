@@ -108,9 +108,15 @@ export class LayersManager {
     if (requestedLayerVersion > highestVersion) {
       return JobAction.UPDATE;
     }
-    throw new BadRequestError(
-      `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same or higher version (${highestVersion}) in catalog`
-    );
+    if (requestedLayerVersion === highestVersion) {
+      throw new ConflictError(
+        `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same version (${highestVersion}) in catalog`
+      );
+    } else {
+      throw new BadRequestError(
+        `layer id: ${resourceId} version: ${version} product type: ${productType} has already higher version (${highestVersion}) in catalog`
+      );
+    }
   }
 
   private getTaskType(jobType: JobAction, files: string[], originDirectory: string): string {
