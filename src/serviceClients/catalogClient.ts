@@ -54,7 +54,7 @@ export class CatalogClient extends HttpClient {
     return res[0];
   }
 
-  public async getLayerVersions(productId: string, productType: string): Promise<number[] | undefined> {
+  private async getLayerVersions(productId: string, productType: string): Promise<number[] | undefined> {
     const req = {
       metadata: {
         productId,

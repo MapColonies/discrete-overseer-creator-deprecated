@@ -1,7 +1,7 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
 import { createLayerJobMock, findJobsMock, jobManagerClientMock } from '../../../mocks/clients/jobManagerClient';
-import { catalogExistsMock, catalogClientMock, getLayerVersionsMock } from '../../../mocks/clients/catalogClient';
+import { catalogExistsMock, catalogClientMock, getHighestLayerVersionMock } from '../../../mocks/clients/catalogClient';
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../../mocks/config';
 import { logger } from '../../../mocks/logger';
@@ -81,7 +81,7 @@ describe('LayersManager', () => {
         originDirectory: '/here',
       };
 
-      getLayerVersionsMock.mockResolvedValue([]);
+      getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -102,7 +102,7 @@ describe('LayersManager', () => {
       );
 
       await layersManager.createLayer(testData);
-      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
       expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(createSplitTilesTasksMock).toHaveBeenCalledTimes(1);
@@ -112,7 +112,7 @@ describe('LayersManager', () => {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
 
-      getLayerVersionsMock.mockResolvedValue([1.0, 2.0]);
+      getHighestLayerVersionMock.mockResolvedValue(2.0);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       mapExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
@@ -134,7 +134,7 @@ describe('LayersManager', () => {
 
       await layersManager.createLayer(testData);
 
-      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
       expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(validateGpkgFilesMock).toHaveBeenCalledTimes(1);
@@ -145,7 +145,7 @@ describe('LayersManager', () => {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
 
-      getLayerVersionsMock.mockResolvedValue([1.0, 2.0]);
+      getHighestLayerVersionMock.mockResolvedValue([1.0, 2.0]);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       mapExistsMock.mockResolvedValue(false);
       findJobsMock.mockResolvedValue([]);
@@ -170,7 +170,7 @@ describe('LayersManager', () => {
       };
 
       await expect(action).rejects.toThrow(BadRequestError);
-      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
       expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
     });
@@ -179,7 +179,7 @@ describe('LayersManager', () => {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
 
-      getLayerVersionsMock.mockResolvedValue([4.0]);
+      getHighestLayerVersionMock.mockResolvedValue(4.0);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
       layersManager = new LayersManager(
@@ -199,7 +199,7 @@ describe('LayersManager', () => {
 
       await expect(action).rejects.toThrow(BadRequestError);
       expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
-      expect(getLayerVersionsMock).toHaveBeenCalledTimes(0);
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(0);
       expect(findJobsMock).toHaveBeenCalledTimes(0);
       expect(createSplitTilesTasksMock).toHaveBeenCalledTimes(0);
     });
@@ -209,7 +209,7 @@ describe('LayersManager', () => {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
 
-      getLayerVersionsMock.mockResolvedValue([2.5]);
+      getHighestLayerVersionMock.mockResolvedValue(2.5);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
       validateGpkgFilesMock.mockReturnValue(false);
@@ -233,7 +233,7 @@ describe('LayersManager', () => {
       };
 
       await expect(action).rejects.toThrow(BadRequestError);
-      expect(getLayerVersionsMock).toHaveBeenCalledTimes(1);
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
     });
 
     it('fail if layer status is pending', async function () {
@@ -300,7 +300,7 @@ describe('LayersManager', () => {
       ];
 
       setValue({ 'tiling.zoomGroups': '1' });
-      getLayerVersionsMock.mockResolvedValue([]);
+      getHighestLayerVersionMock.mockResolvedValue(undefined);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.COMPLETED }]);
@@ -338,7 +338,7 @@ describe('LayersManager', () => {
         },
       ];
       setValue({ 'tiling.zoomGroups': '1' });
-      getLayerVersionsMock.mockResolvedValue([]);
+      getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -365,7 +365,7 @@ describe('LayersManager', () => {
 
     it('fail if layer exists in mapping server for "New" job type', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      getLayerVersionsMock.mockResolvedValue([]);
+      getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(true);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -391,7 +391,7 @@ describe('LayersManager', () => {
 
     it('fail if layer exists in catalog for "New" job type', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      getLayerVersionsMock.mockResolvedValue([]);
+      getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(true);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -417,7 +417,7 @@ describe('LayersManager', () => {
 
     it('fail if files are missing for "New" job type', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
-      getLayerVersionsMock.mockResolvedValue([]);
+      getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(false);
