@@ -137,7 +137,7 @@ export class TasksManager {
       job.status = OperationStatus.FAILED;
     } else if (task.status === OperationStatus.COMPLETED) {
       const highestVersion = await this.catalogClient.getHighestLayerVersion(job.metadata.productId as string, job.metadata.productType as string);
-      const highestVersionToString = Number.isInteger(highestVersion) ? highestVersion?.toFixed(1) as string : String(highestVersion);
+      const highestVersionToString = Number.isInteger(highestVersion) ? (highestVersion?.toFixed(1) as string) : String(highestVersion);
 
       const catalogRecord = await this.catalogClient.findRecord(
         job.metadata.productId as string,
