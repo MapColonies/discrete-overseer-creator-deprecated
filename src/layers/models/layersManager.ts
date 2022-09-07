@@ -109,7 +109,7 @@ export class LayersManager {
       return JobAction.UPDATE;
     }
     throw new BadRequestError(
-      `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same or higher version (${highestExistsLayerVersion}) in catalog`
+      `layer id: ${resourceId} version: ${version} product type: ${productType} has already the same or higher version (${highestVersion}) in catalog`
     );
   }
 
