@@ -72,7 +72,7 @@ export class JobManagerClient extends HttpClient {
     const retryConfig = parseConfig(config.get<IHttpRetryConfig>('httpRetry'));
     super(logger, retryConfig);
     this.targetService = 'DiscreteIngestionDB'; //name of target for logs
-    this.axiosOptions.baseURL = config.get<string>('storageServiceURL');
+    this.axiosOptions.baseURL = config.get<string>('jobManagerURL');
   }
 
   public async createLayerJob(

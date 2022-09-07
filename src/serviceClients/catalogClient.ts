@@ -81,4 +81,13 @@ export class CatalogClient extends HttpClient {
     const res = await this.put<IUpdateRecordResponse>(`/records/${id}`, req);
     return res;
   }
+
+  public async getHighestLayerVersion(productId: string, productType: string): Promise<number | undefined> {
+    const existsLayerVersions = await this.getLayerVersions(productId, productType);
+    if ((Array.isArray(existsLayerVersions) && existsLayerVersions.length > 0)) {
+      const highestExistsLayerVersion = Math.max(...existsLayerVersions);
+      return highestExistsLayerVersion;
+    }
+    return undefined;
+  }
 }
