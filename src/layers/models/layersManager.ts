@@ -98,14 +98,14 @@ export class LayersManager {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
-    const existsLayerVersions = await this.catalog.getLayerVersions(resourceId, productType);
+    const highestVersion = await this.catalog.getHighestLayerVersion(resourceId, productType);
 
-    if (!(Array.isArray(existsLayerVersions) && existsLayerVersions.length > 0)) {
+    if (highestVersion === undefined) {
       return JobAction.NEW;
     }
-    const highestExistsLayerVersion = Math.max(...existsLayerVersions);
+
     const requestedLayerVersion = parseFloat(version);
-    if (requestedLayerVersion > highestExistsLayerVersion) {
+    if (requestedLayerVersion > highestVersion) {
       return JobAction.UPDATE;
     }
     throw new BadRequestError(
