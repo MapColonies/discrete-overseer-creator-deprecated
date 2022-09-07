@@ -63,7 +63,6 @@ export class LayersManager {
 
     const jobType = await this.getJobType(data);
     const taskType = this.getTaskType(jobType, files, originDirectory);
-
     const existsInMapProxy = await this.isExistsInMapProxy(resourceId, productType);
 
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
@@ -87,7 +86,6 @@ export class LayersManager {
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
-
       await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
     } else {
       throw new BadRequestError('Unsupported job type');
@@ -124,7 +122,6 @@ export class LayersManager {
     if (validGpkgFiles) {
       this.grids = getGrids(files, originDirectory);
     }
-
     if (jobType === JobAction.NEW) {
       if (validGpkgFiles) {
         return this.tileMergeTask;
@@ -163,7 +160,6 @@ export class LayersManager {
   private async validateNotExistsInCatalog(resourceId: string, version?: string, productType?: string): Promise<void> {
     const existsInCatalog = await this.catalog.exists(resourceId, version, productType);
     if (existsInCatalog) {
-      console.log('blabla**********************')
       throw new ConflictError(`layer id: ${resourceId} version: ${version as string}, already exists in catalog`);
     }
   }
