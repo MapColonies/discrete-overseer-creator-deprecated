@@ -37,7 +37,7 @@ interface ICreateJobResponse {
   taskIds: string[];
 }
 
-interface IGetJobResponse {
+export interface IGetJobResponse {
   id: string;
   resourceId?: string;
   version?: string;
@@ -165,6 +165,17 @@ export class JobManagerClient extends HttpClient {
     if (typeof res === 'string' || res.length === 0) {
       return [];
     }
+    return res;
+  }
+
+  public async findJobsByInternalId(internalId: string): Promise<IGetJobResponse[]> {
+    const getLayerUrl = `/jobs`;
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { internalId });
+    if (typeof res === 'string' || res.length === 0) {
+      return [];
+    }
+
+    console.log('RES: ', res);
     return res;
   }
 

@@ -12,7 +12,7 @@ import { ConflictError } from '../../common/exceptions/http/conflictError';
 import { ILogger, IRecordIds } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
-import { JobManagerClient } from '../../serviceClients/jobManagerClient';
+import { IGetJobResponse, JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { MergeTilesTasker } from '../../merge/mergeTilesTasker';
@@ -34,6 +34,7 @@ export class LayersManager {
     private readonly zoomLevelCalculator: ZoomLevelCalculator,
     private readonly db: JobManagerClient,
     private readonly catalog: CatalogClient,
+    private readonly jobManager: JobManagerClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator,
     private readonly splitTilesTasker: SplitTilesTasker,
@@ -209,23 +210,25 @@ export class LayersManager {
   private async generateRecordIds(): Promise<IRecordIds> {
     let id: string;
     let isExists: boolean;
+    let jobs: IGetJobResponse[];
     try {
       do {
         id = uuidv4();
         isExists = await this.catalog.existsByRecordId(id);
-      } while (!isExists);
+        jobs = await this.jobManager.findJobsByInternalId(id);
+      } while (isExists && jobs.length > 0);
       
       const displayPath = uuidv4();
       const recordIds = {
         id: id,
         displayPath: displayPath,
       };
-
+      
       this.logger.log('info', `generated record id: ${recordIds.id}, display path: ${recordIds.displayPath}`);
 
       return recordIds;
     } catch (err) {
-      this.logger.log('info', `failed to generate record id: ${(err as Error).message}`);
+      this.logger.log('error', `failed to generate record id: ${(err as Error).message}`);
       throw err;
     }
   }
