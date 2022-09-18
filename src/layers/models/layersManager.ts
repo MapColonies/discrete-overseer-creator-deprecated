@@ -216,7 +216,6 @@ export class LayersManager {
         this.logger.log('info', `generating record id`); 
         id = uuidv4();
         isExists = await this.catalog.existsByRecordId(id);
-        id = '55c5d24b-f6c8-41a3-b043-4cd9888f9f23';
         jobs = await this.jobManager.findJobsByInternalId(id);
       } while (isExists && jobs.length > 0);
       
