@@ -209,16 +209,24 @@ export class LayersManager {
   private async generateRecordIds(): Promise<IRecordIds> {
     let id: string;
     let isExists: boolean;
-    do {
-      id = uuidv4();
-      isExists = await this.catalog.existsByRecordId(id);
-    } while (!isExists);
+    try {
+      do {
+        id = uuidv4();
+        isExists = await this.catalog.existsByRecordId(id);
+      } while (!isExists);
+      
+      const displayPath = uuidv4();
+      const recordIds = {
+        id: id,
+        displayPath: displayPath,
+      };
 
-    const displayPath = uuidv4();
-    const recordIds = {
-      id: id,
-      displayPath: displayPath,
-    };
-    return recordIds;
+      this.logger.log('info', `generated record id: ${recordIds.id}, display path: ${recordIds.displayPath}`);
+
+      return recordIds;
+    } catch (err) {
+      this.logger.log('info', `failed to generate record id: ${(err as Error).message}`);
+      throw err;
+    }
   }
 }
