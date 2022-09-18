@@ -1,6 +1,7 @@
 import config from 'config';
 import { GeoJSON } from 'geojson';
 import isValidGeoJson from '@turf/boolean-valid';
+import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection, Geometry, geojsonType } from '@turf/turf';
 import { IngestionParams, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
@@ -8,7 +9,7 @@ import { Services } from '../../common/constants';
 import { JobAction, OperationStatus, TaskAction } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
-import { ILogger } from '../../common/interfaces';
+import { ILogger, IRecordIds } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
 import { JobManagerClient } from '../../serviceClients/jobManagerClient';
@@ -47,7 +48,6 @@ export class LayersManager {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
-    const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
     const originDirectory = data.originDirectory;
     const files = data.fileNames;
     const polygon = data.metadata.footprint;
@@ -67,6 +67,9 @@ export class LayersManager {
 
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
 
+    const recordIds = await this.generateRecordIds();
+    data.metadata.displayPath = recordIds.displayPath;
+
     if (jobType === JobAction.NEW) {
       await this.validateNotExistsInCatalog(resourceId, version, productType);
       if (existsInMapProxy) {
@@ -75,18 +78,22 @@ export class LayersManager {
 
       this.setDefaultValues(data);
 
+      const layerRelativePath = `${recordIds.id}/${recordIds.displayPath}`;
+
       if (taskType === TaskAction.MERGE_TILES) {
-        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
+        await this.mergeTilesTasker.createMergeTilesTasks(data, recordIds.id, layerRelativePath, taskType, jobType, this.grids, extent);
       } else {
         const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
-        await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
+        await this.splitTilesTasker.createSplitTilesTasks(data, recordIds.id, layerRelativePath, layerZoomRanges, jobType, taskType);
       }
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (jobType === JobAction.UPDATE) {
+      const record = await this.catalog.findRecord(resourceId, undefined, productType);
+      const layerRelativePath = `${record?.id as string}/${record?.metadata.displayPath as string}`;
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
-      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
+      await this.mergeTilesTasker.createMergeTilesTasks(data, recordIds.id, layerRelativePath, taskType, jobType, this.grids, extent);
     } else {
       throw new BadRequestError('Unsupported job type');
     }
@@ -197,5 +204,21 @@ export class LayersManager {
         }
       });
     }
+  }
+
+  private async generateRecordIds(): Promise<IRecordIds> {
+    let id: string;
+    let isExists: boolean;
+    do {
+      id = uuidv4();
+      isExists = await this.catalog.existsByRecordId(id);
+    } while (!isExists);
+
+    const displayPath = uuidv4();
+    const recordIds = {
+      id: id,
+      displayPath: displayPath,
+    };
+    return recordIds;
   }
 }

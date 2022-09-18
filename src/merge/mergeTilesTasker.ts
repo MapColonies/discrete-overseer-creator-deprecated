@@ -120,6 +120,7 @@ export class MergeTilesTasker {
 
   public async createMergeTilesTasks(
     data: IngestionParams,
+    catalogId: string,
     layerRelativePath: string,
     taskType: string,
     jobType: string,
@@ -150,7 +151,7 @@ export class MergeTilesTasker {
       mergeTaskBatch.push(mergeTask);
       if (mergeTaskBatch.length === this.mergeTaskBatchSize) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch);
+          jobId = await this.db.createLayerJob(data, catalogId, layerRelativePath, jobType, taskType, mergeTaskBatch);
         } else {
           try {
             await this.db.createTasks(jobId, mergeTaskBatch, taskType);
@@ -164,7 +165,7 @@ export class MergeTilesTasker {
     }
     if (mergeTaskBatch.length !== 0) {
       if (jobId === undefined) {
-        await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch);
+        await this.db.createLayerJob(data, catalogId, layerRelativePath, jobType, taskType, mergeTaskBatch);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {

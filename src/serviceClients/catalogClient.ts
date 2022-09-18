@@ -33,7 +33,13 @@ export class CatalogClient extends HttpClient {
     return res.length > 0;
   }
 
-  public async findRecord(productId: string, productVersion: string, productType: string): Promise<IFindResponseRecord | undefined> {
+  public async existsByRecordId(recordId: string): Promise<boolean> {
+    const res = await this.get<boolean>(`/records/exists/${recordId}`);
+
+    return res;
+  }
+
+  public async findRecord(productId: string, productVersion?: string, productType?: string): Promise<IFindResponseRecord | undefined> {
     const req = {
       metadata: {
         productId,

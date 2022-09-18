@@ -44,7 +44,7 @@
   "dependencies": {
     "@map-colonies/error-express-handler": "^1.2.0",
     "@map-colonies/mc-logger": "^2.0.2",
-    "@map-colonies/mc-model-types": "^12.1.0",
+    "@map-colonies/mc-model-types": "file:../mc-models/map-colonies-mc-model-types-13.1.3.tgz",
     "@map-colonies/mc-probe": "^1.0.0",
     "@map-colonies/mc-utils": "^1.4.6",
     "@map-colonies/storage-explorer-middleware": "^1.2.7",
@@ -64,6 +64,7 @@
     "reflect-metadata": "^0.1.13",
     "swagger-ui-express": "^4.1.6",
     "tsyringe": "^4.5.0",
+    "uuid": "^9.0.0",
     "xmlbuilder": "^15.1.1"
   },
   "devDependencies": {
@@ -80,6 +81,7 @@
     "@types/multer": "^1.4.5",
     "@types/supertest": "^2.0.12",
     "@types/swagger-ui-express": "^4.1.2",
+    "@types/uuid": "^8.3.4",
     "@types/yamljs": "^0.2.31",
     "commitlint": "^9.1.2",
     "copyfiles": "^2.3.0",

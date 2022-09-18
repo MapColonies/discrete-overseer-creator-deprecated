@@ -77,6 +77,7 @@ export class JobManagerClient extends HttpClient {
 
   public async createLayerJob(
     data: IngestionParams,
+    catalogId: string,
     layerRelativePath: string,
     jobType: string,
     taskType: string,
@@ -84,13 +85,15 @@ export class JobManagerClient extends HttpClient {
   ): Promise<string> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
+    const displayPath = data.metadata.displayPath as string;
     const createLayerTasksUrl = `/jobs`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
+      internalId: catalogId,
       version: version,
       type: jobType,
       status: OperationStatus.IN_PROGRESS,
-      parameters: { ...data, layerRelativePath } as unknown as Record<string, unknown>,
+      parameters: { ...data, layerRelativePath, displayPath } as unknown as Record<string, unknown>,
       producerName: data.metadata.producerName,
       productName: data.metadata.productName,
       productType: data.metadata.productType,
@@ -128,6 +131,7 @@ export class JobManagerClient extends HttpClient {
     const jobPercentage = Math.trunc((res.completedTasks / res.taskCount) * 100);
     return {
       id: res.id,
+      internalId: res.internalId as string,
       status: res.status as OperationStatus,
       isCompleted: res.completedTasks + res.failedTasks + res.expiredTasks + res.abortedTasks === res.taskCount,
       isSuccessful: res.completedTasks === res.taskCount,

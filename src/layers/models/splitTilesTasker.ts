@@ -21,6 +21,7 @@ export class SplitTilesTasker {
 
   public async createSplitTilesTasks(
     data: IngestionParams,
+    catalogId: string,
     layerRelativePath: string,
     layerZoomRanges: ITaskZoomRange[],
     jobType: string,
@@ -33,7 +34,7 @@ export class SplitTilesTasker {
       taskBatch.push(task);
       if (taskBatch.length === this.tasksBatchSize) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, taskBatch);
+          jobId = await this.db.createLayerJob(data, catalogId, layerRelativePath, jobType, taskType, taskBatch);
         } else {
           // eslint-disable-next-line no-useless-catch
           try {
@@ -49,7 +50,7 @@ export class SplitTilesTasker {
     }
     if (taskBatch.length !== 0) {
       if (jobId === undefined) {
-        await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, taskBatch);
+        await this.db.createLayerJob(data, catalogId, layerRelativePath, jobType, taskType, taskBatch);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {

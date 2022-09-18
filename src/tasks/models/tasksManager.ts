@@ -71,7 +71,7 @@ export class TasksManager {
     }
   }
 
-  private async publishToCatalog(jobId: string, metadata: LayerMetadata, layerName: string): Promise<string> {
+  private async publishToCatalog(jobId: string, id: string, metadata: LayerMetadata, layerName: string): Promise<string> {
     try {
       this.logger.log('info', `[TasksManager][publishToCatalog] layer ${metadata.productId as string} version ${metadata.productVersion as string}`);
       const linkData: ILinkBuilderData = {
@@ -79,6 +79,7 @@ export class TasksManager {
         layerName: layerName,
       };
       const publishModel: IRasterCatalogUpsertRequestBody = {
+        id: id,
         metadata: metadata,
         links: this.linkBuilder.createLinks(linkData),
       };
@@ -172,7 +173,7 @@ export class TasksManager {
       const layerName = getMapServingLayerName(job.metadata.productId as string, job.metadata.productType as ProductType);
       this.logger.log(`debug`, `[TasksManager][handleNewIngestion] Layer name to be published to map serveris "${layerName}"`);
       await this.publishToMappingServer(job.id, job.metadata, layerName, job.relativePath);
-      const catalogId = await this.publishToCatalog(job.id, job.metadata, layerName);
+      const catalogId = await this.publishToCatalog(job.id, job.internalId, job.metadata, layerName);
 
       // eslint-disable-next-line @typescript-eslint/no-magic-numbers
       await this.jobManager.updateJobStatus(job.id, OperationStatus.COMPLETED, 100, undefined, catalogId);
