@@ -161,7 +161,7 @@ export class JobManagerClient extends HttpClient {
 
   public async findJobs(resourceId: string, productType: ProductType): Promise<IGetJobResponse[]> {
     const getLayerUrl = `/jobs`;
-    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, productType: productType });
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, productType: productType, shouldReturnTasks: false });
     if (typeof res === 'string' || res.length === 0) {
       return [];
     }
@@ -170,7 +170,7 @@ export class JobManagerClient extends HttpClient {
 
   public async findJobsByInternalId(internalId: string): Promise<IGetJobResponse[]> {
     const getLayerUrl = `/jobs`;
-    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { internalId });
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { internalId, shouldReturnTasks: false });
     if (typeof res === 'string' || res.length === 0) {
       return [];
     }
