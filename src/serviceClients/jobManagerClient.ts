@@ -175,7 +175,6 @@ export class JobManagerClient extends HttpClient {
       return [];
     }
 
-    console.log('RES: ', res);
     return res;
   }
 
