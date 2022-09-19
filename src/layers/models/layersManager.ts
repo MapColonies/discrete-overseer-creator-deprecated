@@ -213,7 +213,7 @@ export class LayersManager {
     let jobs: IGetJobResponse[];
     try {
       do {
-        this.logger.log('info', `generating record id`); 
+        this.logger.log('debug', `generating record id`); 
         id = uuidv4();
         isExists = await this.catalog.existsByRecordId(id);
         jobs = await this.jobManager.findJobsByInternalId(id);
@@ -225,7 +225,7 @@ export class LayersManager {
         displayPath: displayPath,
       };
       
-      this.logger.log('info', `generated record id: ${recordIds.id}, display path: ${recordIds.displayPath}`);
+      this.logger.log('debug', `generated record id: ${recordIds.id}, display path: ${recordIds.displayPath}`);
 
       return recordIds;
     } catch (err) {
