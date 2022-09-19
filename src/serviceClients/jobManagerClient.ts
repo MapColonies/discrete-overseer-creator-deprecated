@@ -85,7 +85,6 @@ export class JobManagerClient extends HttpClient {
   ): Promise<string> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
-    const displayPath = data.metadata.displayPath as string;
     const createLayerTasksUrl = `/jobs`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
@@ -93,7 +92,7 @@ export class JobManagerClient extends HttpClient {
       version: version,
       type: jobType,
       status: OperationStatus.IN_PROGRESS,
-      parameters: { ...data, layerRelativePath, displayPath } as unknown as Record<string, unknown>,
+      parameters: { ...data, layerRelativePath } as unknown as Record<string, unknown>,
       producerName: data.metadata.producerName,
       productName: data.metadata.productName,
       productType: data.metadata.productType,

@@ -70,6 +70,7 @@ export class LayersManager {
 
     const recordIds = await this.generateRecordIds();
     data.metadata.displayPath = recordIds.displayPath;
+    data.metadata.id = recordIds.id;
 
     if (jobType === JobAction.NEW) {
       await this.validateNotExistsInCatalog(resourceId, version, productType);
@@ -79,10 +80,10 @@ export class LayersManager {
 
       this.setDefaultValues(data);
 
-      const layerRelativePath = `${recordIds.id}/${recordIds.displayPath}`;
+      const layerRelativePath = `${data.metadata.id as string}/${data.metadata.displayPath}`;
 
       if (taskType === TaskAction.MERGE_TILES) {
-        await this.mergeTilesTasker.createMergeTilesTasks(data, recordIds.id, layerRelativePath, taskType, jobType, this.grids, extent);
+        await this.mergeTilesTasker.createMergeTilesTasks(data, data.metadata.id, layerRelativePath, taskType, jobType, this.grids, extent);
       } else {
         const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
         await this.splitTilesTasker.createSplitTilesTasks(data, recordIds.id, layerRelativePath, layerZoomRanges, jobType, taskType);
