@@ -1,5 +1,6 @@
 import { tilesGenerator } from '@map-colonies/mc-utils';
 import { bboxPolygon, polygon } from '@turf/turf';
+import { TargetFormat } from '../../../src/common/enums';
 import { ILayerMergeData, IMergeOverlaps, IMergeParameters, IMergeTaskParams } from '../../../src/common/interfaces';
 import { Grid } from '../../../src/layers/interfaces';
 import { MergeTilesTasker } from '../../../src/merge/mergeTilesTasker';
@@ -165,6 +166,7 @@ describe('MergeTilesTasker', () => {
       const filesSourceType = 'GPKG';
       const expectedTasks: IMergeTaskParams[] = [
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -186,6 +188,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -201,6 +204,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 0 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -222,6 +226,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -243,6 +248,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -258,6 +264,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 2, maxX: 3, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -273,6 +280,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -323,6 +331,7 @@ describe('MergeTilesTasker', () => {
       const filesSourceType = 'GPKG';
       const expectedTasks: IMergeTaskParams[] = [
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -344,6 +353,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -365,6 +375,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -386,6 +397,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,
@@ -407,6 +419,7 @@ describe('MergeTilesTasker', () => {
           batches: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
         },
         {
+          targetFormat: TargetFormat.JPEG,
           sources: [
             {
               type: destSourcePath,

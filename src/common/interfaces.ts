@@ -3,6 +3,7 @@ import { ITileRange } from '@map-colonies/mc-utils';
 import { BBox } from '@turf/helpers';
 import { GeoJSON } from 'geojson';
 import { Grid, IBBox } from '../layers/interfaces';
+import { TargetFormat } from '../common/enums';
 
 export interface ILogger {
   log: (level: string, message: string) => void;
@@ -58,6 +59,7 @@ export interface IMergeSources {
 }
 
 export interface IMergeTaskParams {
+  targetFormat: TargetFormat;
   sources: IMergeSources[];
   batches: ITileRange[];
 }

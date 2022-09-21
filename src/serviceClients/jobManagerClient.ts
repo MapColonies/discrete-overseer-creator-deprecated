@@ -66,9 +66,11 @@ interface IGetJobResponse {
 
 @injectable()
 export class JobManagerClient extends HttpClient {
+  /* eslint-disable @typescript-eslint/explicit-member-accessibility */
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   public constructor(@inject(Services.LOGGER) protected readonly logger: ILogger, @inject(Services.CONFIG) config: IConfig) {
+    /* eslint-enable @typescript-eslint/explicit-member-accessibility */
     const retryConfig = parseConfig(config.get<IHttpRetryConfig>('httpRetry'));
     super(logger, retryConfig);
     this.targetService = 'DiscreteIngestionDB'; //name of target for logs
@@ -101,7 +103,6 @@ export class JobManagerClient extends HttpClient {
         };
       }),
     };
-
     const res = await this.post<ICreateJobResponse>(createLayerTasksUrl, createJobRequest);
     return res.id;
   }
