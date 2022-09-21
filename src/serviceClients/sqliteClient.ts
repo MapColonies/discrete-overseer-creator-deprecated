@@ -13,12 +13,7 @@ export class SQLiteClient {
   private readonly fullPath: string;
   private readonly layerSourcesPath: string;
 
-  public constructor(
-    private readonly config: IConfig,
-    private readonly logger: ILogger,
-    packageName: string,
-    originDirectory: string
-  ) {
+  public constructor(private readonly config: IConfig, private readonly logger: ILogger, packageName: string, originDirectory: string) {
     this.layerSourcesPath = this.config.get<string>('layerSourceDir');
     this.packageName = packageName;
     this.fullPath = join(this.layerSourcesPath, originDirectory, this.packageName);
