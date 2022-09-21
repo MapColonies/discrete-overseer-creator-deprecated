@@ -28,3 +28,8 @@ export enum SourceType {
   FS = 'FS',
   GPKG = 'GPKG',
 }
+
+export enum TargetFormat {
+  JPEG = 'jpeg',
+  PNG = 'png',
+}

@@ -12,7 +12,7 @@ import {
 import { difference, union, bbox as toBbox, bboxPolygon, Feature, Polygon, BBox } from '@turf/turf';
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../common/constants';
-import { OperationStatus } from '../common/enums';
+import { OperationStatus, TargetFormat } from '../common/enums';
 import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams, ILogger, IMergeSources } from '../common/interfaces';
 import { JobManagerClient } from '../serviceClients/jobManagerClient';
 import { Grid } from '../layers/interfaces';
@@ -89,6 +89,7 @@ export class MergeTilesTasker {
         const batches = tileBatchGenerator(this.batchSize, rangeGen);
         for (const batch of batches) {
           yield {
+            targetFormat: TargetFormat.JPEG,
             batches: batch,
             sources: [
               {
