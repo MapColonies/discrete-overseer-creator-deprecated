@@ -69,6 +69,7 @@ export class CatalogClient extends HttpClient {
     const req = {
       metadata,
     };
+
     const res = await this.put<IUpdateRecordResponse>(`/records/${id}`, req);
     return res;
   }

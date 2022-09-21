@@ -2,7 +2,7 @@ import config from 'config';
 import { GeoJSON } from 'geojson';
 import isValidGeoJson from '@turf/boolean-valid';
 import { v4 as uuidv4 } from 'uuid';
-import { FeatureCollection, Geometry, geojsonType } from '@turf/turf';
+import { FeatureCollection, Geometry, geojsonType, bbox } from '@turf/turf';
 import { IngestionParams, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
@@ -17,8 +17,8 @@ import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { MergeTilesTasker } from '../../merge/mergeTilesTasker';
 import { createBBoxString } from '../../utils/bbox';
+import { SQLiteClient } from '../../serviceClients/sqliteClient';
 import { Grid } from '../interfaces';
-import { getGrids, getExtents } from '../../utils/gpkg';
 import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 import { FileValidator } from './fileValidator';
 import { SplitTilesTasker } from './splitTilesTasker';
@@ -34,7 +34,6 @@ export class LayersManager {
     private readonly zoomLevelCalculator: ZoomLevelCalculator,
     private readonly db: JobManagerClient,
     private readonly catalog: CatalogClient,
-    private readonly jobManager: JobManagerClient,
     private readonly mapPublisher: MapPublisherClient,
     private readonly fileValidator: FileValidator,
     private readonly splitTilesTasker: SplitTilesTasker,
@@ -54,8 +53,8 @@ export class LayersManager {
     const polygon = data.metadata.footprint;
 
     this.validateGeoJsons(data.metadata);
-    const extent = getExtents(polygon as GeoJSON);
-
+    // polygon to bbox
+    const extent = bbox(polygon as GeoJSON);
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }
@@ -80,22 +79,22 @@ export class LayersManager {
 
       this.setDefaultValues(data);
 
-      const layerRelativePath = `${data.metadata.id as string}/${data.metadata.displayPath}`;
+      const layerRelativePath = `${data.metadata.id}/${data.metadata.displayPath}`;
 
       if (taskType === TaskAction.MERGE_TILES) {
-        await this.mergeTilesTasker.createMergeTilesTasks(data, data.metadata.id, layerRelativePath, taskType, jobType, this.grids, extent);
+        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
       } else {
         const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
-        await this.splitTilesTasker.createSplitTilesTasks(data, recordIds.id, layerRelativePath, layerZoomRanges, jobType, taskType);
+        await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
       }
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (jobType === JobAction.UPDATE) {
       const record = await this.catalog.findRecord(resourceId, undefined, productType);
-      const layerRelativePath = `${record?.id as string}/${record?.metadata.displayPath as string}`;
+      const layerRelativePath = `${record?.metadata.id as string}/${record?.metadata.displayPath as string}`;
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
-      await this.mergeTilesTasker.createMergeTilesTasks(data, recordIds.id, layerRelativePath, taskType, jobType, this.grids, extent);
+      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
     } else {
       throw new BadRequestError('Unsupported job type');
     }
@@ -129,7 +128,13 @@ export class LayersManager {
   private getTaskType(jobType: JobAction, files: string[], originDirectory: string): string {
     const validGpkgFiles = this.fileValidator.validateGpkgFiles(files, originDirectory);
     if (validGpkgFiles) {
-      this.grids = getGrids(files, originDirectory);
+      const grids: Grid[] = [];
+      files.forEach((file) => {
+        const sqliteClient = new SQLiteClient(config, this.logger, file, originDirectory);
+        const grid = sqliteClient.getGrid();
+        grids.push(grid as Grid);
+      });
+      this.grids = grids;
     }
     if (jobType === JobAction.NEW) {
       if (validGpkgFiles) {
@@ -214,18 +219,18 @@ export class LayersManager {
     let jobs: IGetJobResponse[];
     try {
       do {
-        this.logger.log('debug', `generating record id`); 
+        this.logger.log('debug', `generating record id`);
         id = uuidv4();
         isExists = await this.catalog.existsByRecordId(id);
-        jobs = await this.jobManager.findJobsByInternalId(id);
+        jobs = await this.db.findJobsByInternalId(id);
       } while (isExists && jobs.length > 0);
-      
+
       const displayPath = uuidv4();
       const recordIds = {
         id: id,
         displayPath: displayPath,
       };
-      
+
       this.logger.log('debug', `generated record id: ${recordIds.id}, display path: ${recordIds.displayPath}`);
 
       return recordIds;

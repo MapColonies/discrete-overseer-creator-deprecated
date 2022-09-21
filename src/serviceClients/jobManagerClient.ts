@@ -77,7 +77,6 @@ export class JobManagerClient extends HttpClient {
 
   public async createLayerJob(
     data: IngestionParams,
-    catalogId: string,
     layerRelativePath: string,
     jobType: string,
     taskType: string,
@@ -88,7 +87,7 @@ export class JobManagerClient extends HttpClient {
     const createLayerTasksUrl = `/jobs`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
-      internalId: catalogId,
+      internalId: data.metadata.id as string,
       version: version,
       type: jobType,
       status: OperationStatus.IN_PROGRESS,

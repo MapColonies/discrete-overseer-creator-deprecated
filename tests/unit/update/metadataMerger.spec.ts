@@ -154,7 +154,7 @@ describe('MetadataMerger', () => {
     classification: '4',
     creationDate: new Date(1, 1, 1),
     description: 'test',
-    footprint: expectedFootprint,
+    footprint: expectedFootprint.geometry,
     includedInBests: [],
     ingestionDate: new Date(1, 1, 5),
     layerPolygonParts: expectedPolygonParts,

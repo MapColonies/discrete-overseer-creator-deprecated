@@ -1,6 +1,6 @@
 import { singleton } from 'tsyringe';
 import { GeoJSON } from 'geojson';
-import { Feature, FeatureCollection, union, difference, Polygon, MultiPolygon, featureCollection } from '@turf/turf';
+import { Feature, FeatureCollection, union, difference, MultiPolygon, featureCollection, Polygon } from '@turf/turf';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Footprint } from '@map-colonies/mc-utils';
 import { createBBoxString } from '../utils/bbox';
@@ -20,7 +20,7 @@ export class MetadataMerger {
         (oldMetadata.sourceDateEnd as Date) >= (updateMetadata.sourceDateEnd as Date) ? oldMetadata.sourceDateEnd : updateMetadata.sourceDateEnd,
       minHorizontalAccuracyCE90: Math.max(oldMetadata.minHorizontalAccuracyCE90 ?? 0, updateMetadata.minHorizontalAccuracyCE90 ?? 0),
       layerPolygonParts: this.mergeLayerPolygonParts(updateMetadata, oldMetadata.layerPolygonParts),
-      footprint: union(oldMetadata.footprint as Footprint, updateMetadata.footprint as Footprint) as GeoJSON,
+      footprint: union(oldMetadata.footprint as Footprint, updateMetadata.footprint as Footprint)?.geometry as GeoJSON,
       region: this.mergeUniqueArrays(oldMetadata.region, updateMetadata.region),
       rawProductData: undefined,
       maxResolutionDeg: Math.min(oldMetadata.maxResolutionDeg as number, updateMetadata.maxResolutionDeg as number),
