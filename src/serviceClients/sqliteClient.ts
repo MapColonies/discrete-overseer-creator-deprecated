@@ -1,7 +1,5 @@
 import { join } from 'path';
 import Database, { Database as SQLiteDB } from 'better-sqlite3';
-import { inject, singleton } from 'tsyringe';
-import { Services } from '../common/constants';
 import { ILogger, IConfig } from '../common/interfaces';
 import { Grid } from '../layers/interfaces';
 
