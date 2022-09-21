@@ -53,7 +53,6 @@ describe('SQLClient', () => {
         return { get: () => mockMatrixValues } as Statement;
       });
 
-      //const testDb = new SQLiteClient(config, logger, 'test.gpkg', '/here');
       const result = sqlClient.getGrid();
 
       expect(result).toBeUndefined();

@@ -10,15 +10,14 @@ interface IMatrixValues {
   matrixHeight: number;
 }
 
-@singleton()
 export class SQLiteClient {
   public readonly packageName: string;
   private readonly fullPath: string;
   private readonly layerSourcesPath: string;
 
   public constructor(
-    @inject(Services.CONFIG) private readonly config: IConfig,
-    @inject(Services.LOGGER) private readonly logger: ILogger,
+    private readonly config: IConfig,
+    private readonly logger: ILogger,
     packageName: string,
     originDirectory: string
   ) {
