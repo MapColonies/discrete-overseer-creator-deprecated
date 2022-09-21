@@ -82,6 +82,7 @@ export class TasksManager {
         metadata: metadata,
         links: this.linkBuilder.createLinks(linkData),
       };
+
       return await this.catalogClient.publish(publishModel);
     } catch (err) {
       await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, undefined, 'Failed to publish layer to catalog');
@@ -152,8 +153,8 @@ export class TasksManager {
         }: ${JSON.stringify(catalogRecord?.metadata)}`
       );
       const mergedData = this.metadataMerger.merge(catalogRecord?.metadata as LayerMetadata, job.metadata);
-      this.logger.log(`info`, `Updating catalog record ${catalogRecord?.id as string} with new metadata`);
-      await this.catalogClient.update(catalogRecord?.id as string, mergedData);
+      this.logger.log(`info`, `Updating catalog record ${catalogRecord?.metadata.id as string} with new metadata`);
+      await this.catalogClient.update(catalogRecord?.metadata.id as string, mergedData);
 
       if (job.isSuccessful) {
         this.logger.log(`info`, `Updating status of job ${job.id} to be ${OperationStatus.COMPLETED}`);

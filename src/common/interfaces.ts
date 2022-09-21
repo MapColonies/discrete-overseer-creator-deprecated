@@ -26,6 +26,11 @@ export interface IUpdateRecordResponse {
   status: string;
 }
 
+export interface IRecordIds {
+  id: string;
+  displayPath: string;
+}
+
 export interface IFindResponseRecord extends IRasterCatalogUpsertRequestBody {
   id: string;
 }

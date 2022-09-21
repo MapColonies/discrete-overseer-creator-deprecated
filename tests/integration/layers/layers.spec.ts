@@ -11,6 +11,8 @@ import { mapExistsMock } from '../../mocks/clients/mapPublisherClient';
 import { catalogExistsMock, getHighestLayerVersionMock } from '../../mocks/clients/catalogClient';
 import { setValue, clear as clearConfig } from '../../mocks/config';
 import { OperationStatus } from '../../../src/common/enums';
+import { Grid } from '../../../src/layers/interfaces';
+import { SQLiteClient } from '../../../src/serviceClients/sqliteClient';
 import * as requestSender from './helpers/requestSender';
 
 const validPolygon = {
@@ -178,19 +180,21 @@ describe('layers', function () {
       findJobsMock.mockResolvedValue([]);
       const response = await requestSender.createLayer(validTestData);
       expect(response).toSatisfyApiSpec();
-      expect(response.status).toBe(httpStatusCodes.OK);
       expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(mapExistsMock).toHaveBeenCalledTimes(1);
       expect(catalogExistsMock).toHaveBeenCalledTimes(1);
       expect(createLayerJobMock).toHaveBeenCalledTimes(1);
       expect(createTasksMock).toHaveBeenCalledTimes(3);
+      expect(response.status).toBe(httpStatusCodes.OK);
     });
 
     it('should return 200 status code for update layer operation with higher version on exists', async function () {
+      const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
       findJobsMock.mockResolvedValue([]);
       getHighestLayerVersionMock.mockResolvedValue(1.0);
       mapExistsMock.mockResolvedValue(true);
+      getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
       const higherVersionMetadata = { ...validTestData.metadata, productVersion: '3.0' };
       const validHigherVersionRecord = { ...validTestData, fileNames: ['indexed.gpkg'], originDirectory: 'files', metadata: higherVersionMetadata };
 
@@ -227,7 +231,7 @@ describe('layers', function () {
     it('should return 200 status code for sending request with extra metadata fields', async function () {
       findJobsMock.mockResolvedValue([]);
       let exrtraFieldTestMetaData = { ...validTestData.metadata } as Record<string, unknown>;
-      exrtraFieldTestMetaData = { ...exrtraFieldTestMetaData, id: 'test id' };
+      exrtraFieldTestMetaData = { ...exrtraFieldTestMetaData };
       const extraTestData = { ...validTestData, metadata: exrtraFieldTestMetaData };
       const response = await requestSender.createLayer(extraTestData);
       expect(response).toSatisfyApiSpec();
@@ -243,6 +247,8 @@ describe('layers', function () {
           metadata: {
             ...validTestData.metadata,
             productBoundingBox: '100,0,101,1',
+            id: expect.anything(),
+            displayPath: expect.anything(),
             layerPolygonParts: expect.anything(),
             sourceDateEnd: expect.anything(),
             sourceDateStart: expect.anything(),
@@ -255,19 +261,20 @@ describe('layers', function () {
         expect.anything(),
         expect.anything()
       );
-      /* eslint-enable @typescript-eslint/no-unsafe-assignment */
       expect(createTasksMock).toHaveBeenCalledTimes(3);
     });
 
     it('should return 200 status code for indexed gpkg', async function () {
+      const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       findJobsMock.mockResolvedValue([]);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
+      getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
 
       const testData = {
         fileNames: ['indexed.gpkg'],
-        metadata: validTestImageMetadata,
+        metadata: { ...validTestImageMetadata },
         originDirectory: 'files',
       };
 
@@ -343,7 +350,7 @@ describe('layers', function () {
 
       const testData = {
         fileNames: ['unindexed.gpkg'],
-        metadata: validTestImageMetadata,
+        metadata: { ...validTestImageMetadata },
         originDirectory: 'files',
       };
 

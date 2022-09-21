@@ -25,7 +25,7 @@ describe('FileValidator', () => {
       getGpkgIndexFn.mockReturnValue(undefined);
       setValue({ layerSourceDir: 'tests/mocks' });
       const testData: string[] = ['unindexed.gpkg'];
-      const fileValidator = new FileValidator(configMock);
+      const fileValidator = new FileValidator(configMock, logger);
 
       const action = () => fileValidator.validateGpkgIndex(testData, 'files');
       expect(action).toThrow(BadRequestError);
@@ -38,7 +38,7 @@ describe('FileValidator', () => {
     getGpkgIndexFn.mockReturnValue({});
     setValue({ layerSourceDir: 'tests/mocks' });
     const testData: string[] = ['indexed.gpkg'];
-    const fileValidator = new FileValidator(configMock);
+    const fileValidator = new FileValidator(configMock, logger);
 
     const action = () => fileValidator.validateGpkgIndex(testData, 'files');
     expect(action).not.toThrow();

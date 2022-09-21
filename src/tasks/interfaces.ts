@@ -3,6 +3,7 @@ import { OperationStatus } from '../common/enums';
 
 export interface ICompletedTasks {
   id: string;
+  internalId: string;
   isCompleted: boolean;
   isSuccessful: boolean;
   metadata: LayerMetadata;

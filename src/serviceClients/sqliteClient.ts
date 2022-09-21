@@ -1,9 +1,6 @@
 import { join } from 'path';
 import Database, { Database as SQLiteDB } from 'better-sqlite3';
-import { IConfig } from 'config';
-import { container } from 'tsyringe';
-import { Services } from '../common/constants';
-import { ILogger } from '../common/interfaces';
+import { ILogger, IConfig } from '../common/interfaces';
 import { Grid } from '../layers/interfaces';
 
 interface IMatrixValues {
@@ -15,12 +12,8 @@ export class SQLiteClient {
   public readonly packageName: string;
   private readonly fullPath: string;
   private readonly layerSourcesPath: string;
-  private readonly logger: ILogger;
-  private readonly config: IConfig;
 
-  public constructor(packageName: string, originDirectory: string) {
-    this.logger = container.resolve(Services.LOGGER);
-    this.config = container.resolve(Services.CONFIG);
+  public constructor(private readonly config: IConfig, private readonly logger: ILogger, packageName: string, originDirectory: string) {
     this.layerSourcesPath = this.config.get<string>('layerSourceDir');
     this.packageName = packageName;
     this.fullPath = join(this.layerSourcesPath, originDirectory, this.packageName);

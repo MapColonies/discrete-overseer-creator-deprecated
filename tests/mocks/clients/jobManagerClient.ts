@@ -7,6 +7,7 @@ const getTaskMock = jest.fn();
 const updateJobStatusMock = jest.fn();
 const findJobsMock = jest.fn();
 const abortJobMock = jest.fn();
+const findJobsByInternalIdMock = jest.fn();
 
 const jobManagerClientMock = {
   createLayerJob: createLayerJobMock,
@@ -16,6 +17,17 @@ const jobManagerClientMock = {
   updateJobStatus: updateJobStatusMock,
   findJobs: findJobsMock,
   abortJob: abortJobMock,
+  findJobsByInternalId: findJobsByInternalIdMock,
 } as unknown as JobManagerClient;
 
-export { createLayerJobMock, createTasksMock, updateJobStatusMock, getJobStatusMock, getTaskMock, findJobsMock, abortJobMock, jobManagerClientMock };
+export {
+  createLayerJobMock,
+  createTasksMock,
+  updateJobStatusMock,
+  getJobStatusMock,
+  getTaskMock,
+  findJobsMock,
+  abortJobMock,
+  findJobsByInternalIdMock,
+  jobManagerClientMock,
+};

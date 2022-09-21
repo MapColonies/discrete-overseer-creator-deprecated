@@ -12,6 +12,8 @@ import { OperationStatus } from '../../../../src/common/enums';
 import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
 import { createSplitTilesTasksMock, generateTasksParametersMock, splitTilesTaskerMock } from '../../../mocks/splitTilesTasker';
 import { createMergeTilesTasksMock, mergeTilesTasker } from '../../../mocks/mergeTilesTasker';
+import { SQLiteClient } from '../../../../src/serviceClients/sqliteClient';
+import { Grid } from '../../../../src/layers/interfaces';
 
 let layersManager: LayersManager;
 
@@ -56,11 +58,6 @@ const testImageMetadata = {
   rawProductData: undefined,
 } as unknown as LayerMetadata;
 const layerRelativePath = 'test/OrthophotoHistory';
-const testData: IngestionParams = {
-  fileNames: [],
-  metadata: testImageMetadata,
-  originDirectory: '/here',
-};
 
 describe('LayersManager', () => {
   beforeEach(function () {
@@ -77,7 +74,7 @@ describe('LayersManager', () => {
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
       const testData: IngestionParams = {
         fileNames: ['test.tif'],
-        metadata: testImageMetadata,
+        metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
 
@@ -89,7 +86,7 @@ describe('LayersManager', () => {
       createLayerJobMock.mockResolvedValue('testJobId');
       createSplitTilesTasksMock.mockResolvedValue(undefined);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -111,7 +108,13 @@ describe('LayersManager', () => {
     it('should create "Update" job type with "Merge-Tiles" task type successfully when includes only GPKG files', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
-
+      const testData: IngestionParams = {
+        fileNames: ['test.gpkg'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+      const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
+      getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
       getHighestLayerVersionMock.mockResolvedValue(2.0);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       mapExistsMock.mockResolvedValue(true);
@@ -120,7 +123,7 @@ describe('LayersManager', () => {
       createLayerJobMock.mockResolvedValue('testJobId');
       createMergeTilesTasksMock.mockResolvedValue(undefined);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -144,6 +147,11 @@ describe('LayersManager', () => {
     it('should throw Bad Request Error for "Update" job type if layer is not exists in map proxy', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
 
       getHighestLayerVersionMock.mockResolvedValue([1.0, 2.0]);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -153,7 +161,7 @@ describe('LayersManager', () => {
       createLayerJobMock.mockResolvedValue('testJobId');
       createMergeTilesTasksMock.mockResolvedValue(undefined);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -178,10 +186,15 @@ describe('LayersManager', () => {
     it('should throw Bad Request Error for "New" or "Update" job type if higher product version is already exists in catalog', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
 
       getHighestLayerVersionMock.mockResolvedValue(4.0);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -208,6 +221,11 @@ describe('LayersManager', () => {
     it('should throw Bad Request Error for "Update" job type if there is unsupported file (not GPKG) in request', async function () {
       setValue({ 'tiling.zoomGroups': '1,2-3' });
       setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
 
       getHighestLayerVersionMock.mockResolvedValue(2.5);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -216,7 +234,7 @@ describe('LayersManager', () => {
       createLayerJobMock.mockResolvedValue('testJobId');
       createMergeTilesTasksMock.mockResolvedValue(undefined);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -238,11 +256,17 @@ describe('LayersManager', () => {
 
     it('fail if layer status is pending', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.PENDING }]);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -262,12 +286,18 @@ describe('LayersManager', () => {
 
     it('fail if layer status is inProgress', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.IN_PROGRESS }]);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -300,13 +330,19 @@ describe('LayersManager', () => {
       ];
 
       setValue({ 'tiling.zoomGroups': '1' });
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.COMPLETED }]);
       generateTasksParametersMock.mockReturnValue(taskParams);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -338,6 +374,12 @@ describe('LayersManager', () => {
         },
       ];
       setValue({ 'tiling.zoomGroups': '1' });
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
@@ -345,7 +387,7 @@ describe('LayersManager', () => {
       findJobsMock.mockResolvedValue([{ status: OperationStatus.FAILED }]);
       generateTasksParametersMock.mockReturnValue(taskParams);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -365,13 +407,19 @@ describe('LayersManager', () => {
 
     it('fail if layer exists in mapping server for "New" job type', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(true);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -391,13 +439,19 @@ describe('LayersManager', () => {
 
     it('fail if layer exists in catalog for "New" job type', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(true);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -417,12 +471,18 @@ describe('LayersManager', () => {
 
     it('fail if files are missing for "New" job type', async function () {
       setValue({ 'tiling.zoomGroups': '1' });
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(false);
 
-      const zoomLevelCalculator = new ZoomLevelCalculator(logger, configMock);
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
         logger,
         zoomLevelCalculator,
@@ -438,6 +498,46 @@ describe('LayersManager', () => {
         await layersManager.createLayer(testData);
       };
       await expect(action).rejects.toThrow(BadRequestError);
+    });
+  });
+
+  describe('generateRecordIds', () => {
+    it('metadata for "new" ingestion job should includes "id" and "displayPath" while creating job tasks', async function () {
+      setValue({ 'tiling.zoomGroups': '1,2-3' });
+      setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+      const testData: IngestionParams = {
+        fileNames: ['test.tif'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
+      getHighestLayerVersionMock.mockResolvedValue(undefined);
+      mapExistsMock.mockResolvedValue(false);
+      catalogExistsMock.mockResolvedValue(false);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      findJobsMock.mockResolvedValue([]);
+      createLayerJobMock.mockResolvedValue('testJobId');
+      createSplitTilesTasksMock.mockResolvedValue(undefined);
+
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
+      layersManager = new LayersManager(
+        logger,
+        zoomLevelCalculator,
+        jobManagerClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock,
+        splitTilesTaskerMock,
+        mergeTilesTasker
+      );
+
+      await layersManager.createLayer(testData);
+
+      expect(createSplitTilesTasksMock).toHaveBeenCalledTimes(1);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(createSplitTilesTasksMock.mock.calls[0][0].metadata).toHaveProperty('id');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(createSplitTilesTasksMock.mock.calls[0][0].metadata).toHaveProperty('displayPath');
     });
   });
 });

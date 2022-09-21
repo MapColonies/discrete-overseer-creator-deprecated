@@ -1,22 +1,21 @@
 import Database, { Statement } from 'better-sqlite3';
-import { container } from 'tsyringe';
-import { Services } from '../../../src/common/constants';
 import { Grid } from '../../../src/layers/interfaces';
 import { SQLiteClient } from '../../../src/serviceClients/sqliteClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../mocks/config';
 import { logger } from '../../mocks/logger';
 
 jest.mock('better-sqlite3');
+let sqlClient: SQLiteClient;
 
 describe('SQLClient', () => {
   beforeEach(function () {
-    container.register(Services.CONFIG, { useValue: configMock });
-    container.register(Services.LOGGER, { useValue: logger });
     jest.resetAllMocks();
     jest.clearAllMocks();
     jest.restoreAllMocks();
     clearMockConfig();
     initMockConfig();
+
+    sqlClient = new SQLiteClient(configMock, logger, 'test_gpkg', 'test_dir');
   });
 
   describe('getGrid', () => {
@@ -28,8 +27,7 @@ describe('SQLClient', () => {
         return { get: () => mockMatrixValues } as Statement;
       });
 
-      const testDb = new SQLiteClient('test.gpkg', '/here');
-      const result = testDb.getGrid();
+      const result = sqlClient.getGrid();
 
       expect(result).toBe(Grid.TWO_ON_ONE);
     });
@@ -42,8 +40,7 @@ describe('SQLClient', () => {
         return { get: () => mockMatrixValues } as Statement;
       });
 
-      const testDb = new SQLiteClient('test.gpkg', '/here');
-      const result = testDb.getGrid();
+      const result = sqlClient.getGrid();
 
       expect(result).toBe(Grid.ONE_ON_ONE);
     });
@@ -56,8 +53,7 @@ describe('SQLClient', () => {
         return { get: () => mockMatrixValues } as Statement;
       });
 
-      const testDb = new SQLiteClient('test.gpkg', '/here');
-      const result = testDb.getGrid();
+      const result = sqlClient.getGrid();
 
       expect(result).toBeUndefined();
     });

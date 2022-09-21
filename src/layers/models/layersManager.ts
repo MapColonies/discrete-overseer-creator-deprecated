@@ -1,23 +1,24 @@
 import config from 'config';
 import { GeoJSON } from 'geojson';
 import isValidGeoJson from '@turf/boolean-valid';
-import { FeatureCollection, Geometry, geojsonType } from '@turf/turf';
+import { v4 as uuidv4 } from 'uuid';
+import { FeatureCollection, Geometry, geojsonType, bbox } from '@turf/turf';
 import { IngestionParams, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { JobAction, OperationStatus, TaskAction } from '../../common/enums';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { ConflictError } from '../../common/exceptions/http/conflictError';
-import { ILogger } from '../../common/interfaces';
+import { ILogger, IRecordIds } from '../../common/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
 import { MapPublisherClient } from '../../serviceClients/mapPublisherClient';
-import { JobManagerClient } from '../../serviceClients/jobManagerClient';
+import { IGetJobResponse, JobManagerClient } from '../../serviceClients/jobManagerClient';
 import { ZoomLevelCalculator } from '../../utils/zoomToResolution';
 import { getMapServingLayerName } from '../../utils/layerNameGenerator';
 import { MergeTilesTasker } from '../../merge/mergeTilesTasker';
 import { createBBoxString } from '../../utils/bbox';
+import { SQLiteClient } from '../../serviceClients/sqliteClient';
 import { Grid } from '../interfaces';
-import { getGrids, getExtents } from '../../utils/gpkg';
 import { layerMetadataToPolygonParts } from '../../common/utills/polygonPartsBuilder';
 import { FileValidator } from './fileValidator';
 import { SplitTilesTasker } from './splitTilesTasker';
@@ -47,14 +48,13 @@ export class LayersManager {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
-    const layerRelativePath = `${data.metadata.productId as string}/${data.metadata.productType as string}`;
     const originDirectory = data.originDirectory;
     const files = data.fileNames;
     const polygon = data.metadata.footprint;
 
     this.validateGeoJsons(data.metadata);
-    const extent = getExtents(polygon as GeoJSON);
-
+    // polygon to bbox
+    const extent = bbox(polygon as GeoJSON);
     if (convertedData.id !== undefined) {
       throw new BadRequestError(`received invalid field id`);
     }
@@ -67,6 +67,10 @@ export class LayersManager {
 
     this.logger.log('info', `creating ${jobType} job and ${taskType} tasks for layer ${data.metadata.productId as string} type: ${productType}`);
 
+    const recordIds = await this.generateRecordIds();
+    data.metadata.displayPath = recordIds.displayPath;
+    data.metadata.id = recordIds.id;
+
     if (jobType === JobAction.NEW) {
       await this.validateNotExistsInCatalog(resourceId, version, productType);
       if (existsInMapProxy) {
@@ -74,6 +78,8 @@ export class LayersManager {
       }
 
       this.setDefaultValues(data);
+
+      const layerRelativePath = `${data.metadata.id}/${data.metadata.displayPath}`;
 
       if (taskType === TaskAction.MERGE_TILES) {
         await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
@@ -83,6 +89,8 @@ export class LayersManager {
       }
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } else if (jobType === JobAction.UPDATE) {
+      const record = await this.catalog.findRecord(resourceId, undefined, productType);
+      const layerRelativePath = `${record?.metadata.id as string}/${record?.metadata.displayPath as string}`;
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
@@ -120,7 +128,13 @@ export class LayersManager {
   private getTaskType(jobType: JobAction, files: string[], originDirectory: string): string {
     const validGpkgFiles = this.fileValidator.validateGpkgFiles(files, originDirectory);
     if (validGpkgFiles) {
-      this.grids = getGrids(files, originDirectory);
+      const grids: Grid[] = [];
+      files.forEach((file) => {
+        const sqliteClient = new SQLiteClient(config, this.logger, file, originDirectory);
+        const grid = sqliteClient.getGrid();
+        grids.push(grid as Grid);
+      });
+      this.grids = grids;
     }
     if (jobType === JobAction.NEW) {
       if (validGpkgFiles) {
@@ -196,6 +210,33 @@ export class LayersManager {
           throw new BadRequestError(`received invalid footprint for layerPolygonParts feature, it must be valid Polygon or MultiPolygon`);
         }
       });
+    }
+  }
+
+  private async generateRecordIds(): Promise<IRecordIds> {
+    let id: string;
+    let isExists: boolean;
+    let jobs: IGetJobResponse[];
+    try {
+      do {
+        this.logger.log('debug', `generating record id`);
+        id = uuidv4();
+        isExists = await this.catalog.existsByRecordId(id);
+        jobs = await this.db.findJobsByInternalId(id);
+      } while (isExists && jobs.length > 0);
+
+      const displayPath = uuidv4();
+      const recordIds = {
+        id: id,
+        displayPath: displayPath,
+      };
+
+      this.logger.log('debug', `generated record id: ${recordIds.id}, display path: ${recordIds.displayPath}`);
+
+      return recordIds;
+    } catch (err) {
+      this.logger.log('error', `failed to generate record id: ${(err as Error).message}`);
+      throw err;
     }
   }
 }

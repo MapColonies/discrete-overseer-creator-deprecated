@@ -2,13 +2,13 @@ import { inject, singleton } from 'tsyringe';
 import { degreesPerPixelToZoomLevel } from '@map-colonies/mc-utils';
 import { ITaskZoomRange } from '../tasks/interfaces';
 import { Services } from '../common/constants';
-import { IConfig, ILogger } from '../common/interfaces';
+import { IConfig } from '../common/interfaces';
 
 @singleton()
 export class ZoomLevelCalculator {
   private readonly zoomRanges: ITaskZoomRange[];
 
-  public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, @inject(Services.CONFIG) private readonly config: IConfig) {
+  public constructor(@inject(Services.CONFIG) private readonly config: IConfig) {
     const batches = config.get<string>('tiling.zoomGroups');
     this.zoomRanges = this.getZoomRanges(batches);
   }

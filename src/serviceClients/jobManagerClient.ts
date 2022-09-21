@@ -37,7 +37,7 @@ interface ICreateJobResponse {
   taskIds: string[];
 }
 
-interface IGetJobResponse {
+export interface IGetJobResponse {
   id: string;
   resourceId?: string;
   version?: string;
@@ -89,6 +89,7 @@ export class JobManagerClient extends HttpClient {
     const createLayerTasksUrl = `/jobs`;
     const createJobRequest: ICreateJobBody = {
       resourceId: resourceId,
+      internalId: data.metadata.id as string,
       version: version,
       type: jobType,
       status: OperationStatus.IN_PROGRESS,
@@ -129,6 +130,7 @@ export class JobManagerClient extends HttpClient {
     const jobPercentage = Math.trunc((res.completedTasks / res.taskCount) * 100);
     return {
       id: res.id,
+      internalId: res.internalId as string,
       status: res.status as OperationStatus,
       isCompleted: res.completedTasks + res.failedTasks + res.expiredTasks + res.abortedTasks === res.taskCount,
       isSuccessful: res.completedTasks === res.taskCount,
@@ -158,10 +160,20 @@ export class JobManagerClient extends HttpClient {
 
   public async findJobs(resourceId: string, productType: ProductType): Promise<IGetJobResponse[]> {
     const getLayerUrl = `/jobs`;
-    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, productType: productType });
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { resourceId, productType: productType, shouldReturnTasks: false });
     if (typeof res === 'string' || res.length === 0) {
       return [];
     }
+    return res;
+  }
+
+  public async findJobsByInternalId(internalId: string): Promise<IGetJobResponse[]> {
+    const getLayerUrl = `/jobs`;
+    const res = await this.get<IGetJobResponse[]>(getLayerUrl, { internalId, shouldReturnTasks: false });
+    if (typeof res === 'string' || res.length === 0) {
+      return [];
+    }
+
     return res;
   }
 

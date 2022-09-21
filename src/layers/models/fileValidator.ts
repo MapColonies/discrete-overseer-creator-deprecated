@@ -3,13 +3,13 @@ import { promises as fsPromises, constants as fsConstants } from 'fs';
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
-import { IConfig } from '../../common/interfaces';
+import { IConfig, ILogger } from '../../common/interfaces';
 import { SQLiteClient } from '../../serviceClients/sqliteClient';
 
 @singleton()
 export class FileValidator {
   private readonly sourceMount: string;
-  public constructor(@inject(Services.CONFIG) config: IConfig) {
+  public constructor(@inject(Services.CONFIG) private readonly config: IConfig, @inject(Services.LOGGER) private readonly logger: ILogger) {
     this.sourceMount = config.get('layerSourceDir');
   }
 
@@ -36,7 +36,7 @@ export class FileValidator {
 
   public validateGpkgIndex(files: string[], originDirectory: string): void {
     files.forEach((file) => {
-      const sqliteClient = new SQLiteClient(file, originDirectory);
+      const sqliteClient = new SQLiteClient(this.config, this.logger, file, originDirectory);
       const index = sqliteClient.getGpkgIndex();
       // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (!index) {
