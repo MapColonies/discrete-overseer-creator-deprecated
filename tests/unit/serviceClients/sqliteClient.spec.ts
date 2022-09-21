@@ -27,7 +27,6 @@ describe('SQLClient', () => {
         return { get: () => mockMatrixValues } as Statement;
       });
 
-      //const testDb = new SQLiteClient('test.gpkg', '/here');
       const result = sqlClient.getGrid();
 
       expect(result).toBe(Grid.TWO_ON_ONE);
@@ -41,7 +40,6 @@ describe('SQLClient', () => {
         return { get: () => mockMatrixValues } as Statement;
       });
 
-      //const testDb = new SQLiteClient('test.gpkg', '/here');
       const result = sqlClient.getGrid();
 
       expect(result).toBe(Grid.ONE_ON_ONE);
