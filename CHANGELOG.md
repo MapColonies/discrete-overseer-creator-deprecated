@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.5.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.4.2...v3.5.0) (2022-09-22)
+
+
+### Features
+
+* added catalogId and displayPath support ([#170](https://github.com/MapColonies/discrete-overseer-creator/issues/170)) ([7caf627](https://github.com/MapColonies/discrete-overseer-creator/commit/7caf62759e95760f8843e92d2a596ab4e6b6602c))
+
+
+### Bug Fixes
+
+* add targetFormat-jpeg ([#171](https://github.com/MapColonies/discrete-overseer-creator/issues/171)) ([75b9b43](https://github.com/MapColonies/discrete-overseer-creator/commit/75b9b438ae5d933e3021c84b7190155a743ec21f))
+
 ### [3.4.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.4.1...v3.4.2) (2022-09-07)
 
 
