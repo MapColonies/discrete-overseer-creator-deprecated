@@ -13,11 +13,16 @@ export class FileValidator {
     this.sourceMount = config.get('layerSourceDir');
   }
 
-  public async validateExists(srcDir: string, files: string[]): Promise<boolean> {
+  public validateSourceDirectory(srcDir: string): boolean {
     if (!srcDir) {
       this.logger.log('info', `"originDirectory" is empty, files should be stored on specific directory`);
-      throw new BadRequestError(`"originDirectory" is empty, files should be stored on specific directory`);
+      return false;
+    } else {
+      return true;
     }
+  }
+
+  public async validateExists(srcDir: string, files: string[]): Promise<boolean> {
     const filePromises = files.map(async (file) => {
       const fullPath = path.join(this.sourceMount, srcDir, file);
       return fsPromises
