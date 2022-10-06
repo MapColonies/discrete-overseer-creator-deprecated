@@ -306,6 +306,21 @@ describe('layers', function () {
       expect(createTasksMock).toHaveBeenCalledTimes(0);
     });
 
+    it('should return 400 status code for missing originDirectory value', async function () {
+      findJobsMock.mockResolvedValue([]);
+      const invalidTestData = { ...validTestData, originDirectory: '' };
+      const response = await requestSender.createLayer(invalidTestData);
+      expect(response).toSatisfyApiSpec();
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(0);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
     it('should return 400 status code for update layer operation with lower version then catalog exists', async function () {
       let invalidTestMetaDataHasLowerVersion = { ...validTestData.metadata } as Record<string, unknown>;
       invalidTestMetaDataHasLowerVersion = { ...invalidTestMetaDataHasLowerVersion, productVersion: '1.0' };
