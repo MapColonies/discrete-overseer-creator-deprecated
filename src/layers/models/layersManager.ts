@@ -150,6 +150,10 @@ export class LayersManager {
   }
 
   private async validateFiles(data: IngestionParams): Promise<void> {
+    const originDirectoryExists = this.fileValidator.validateSourceDirectory(data.originDirectory);
+    if (!originDirectoryExists) {
+      throw new BadRequestError(`"originDirectory" is empty, files should be stored on specific directory`);
+    }
     const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
     if (!filesExists) {
       throw new BadRequestError('invalid files list, some files are missing');
