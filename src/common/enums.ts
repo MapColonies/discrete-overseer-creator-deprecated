@@ -33,3 +33,8 @@ export enum TargetFormat {
   JPEG = 'jpeg',
   PNG = 'png',
 }
+
+export enum TileFormats {
+  JPEG = 'image/jpeg',
+  PNG = 'image/png',
+}

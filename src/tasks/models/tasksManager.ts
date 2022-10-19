@@ -1,7 +1,7 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
-import { OperationStatus, MapServerCacheType } from '../../common/enums';
+import { OperationStatus, MapServerCacheType, TileFormats } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
 import { IPublishMapLayerRequest, PublishedMapLayerCacheType } from '../../layers/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
@@ -94,11 +94,12 @@ export class TasksManager {
     const id = metadata.productId as string;
     const version = metadata.productVersion as string;
     try {
-      this.logger.log('info', `[TasksManager][publishToMappingServer] layer ${id} version  ${version}`);
+      this.logger.log('info', `[TasksManager][publishToMappingServer] layer ${id} version ${version}`);
       const publishReq: IPublishMapLayerRequest = {
         name: `${layerName}`,
         tilesPath: relativePath,
         cacheType: this.cacheType,
+        format: TileFormats.JPEG,
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {

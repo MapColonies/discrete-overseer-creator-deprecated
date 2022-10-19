@@ -1,9 +1,11 @@
 import { BBox } from '@turf/helpers';
+import { TileFormats as TileFormats } from '../common/enums';
 
 export interface IPublishMapLayerRequest {
   name: string;
   tilesPath: string;
   cacheType: PublishedMapLayerCacheType;
+  format: TileFormats;
 }
 
 export enum PublishedMapLayerCacheType {
