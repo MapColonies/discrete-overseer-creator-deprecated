@@ -8,8 +8,9 @@ import { configMock, init as initMockConfig, setValue } from '../../../mocks/con
 import { linkBuilderMock } from '../../../mocks/linkBuilder';
 import { logger } from '../../../mocks/logger';
 import { OperationTypeEnum } from '../../../../src/serviceClients/syncClient';
-import { OperationStatus } from '../../../../src/common/enums';
+import { OperationStatus, TileFormat } from '../../../../src/common/enums';
 import { mergeMock, metadataMergerMock } from '../../../mocks/metadataMerger';
+import { IPublishMapLayerRequest, PublishedMapLayerCacheType } from '../../../../src/layers/interfaces';
 
 let tasksManager: TasksManager;
 
@@ -36,10 +37,11 @@ describe('TasksManager', () => {
       maxResolutionDeg: 2.68220901489258e-6,
     };
 
-    const mapPublishReq = {
+    const mapPublishReq: IPublishMapLayerRequest = {
       name: `test-${testMetadata.productType}`,
       tilesPath: `test/${testMetadata.productType}`,
-      cacheType: 'file',
+      cacheType: PublishedMapLayerCacheType.FS,
+      format: TileFormat.JPEG,
     };
 
     const catalogReqData = {
