@@ -203,31 +203,31 @@ components:
     createLayerExample:
       value:
         metadata:
-          type: "RECORD_RASTER"
-          classification: "string"
-          productId: "string"
-          productName: "string"
-          productVersion: "47"
-          productType: "Orthophoto"
-          productSubType: "string"
-          description: "string"
-          srsId: "string"
-          srsName: "string"
-          producerName: "string"
-          creationDate: "2022-10-25T10:44:42.787Z"
-          ingestionDate: "2022-10-25T10:44:42.787Z"
-          sourceDateStart: "2022-10-25T10:44:42.787Z"
-          sourceDateEnd: "2022-10-25T10:44:42.787Z"
+          type: 'RECORD_RASTER'
+          classification: 'string'
+          productId: 'string'
+          productName: 'string'
+          productVersion: '47'
+          productType: 'Orthophoto'
+          productSubType: 'string'
+          description: 'string'
+          srsId: 'string'
+          srsName: 'string'
+          producerName: 'string'
+          creationDate: '2022-10-25T10:44:42.787Z'
+          ingestionDate: '2022-10-25T10:44:42.787Z'
+          sourceDateStart: '2022-10-25T10:44:42.787Z'
+          sourceDateEnd: '2022-10-25T10:44:42.787Z'
           maxResolutionDeg: 0.072
           maxResolutionMeter: 8000
           minHorizontalAccuracyCE90: 4000
-          sensors: ["string"]
-          region: ["string"]
+          sensors: ['string']
+          region: ['string']
           rms: 0
           scale: 100000000
           footprint:
-            type: "Polygon"
+            type: 'Polygon'
             coordinates: [[[-180, -90], [-180, 90], [180, 90], [180, -90], [-180, -90]]]
           productBoundingBox: -180,-90,180,90
-        originDirectory: "string"
-        fileNames: ["example.tif"]
+        originDirectory: 'string'
+        fileNames: ['example.tif']
