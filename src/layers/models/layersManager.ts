@@ -154,6 +154,10 @@ export class LayersManager {
     if (!originDirectoryExists) {
       throw new BadRequestError(`"originDirectory" is empty, files should be stored on specific directory`);
     }
+    const originDirectoryNotWatch = this.fileValidator.validateNotWatchDir(data.originDirectory);
+    if (!originDirectoryNotWatch) {
+      throw new BadRequestError(`"originDirectory" can't be with same name as watch directory`);
+    }
     const filesExists = await this.fileValidator.validateExists(data.originDirectory, data.fileNames);
     if (!filesExists) {
       throw new BadRequestError('invalid files list, some files are missing');

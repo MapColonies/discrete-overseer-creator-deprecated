@@ -5,7 +5,13 @@ import { catalogExistsMock, catalogClientMock, getHighestLayerVersionMock } from
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../../mocks/config';
 import { logger } from '../../../mocks/logger';
-import { fileValidatorValidateExistsMock, validateSourceDirectoryMock, validateGpkgFilesMock, fileValidatorMock } from '../../../mocks/fileValidator';
+import {
+  fileValidatorValidateExistsMock,
+  validateSourceDirectoryMock,
+  validateNotWatchDirMock,
+  validateGpkgFilesMock,
+  fileValidatorMock,
+} from '../../../mocks/fileValidator';
 import { ConflictError } from '../../../../src/common/exceptions/http/conflictError';
 import { BadRequestError } from '../../../../src/common/exceptions/http/badRequestError';
 import { OperationStatus } from '../../../../src/common/enums';
@@ -83,6 +89,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
       createLayerJobMock.mockResolvedValue('testJobId');
       createSplitTilesTasksMock.mockResolvedValue(undefined);
@@ -119,6 +126,7 @@ describe('LayersManager', () => {
       getHighestLayerVersionMock.mockResolvedValue(2.0);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       mapExistsMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
       validateGpkgFilesMock.mockReturnValue(true);
@@ -160,6 +168,7 @@ describe('LayersManager', () => {
       findJobsMock.mockResolvedValue([]);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       validateGpkgFilesMock.mockReturnValue(true);
       createLayerJobMock.mockResolvedValue('testJobId');
       createMergeTilesTasksMock.mockResolvedValue(undefined);
@@ -197,6 +206,7 @@ describe('LayersManager', () => {
 
       getHighestLayerVersionMock.mockResolvedValue(4.0);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
       layersManager = new LayersManager(
@@ -234,6 +244,7 @@ describe('LayersManager', () => {
       getHighestLayerVersionMock.mockResolvedValue(2.5);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
       validateGpkgFilesMock.mockReturnValue(false);
       createLayerJobMock.mockResolvedValue('testJobId');
@@ -270,6 +281,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.PENDING }]);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
@@ -302,6 +314,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.IN_PROGRESS }]);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
@@ -347,6 +360,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.COMPLETED }]);
       generateTasksParametersMock.mockReturnValue(taskParams);
 
@@ -393,6 +407,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([{ status: OperationStatus.FAILED }]);
       generateTasksParametersMock.mockReturnValue(taskParams);
 
@@ -427,6 +442,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
@@ -460,6 +476,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(true);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
 
       const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
@@ -527,6 +544,7 @@ describe('LayersManager', () => {
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
       validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
       findJobsMock.mockResolvedValue([]);
       createLayerJobMock.mockResolvedValue('testJobId');
       createSplitTilesTasksMock.mockResolvedValue(undefined);
