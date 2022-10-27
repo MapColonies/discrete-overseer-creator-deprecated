@@ -10,6 +10,7 @@ data:
   REQUEST_PAYLOAD_LIMIT: {{ .Values.env.requestPayloadLimit | quote }}
   RESPONSE_COMPRESSION_ENABLED: {{ .Values.env.responseCompressionEnabled | quote }}
   LOG_LEVEL: {{ .Values.env.logLevel | quote }}
+  WATCH_DIRECTORY: {{ .Values.rasterCommon.ingestion.watcher.directory | quote }}
   LOG_PRETTY_PRINT_ENABLED: {{ .Values.env.logPrettyPrintEnabled | quote }}
   JOB_MANAGER_URL: {{ .Values.rasterCommon.serviceUrls.jobManager | quote }}
   SYNC_SERVICE_URL: {{ .Values.rasterCommon.serviceUrls.syncManager | quote }}

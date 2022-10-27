@@ -165,6 +165,7 @@ describe('layers', function () {
     setValue('tiling.zoomGroups', '0,1,2,3,4,5,6,7,8,9,10');
     setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
     setValue('layerSourceDir', 'tests/mocks');
+    setValue('watcher.watchDirectory', 'watch');
     registerTestValues();
     requestSender.init();
     createLayerJobMock.mockResolvedValue('jobId');
@@ -309,6 +310,21 @@ describe('layers', function () {
     it('should return 400 status code for missing originDirectory value', async function () {
       findJobsMock.mockResolvedValue([]);
       const invalidTestData = { ...validTestData, originDirectory: '' };
+      const response = await requestSender.createLayer(invalidTestData);
+      expect(response).toSatisfyApiSpec();
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(0);
+      expect(findJobsMock).toHaveBeenCalledTimes(0);
+      expect(mapExistsMock).toHaveBeenCalledTimes(0);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(0);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(0);
+      expect(createTasksMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 400 status code for originDirectory equal to watchDir', async function () {
+      findJobsMock.mockResolvedValue([]);
+      const invalidTestData = { ...validTestData, originDirectory: 'watch' };
       const response = await requestSender.createLayer(invalidTestData);
       expect(response).toSatisfyApiSpec();
 

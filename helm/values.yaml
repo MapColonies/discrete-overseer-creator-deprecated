@@ -31,6 +31,9 @@ rasterCommon:
     secretName: ''
     path: '/usr/local/share/ca-certificates'
     key: 'ca.crt'
+  ingestion:
+    watcher:
+      directory: 'watch'
 
 enabled: true
 environment: development

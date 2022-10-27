@@ -16,6 +16,9 @@
       }
     }
   },
+  "watcher": {
+    "watchDirectory": "watch"
+  },
   "layerSourceDir": "/layerSources",
   "mapServerCacheType": "FS",
   "displayNameDir": "\\layerSources",

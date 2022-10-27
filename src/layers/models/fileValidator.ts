@@ -22,6 +22,16 @@ export class FileValidator {
     }
   }
 
+  public validateNotWatchDir(srcDir: string): boolean {
+    const watchDir = this.config.get('watcher.watchDirectory');
+    if (srcDir === watchDir) {
+      this.logger.log('info', `"originDirectory" can't be with same name as watch directory (${watchDir})`);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   public async validateExists(srcDir: string, files: string[]): Promise<boolean> {
     const filePromises = files.map(async (file) => {
       const fullPath = path.join(this.sourceMount, srcDir, file);
