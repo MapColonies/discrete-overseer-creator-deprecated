@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.5.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.5.0...v3.5.1) (2022-10-27)
+
+
+### Bug Fixes
+
+* block manual ingest from watchDir ([#175](https://github.com/MapColonies/discrete-overseer-creator/issues/175)) ([f00b75d](https://github.com/MapColonies/discrete-overseer-creator/commit/f00b75d0f7426ac04c54fa5cbb65ad6f707e7d23))
+
 ## [3.5.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.4.2...v3.5.0) (2022-09-22)
 
 
