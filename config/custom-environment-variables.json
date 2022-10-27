@@ -13,9 +13,7 @@
       }
     }
   },
-  "watcher": {
-    "watchDirectory": "WATCH_DIRECTORY"
-  },
+  "watchDirectory": "WATCH_DIRECTORY",
   "layerSourceDir": "LAYER_SOURCE_DIR",
   "mapServerCacheType": "MAP_SERVER_CACHE_TYPE",
   "displayNameDir": "DISPLAY_NAME_DIR",

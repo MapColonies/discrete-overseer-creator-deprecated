@@ -32,7 +32,7 @@ rasterCommon:
     path: '/usr/local/share/ca-certificates'
     key: 'ca.crt'
   ingestion:
-    watcher:
+    watchDirectoryOptions:
       directory: 'watch'
 
 enabled: true

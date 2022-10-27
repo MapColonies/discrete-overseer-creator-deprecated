@@ -23,7 +23,7 @@ export class FileValidator {
   }
 
   public validateNotWatchDir(srcDir: string): boolean {
-    const watchDir = this.config.get('watcher.watchDirectory');
+    const watchDir = this.config.get('watchDirectory');
     if (srcDir === watchDir) {
       this.logger.log('info', `"originDirectory" can't be with same name as watch directory (${watchDir})`);
       return false;
