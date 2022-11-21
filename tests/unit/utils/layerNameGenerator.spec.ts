@@ -12,7 +12,7 @@ describe('layerNameGenerator', () => {
     it('Check layer with product type "Orthophoto"', function () {
       const productId = 'id';
       const layerName = getMapServingLayerName(productId, ProductType.ORTHOPHOTO);
-      expect(layerName).toEqual(`${productId}-${ProductType.ORTHOPHOTO}`);
+      expect(layerName).toBe(`${productId}-${ProductType.ORTHOPHOTO}`);
     });
 
     it('Check layer with all other product types (Not "Orthophoto")', function () {
@@ -20,7 +20,7 @@ describe('layerNameGenerator', () => {
       const valuesNoOrtho = Object.values(ProductType).filter((value) => value !== ProductType.ORTHOPHOTO) as ProductType[];
       for (let i = 0; i < valuesNoOrtho.length; i++) {
         const layerName = getMapServingLayerName(productId, valuesNoOrtho[i]);
-        expect(layerName).toEqual(`${productId}-${valuesNoOrtho[i]}`);
+        expect(layerName).toBe(`${productId}-${valuesNoOrtho[i]}`);
       }
     });
   });

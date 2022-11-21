@@ -119,7 +119,7 @@ describe('MergeTilesTasker', () => {
 
       const tiles: Set<string>[] = [new Set<string>(), new Set<string>(), new Set<string>(), new Set<string>(), new Set<string>(), new Set<string>()];
       for (const task of taskGen) {
-        expect(task.sources[0].path).toEqual('test/dest');
+        expect(task.sources[0].path).toBe('test/dest');
         for (const tile of tilesGenerator(task.batches)) {
           const tileStr = `${tile.zoom}/${tile.x}/${tile.y}`;
           expect(tiles[tile.zoom].has(tileStr)).toBeFalsy();
