@@ -7,6 +7,7 @@ describe('zoomToResulation', () => {
   beforeEach(function () {
     jest.resetAllMocks();
     initMockConfig();
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     setValue({ 'tiling.zoomGroups': '0-10,11,12,13,14,15,16,17,18,19,20,21,22,23' });
     zoomLevelCalculator = new ZoomLevelCalculator(configMock);
   });
