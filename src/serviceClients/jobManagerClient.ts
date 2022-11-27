@@ -22,14 +22,19 @@ interface ICreateJobBody {
   version: string;
   parameters: Record<string, unknown>;
   type: string;
+  percentage?: number;
   description?: string;
   status?: OperationStatus;
   reason?: string;
   tasks?: ICreateTaskBody[];
+  priority?: number;
   internalId?: string;
   producerName?: string;
   productName?: string;
   productType?: string;
+  expirationDate?: Date;
+  additionalIdentifiers?: string;
+  domain?: string;
 }
 
 interface ICreateJobResponse {
@@ -51,6 +56,7 @@ export interface IGetJobResponse {
   type: string;
   percentage?: number;
   isCleaned: boolean;
+  priority: number;
   internalId?: string;
   producerName?: string;
   productName?: string;
@@ -62,10 +68,15 @@ export interface IGetJobResponse {
   pendingTasks: number;
   inProgressTasks: number;
   abortedTasks: number;
+  additionalIdentifiers?: string;
+  expirationDate?: Date;
+  domain: string;
 }
 
 @injectable()
 export class JobManagerClient extends HttpClient {
+  private readonly jobDomain: string;
+
   /* eslint-disable @typescript-eslint/explicit-member-accessibility */
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -73,8 +84,9 @@ export class JobManagerClient extends HttpClient {
     /* eslint-enable @typescript-eslint/explicit-member-accessibility */
     const retryConfig = parseConfig(config.get<IHttpRetryConfig>('httpRetry'));
     super(logger, retryConfig);
-    this.targetService = 'DiscreteIngestionDB'; //name of target for logs
+    this.targetService = 'Jobs_Manager'; //name of target for logs
     this.axiosOptions.baseURL = config.get<string>('jobManagerURL');
+    this.jobDomain = config.get<string>('jobDomain');
   }
 
   public async createLayerJob(
@@ -97,6 +109,7 @@ export class JobManagerClient extends HttpClient {
       producerName: data.metadata.producerName,
       productName: data.metadata.productName,
       productType: data.metadata.productType,
+      domain: this.jobDomain,
       tasks: taskParams?.map((params) => {
         return {
           type: taskType,

@@ -42,6 +42,7 @@
     "__format": "boolean"
   },
   "linkTemplatesPath": "LINKS_TEMPLATE_PATH",
+  "jobDomain": "JOB_DOMAIN",
   "ingestionNewJobType": "INGESTION_NEW_JOB_TYPE",
   "ingestionUpdateJobType": "INGESTION_UPDATE_JOB_TYPE",
   "ingestionTaskType": {

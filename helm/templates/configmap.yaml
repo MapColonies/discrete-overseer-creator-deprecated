@@ -27,6 +27,7 @@ data:
   LINK_TEMPLATE: {{ tpl (.Files.Get "config/linkTemplates.template") . | quote }}
   LAYER_SOURCE_DIR: {{ .Values.env.layerSourceDir | quote }}
   SHOULD_SYNC: {{ .Values.env.shouldSync | quote }}
+  JOB_DOMAIN: {{ .Values.rasterCommon.jobManagement.jobDomain | quote }}
   INGESTION_NEW_JOB_TYPE: {{ .Values.rasterCommon.jobManagement.ingestion.new.jobType | quote }}
   INGESTION_SPLIT_TILES_TASK_TYPE: {{ .Values.rasterCommon.jobManagement.ingestion.new.splitTilesTaskType | quote }}
   INGESTION_UPDATE_JOB_TYPE: {{ .Values.rasterCommon.jobManagement.ingestion.update.jobType | quote }}
