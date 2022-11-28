@@ -84,7 +84,7 @@ export class JobManagerClient extends HttpClient {
     /* eslint-enable @typescript-eslint/explicit-member-accessibility */
     const retryConfig = parseConfig(config.get<IHttpRetryConfig>('httpRetry'));
     super(logger, retryConfig);
-    this.targetService = 'Jobs_Manager'; //name of target for logs
+    this.targetService = 'JobsManager'; //name of target for logs
     this.axiosOptions.baseURL = config.get<string>('jobManagerURL');
     this.jobDomain = config.get<string>('jobDomain');
   }

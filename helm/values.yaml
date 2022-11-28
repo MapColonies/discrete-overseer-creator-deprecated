@@ -12,6 +12,7 @@ rasterCommon:
     catalogManager: http://localhost:8083
     jobManager: http://localhost:8084
   jobManagement:
+    jobDomain: RASTER
     ingestion:
       new: 
         jobType: Ingestion_New
