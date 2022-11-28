@@ -36,6 +36,7 @@
   },
   "shouldSync": true,
   "linkTemplatesPath": "config/linkTemplates.template",
+  "jobDomain": "RASTER",
   "ingestionNewJobType": "Ingestion_New",
   "ingestionUpdateJobType": "Ingestion_Update",
   "ingestionTaskType": {
