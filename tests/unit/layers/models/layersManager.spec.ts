@@ -83,6 +83,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
@@ -122,6 +123,7 @@ describe('LayersManager', () => {
         fileNames: ['test.gpkg'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
       const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
       getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
@@ -165,6 +167,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
       getHighestLayerVersionMock.mockResolvedValue([1.0, 2.0]);
       mapExistsMock.mockResolvedValue(false);
@@ -206,6 +209,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       getHighestLayerVersionMock.mockResolvedValue(4.0);
@@ -244,6 +248,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       getHighestLayerVersionMock.mockResolvedValue(2.5);
@@ -282,6 +287,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       catalogExistsMock.mockResolvedValue(false);
@@ -315,6 +321,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       mapExistsMock.mockResolvedValue(false);
@@ -362,6 +369,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
@@ -410,6 +418,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
@@ -446,6 +455,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
@@ -481,6 +491,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
@@ -516,6 +527,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
@@ -551,6 +563,7 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
+        managerCallbackUrl: 'http:localhostTest',
       };
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
