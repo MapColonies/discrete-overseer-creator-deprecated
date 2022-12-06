@@ -23,9 +23,8 @@ export class LayersController {
         metadata: filterLayerMetadata(req.body.metadata),
         originDirectory: req.body.originDirectory,
         fileNames: req.body.fileNames,
-        managerCallbackUrl: overseerUrl,
       };
-      await this.manager.createLayer(sourceRequest);
+      await this.manager.createLayer(sourceRequest, overseerUrl);
       return res.sendStatus(httpStatus.OK);
     } catch (err) {
       next(err);

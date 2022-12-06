@@ -231,5 +231,3 @@ components:
           productBoundingBox: -180,-90,180,90
         originDirectory: 'string'
         fileNames: ['example.tif']
-        managerCallbackUrl: "http://localhost:8080"
-

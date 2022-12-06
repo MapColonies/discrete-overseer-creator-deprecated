@@ -83,8 +83,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
@@ -108,7 +108,7 @@ describe('LayersManager', () => {
         mergeTilesTasker
       );
 
-      await layersManager.createLayer(testData);
+      await layersManager.createLayer(testData, managerCallbackUrl);
       expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
       expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
@@ -123,8 +123,9 @@ describe('LayersManager', () => {
         fileNames: ['test.gpkg'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
+
       const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
       getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
       getHighestLayerVersionMock.mockResolvedValue(2.0);
@@ -149,7 +150,7 @@ describe('LayersManager', () => {
         mergeTilesTasker
       );
 
-      await layersManager.createLayer(testData);
+      await layersManager.createLayer(testData, managerCallbackUrl);
 
       expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
       expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
@@ -167,8 +168,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
       getHighestLayerVersionMock.mockResolvedValue([1.0, 2.0]);
       mapExistsMock.mockResolvedValue(false);
       findJobsMock.mockResolvedValue([]);
@@ -192,7 +193,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
 
       await expect(action).rejects.toThrow(BadRequestError);
@@ -209,8 +210,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(4.0);
       validateSourceDirectoryMock.mockResolvedValue(true);
@@ -229,7 +230,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
 
       await expect(action).rejects.toThrow(BadRequestError);
@@ -248,8 +249,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(2.5);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -273,7 +274,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
 
       await expect(action).rejects.toThrow(BadRequestError);
@@ -287,8 +288,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
 
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -309,7 +310,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -321,9 +322,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
-
+      const managerCallbackUrl = 'http:localhostTest';
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -344,7 +344,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -369,9 +369,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
-
+      const managerCallbackUrl = 'http:localhostTest';
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -393,7 +392,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action()).resolves.not.toThrow();
     });
@@ -418,8 +417,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
@@ -443,7 +442,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action()).resolves.not.toThrow();
     });
@@ -455,8 +454,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(true);
@@ -479,7 +478,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -491,9 +490,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
-
+      const managerCallbackUrl = 'http:localhostTest';
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(true);
@@ -515,7 +513,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -527,8 +525,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
@@ -548,7 +546,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(BadRequestError);
     });
@@ -563,8 +561,8 @@ describe('LayersManager', () => {
         fileNames: ['test.tif'],
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
-        managerCallbackUrl: 'http:localhostTest',
       };
+      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
@@ -588,7 +586,7 @@ describe('LayersManager', () => {
         mergeTilesTasker
       );
 
-      await layersManager.createLayer(testData);
+      await layersManager.createLayer(testData, managerCallbackUrl);
 
       expect(createSplitTilesTasksMock).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

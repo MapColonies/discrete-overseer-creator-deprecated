@@ -43,7 +43,7 @@ export class LayersManager {
     this.tileMergeTask = config.get<string>('ingestionTaskType.tileMergeTask');
   }
 
-  public async createLayer(data: IngestionParams): Promise<void> {
+  public async createLayer(data: IngestionParams, overseerUrl: string): Promise<void> {
     const convertedData: Record<string, unknown> = data.metadata as unknown as Record<string, unknown>;
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
@@ -82,7 +82,7 @@ export class LayersManager {
       const layerRelativePath = `${data.metadata.id}/${data.metadata.displayPath}`;
 
       if (taskType === TaskAction.MERGE_TILES) {
-        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
+        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent, overseerUrl);
       } else {
         const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
         await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
@@ -94,7 +94,7 @@ export class LayersManager {
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
-      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent);
+      await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent, overseerUrl);
     } else {
       throw new BadRequestError('Unsupported job type');
     }

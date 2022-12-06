@@ -125,7 +125,8 @@ export class MergeTilesTasker {
     taskType: string,
     jobType: string,
     grids: Grid[],
-    extent: BBox
+    extent: BBox,
+    managerCallbackUrl: string
   ): Promise<void> {
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
       const fileRelativePath = join(data.originDirectory, fileName);
@@ -151,7 +152,7 @@ export class MergeTilesTasker {
       mergeTaskBatch.push(mergeTask);
       if (mergeTaskBatch.length === this.mergeTaskBatchSize) {
         if (jobId === undefined) {
-          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch);
+          jobId = await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch, managerCallbackUrl);
         } else {
           try {
             await this.db.createTasks(jobId, mergeTaskBatch, taskType);
@@ -165,7 +166,7 @@ export class MergeTilesTasker {
     }
     if (mergeTaskBatch.length !== 0) {
       if (jobId === undefined) {
-        await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch);
+        await this.db.createLayerJob(data, layerRelativePath, jobType, taskType, mergeTaskBatch, managerCallbackUrl);
       } else {
         // eslint-disable-next-line no-useless-catch
         try {
