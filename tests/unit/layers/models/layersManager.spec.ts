@@ -65,6 +65,8 @@ const testImageMetadata = {
 } as unknown as LayerMetadata;
 const layerRelativePath = 'test/OrthophotoHistory';
 
+const managerCallbackUrl = 'http:localhostTest';
+
 describe('LayersManager', () => {
   beforeEach(function () {
     jest.resetAllMocks();
@@ -107,7 +109,7 @@ describe('LayersManager', () => {
         mergeTilesTasker
       );
 
-      await layersManager.createLayer(testData);
+      await layersManager.createLayer(testData, managerCallbackUrl);
       expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
       expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
       expect(findJobsMock).toHaveBeenCalledTimes(1);
@@ -123,6 +125,7 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
+
       const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
       getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
       getHighestLayerVersionMock.mockResolvedValue(2.0);
@@ -147,7 +150,7 @@ describe('LayersManager', () => {
         mergeTilesTasker
       );
 
-      await layersManager.createLayer(testData);
+      await layersManager.createLayer(testData, managerCallbackUrl);
 
       expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
       expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
@@ -189,7 +192,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
 
       await expect(action).rejects.toThrow(BadRequestError);
@@ -225,7 +228,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
 
       await expect(action).rejects.toThrow(BadRequestError);
@@ -268,7 +271,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
 
       await expect(action).rejects.toThrow(BadRequestError);
@@ -303,7 +306,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -337,7 +340,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -385,7 +388,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action()).resolves.not.toThrow();
     });
@@ -434,7 +437,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action()).resolves.not.toThrow();
     });
@@ -469,7 +472,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -504,7 +507,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(ConflictError);
     });
@@ -536,7 +539,7 @@ describe('LayersManager', () => {
       );
 
       const action = async () => {
-        await layersManager.createLayer(testData);
+        await layersManager.createLayer(testData, managerCallbackUrl);
       };
       await expect(action).rejects.toThrow(BadRequestError);
     });
@@ -575,7 +578,7 @@ describe('LayersManager', () => {
         mergeTilesTasker
       );
 
-      await layersManager.createLayer(testData);
+      await layersManager.createLayer(testData, managerCallbackUrl);
 
       expect(createSplitTilesTasksMock).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

@@ -94,7 +94,8 @@ export class JobManagerClient extends HttpClient {
     layerRelativePath: string,
     jobType: string,
     taskType: string,
-    taskParams?: (ITaskParameters | IMergeTaskParams)[]
+    taskParams?: (ITaskParameters | IMergeTaskParams)[],
+    managerCallbackUrl?: string
   ): Promise<string> {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
@@ -105,7 +106,7 @@ export class JobManagerClient extends HttpClient {
       version: version,
       type: jobType,
       status: OperationStatus.IN_PROGRESS,
-      parameters: { ...data, layerRelativePath } as unknown as Record<string, unknown>,
+      parameters: { ...data, layerRelativePath, managerCallbackUrl } as unknown as Record<string, unknown>,
       producerName: data.metadata.producerName,
       productName: data.metadata.productName,
       productType: data.metadata.productType,
