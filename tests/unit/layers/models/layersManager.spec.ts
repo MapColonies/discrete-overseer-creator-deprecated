@@ -65,6 +65,8 @@ const testImageMetadata = {
 } as unknown as LayerMetadata;
 const layerRelativePath = 'test/OrthophotoHistory';
 
+const managerCallbackUrl = 'http:localhostTest';
+
 describe('LayersManager', () => {
   beforeEach(function () {
     jest.resetAllMocks();
@@ -84,7 +86,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
@@ -124,7 +125,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
 
       const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
       getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
@@ -169,7 +169,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
       getHighestLayerVersionMock.mockResolvedValue([1.0, 2.0]);
       mapExistsMock.mockResolvedValue(false);
       findJobsMock.mockResolvedValue([]);
@@ -211,7 +210,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(4.0);
       validateSourceDirectoryMock.mockResolvedValue(true);
@@ -250,7 +248,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(2.5);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -289,7 +286,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
 
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -323,7 +319,7 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
+
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -370,7 +366,7 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
+
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       catalogExistsMock.mockResolvedValue(false);
       fileValidatorValidateExistsMock.mockResolvedValue(true);
@@ -418,7 +414,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
@@ -455,7 +450,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(true);
@@ -491,7 +485,7 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
+
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
       catalogExistsMock.mockResolvedValue(true);
@@ -526,7 +520,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
@@ -562,7 +555,6 @@ describe('LayersManager', () => {
         metadata: { ...testImageMetadata },
         originDirectory: '/here',
       };
-      const managerCallbackUrl = 'http:localhostTest';
 
       getHighestLayerVersionMock.mockResolvedValue(undefined);
       mapExistsMock.mockResolvedValue(false);
