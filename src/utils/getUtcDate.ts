@@ -9,6 +9,5 @@ export const getUtcNow = (): Date => {
       date.getUTCSeconds()
     );
     const utcDate = new Date(nowUtc);
-    console.log(`inner ${utcDate.toISOString()}`)
     return utcDate;
   };
