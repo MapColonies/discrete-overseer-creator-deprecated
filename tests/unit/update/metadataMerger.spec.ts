@@ -1,6 +1,7 @@
 import { bboxPolygon, featureCollection, polygon } from '@turf/turf';
 import { LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { MetadataMerger } from '../../../src/update/metadataMerger';
+import { getUtcNow } from '../../../src/utils/getUtcDate';
 
 describe('MetadataMerger', () => {
   let merger: MetadataMerger;
@@ -41,7 +42,7 @@ describe('MetadataMerger', () => {
     description: 'test',
     footprint: baseFootprint,
     includedInBests: [],
-    ingestionDate: new Date(1, 1, 5),
+    ingestionDate: new Date(2022, 1, 1),
     layerPolygonParts: basePolygonParts,
     maxResolutionMeter: 777,
     producerName: 'tester',
@@ -86,7 +87,6 @@ describe('MetadataMerger', () => {
     description: 'test',
     footprint: updateFootprint,
     includedInBests: [],
-    ingestionDate: new Date(2, 1, 5),
     layerPolygonParts: updatePolygonParts,
     maxResolutionMeter: 500,
     producerName: 'tester',
@@ -156,7 +156,7 @@ describe('MetadataMerger', () => {
     description: 'test',
     footprint: expectedFootprint.geometry,
     includedInBests: [],
-    ingestionDate: new Date(1, 1, 5),
+    // ingestionDate: new Date(),
     layerPolygonParts: expectedPolygonParts,
     maxResolutionMeter: 500,
     producerName: 'tester',
@@ -180,7 +180,7 @@ describe('MetadataMerger', () => {
   } as unknown as LayerMetadata;
 
   beforeAll(() => {
-    jest.useFakeTimers().setSystemTime(new Date(3, 2, 1));
+    // jest.useFakeTimers().setSystemTime(new Date(3, 2, 1));
   });
   beforeEach(() => {
     merger = new MetadataMerger();
@@ -188,7 +188,9 @@ describe('MetadataMerger', () => {
   describe('merge', () => {
     it('merges metadata properly', () => {
       const merged = merger.merge(baseMetadata, updateMetadata);
-      expect(merged).toEqual(expectedMetadata);
+      const { ingestionDate, ...rest} = merged;
+      expect(ingestionDate?.getTime()).toBeGreaterThan(baseMetadata.ingestionDate?.getTime() as number);
+      expect(rest).toEqual(expectedMetadata);
     });
   });
 });

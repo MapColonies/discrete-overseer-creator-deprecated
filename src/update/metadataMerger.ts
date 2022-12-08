@@ -5,6 +5,7 @@ import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Footprint } from '@map-colonies/mc-utils';
 import { createBBoxString } from '../utils/bbox';
 import { layerMetadataToPolygonParts } from '../common/utills/polygonPartsBuilder';
+import { getUtcNow } from '../utils/getUtcDate';
 
 @singleton()
 export class MetadataMerger {
@@ -18,6 +19,7 @@ export class MetadataMerger {
           : updateMetadata.sourceDateStart,
       sourceDateEnd:
         (oldMetadata.sourceDateEnd as Date) >= (updateMetadata.sourceDateEnd as Date) ? oldMetadata.sourceDateEnd : updateMetadata.sourceDateEnd,
+      ingestionDate: getUtcNow(),
       minHorizontalAccuracyCE90: Math.max(oldMetadata.minHorizontalAccuracyCE90 ?? 0, updateMetadata.minHorizontalAccuracyCE90 ?? 0),
       layerPolygonParts: this.mergeLayerPolygonParts(updateMetadata, oldMetadata.layerPolygonParts),
       footprint: union(oldMetadata.footprint as Footprint, updateMetadata.footprint as Footprint)?.geometry as GeoJSON,
