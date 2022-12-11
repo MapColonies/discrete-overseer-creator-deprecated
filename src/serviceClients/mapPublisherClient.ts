@@ -23,7 +23,7 @@ export class MapPublisherClient extends HttpClient {
   }
 
   public async exists(name: string): Promise<boolean> {
-    const saveMetadataUrl = encodeURIComponent(`/layer/${name}`);
+    const saveMetadataUrl = `/layer/${encodeURIComponent(name)}`;
     try {
       await this.get(saveMetadataUrl);
       return true;
