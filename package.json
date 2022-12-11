@@ -46,7 +46,7 @@
     "@map-colonies/mc-logger": "^2.0.2",
     "@map-colonies/mc-model-types": "^13.4.1",
     "@map-colonies/mc-probe": "^1.0.0",
-    "@map-colonies/mc-utils": "file:../mc-utils/map-colonies-mc-utils-1.5.0.tgz",
+    "@map-colonies/mc-utils": "^1.6.0",
     "@map-colonies/storage-explorer-middleware": "^1.2.7",
     "@turf/boolean-valid": "^6.5.0",
     "@turf/turf": "^6.5.0",
