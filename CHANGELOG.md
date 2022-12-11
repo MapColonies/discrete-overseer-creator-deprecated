@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.6.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.5.2...v3.6.0) (2022-12-11)
+
+
+### Features
+
+* add job domain (MAPCO-2709) ([#180](https://github.com/MapColonies/discrete-overseer-creator/issues/180)) ([1be9557](https://github.com/MapColonies/discrete-overseer-creator/commit/1be9557447b545131bbd8ba0b1bc6e0e236932a4))
+* adding overseer as callback param to job manager jobs (MAPCO-2384) ([#181](https://github.com/MapColonies/discrete-overseer-creator/issues/181)) ([a2f98b8](https://github.com/MapColonies/discrete-overseer-creator/commit/a2f98b8704c3ee00738f93f7b8257afb45c3b40a))
+
+
+### Bug Fixes
+
+* encode arguments when sending get requests ([#179](https://github.com/MapColonies/discrete-overseer-creator/issues/179)) ([de56ade](https://github.com/MapColonies/discrete-overseer-creator/commit/de56adef5129fb7f7110a796e973f799d70dd14d))
+* update ingestion date field (MAPCO-2669) ([#182](https://github.com/MapColonies/discrete-overseer-creator/issues/182)) ([96066c1](https://github.com/MapColonies/discrete-overseer-creator/commit/96066c17e6e5032544c74b0419ae108aa244230e))
+
 ### [3.5.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.5.1...v3.5.2) (2022-10-30)
 
 ### [3.5.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.5.0...v3.5.1) (2022-10-27)
