@@ -156,7 +156,6 @@ describe('MetadataMerger', () => {
     description: 'test',
     footprint: expectedFootprint.geometry,
     includedInBests: [],
-    // ingestionDate: new Date(),
     layerPolygonParts: expectedPolygonParts,
     maxResolutionMeter: 500,
     producerName: 'tester',
@@ -179,18 +178,15 @@ describe('MetadataMerger', () => {
     scale: undefined,
   } as unknown as LayerMetadata;
 
-  beforeAll(() => {
-    // jest.useFakeTimers().setSystemTime(new Date(3, 2, 1));
-  });
   beforeEach(() => {
     merger = new MetadataMerger();
   });
   describe('merge', () => {
     it('merges metadata properly', () => {
       const merged = merger.merge(baseMetadata, updateMetadata);
-      const { ingestionDate, ...rest} = merged;
+      const { ingestionDate, ...restUpdateMetadata} = merged;
       expect(ingestionDate?.getTime()).toBeGreaterThan(baseMetadata.ingestionDate?.getTime() as number);
-      expect(rest).toEqual(expectedMetadata);
+      expect(restUpdateMetadata).toEqual(expectedMetadata);
     });
   });
 });
