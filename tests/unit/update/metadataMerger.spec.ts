@@ -1,7 +1,6 @@
 import { bboxPolygon, featureCollection, polygon } from '@turf/turf';
 import { LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { MetadataMerger } from '../../../src/update/metadataMerger';
-import { getUtcNow } from '../../../src/utils/getUtcDate';
 
 describe('MetadataMerger', () => {
   let merger: MetadataMerger;
@@ -184,7 +183,7 @@ describe('MetadataMerger', () => {
   describe('merge', () => {
     it('merges metadata properly', () => {
       const merged = merger.merge(baseMetadata, updateMetadata);
-      const { ingestionDate, ...restUpdateMetadata} = merged;
+      const { ingestionDate, ...restUpdateMetadata } = merged;
       expect(ingestionDate?.getTime()).toBeGreaterThan(baseMetadata.ingestionDate?.getTime() as number);
       expect(restUpdateMetadata).toEqual(expectedMetadata);
     });
