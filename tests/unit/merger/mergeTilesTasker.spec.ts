@@ -164,15 +164,16 @@ describe('MergeTilesTasker', () => {
 
       const destSourcePath = 'FS';
       const filesSourceType = 'GPKG';
+      const expectedTargetMergeSource = {
+        type: destSourcePath,
+        path: 'test/dest',
+        isNew: false,
+      };
       const expectedTasks: IMergeTaskParams[] = [
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -191,11 +192,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
@@ -208,11 +205,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -231,11 +224,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -254,11 +243,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
@@ -271,11 +256,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -288,11 +269,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -336,15 +313,16 @@ describe('MergeTilesTasker', () => {
       }
       const destSourcePath = 'FS';
       const filesSourceType = 'GPKG';
+      const expectedTargetMergeSource = {
+        type: destSourcePath,
+        path: 'test/dest',
+        isNew: false,
+      };
       const expectedTasks: IMergeTaskParams[] = [
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -363,11 +341,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -386,11 +360,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -409,11 +379,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -432,11 +398,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: false,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -486,15 +448,16 @@ describe('MergeTilesTasker', () => {
 
       const destSourcePath = 'FS';
       const filesSourceType = 'GPKG';
+      const expectedTargetMergeSource = {
+        type: destSourcePath,
+        path: 'test/dest',
+        isNew: true,
+      };
       const expectedTasks: IMergeTaskParams[] = [
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: true,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -513,11 +476,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: true,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
@@ -530,11 +489,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: true,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -553,11 +508,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: true,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -576,11 +527,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: true,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[1].tilesPath,
@@ -593,11 +540,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: true,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,
@@ -610,11 +553,7 @@ describe('MergeTilesTasker', () => {
         {
           targetFormat: TargetFormat.JPEG,
           sources: [
-            {
-              type: destSourcePath,
-              path: 'test/dest',
-              isNew: true,
-            },
+            expectedTargetMergeSource,
             {
               type: filesSourceType,
               path: layers[0].tilesPath,

@@ -59,7 +59,6 @@ export interface IMergeOverlaps {
 export interface IMergeSources {
   type: string;
   path: string;
-  isNew?: boolean;
   grid?: Grid;
   extent?: IBBox;
 }
