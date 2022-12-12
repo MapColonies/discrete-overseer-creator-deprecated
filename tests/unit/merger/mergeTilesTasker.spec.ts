@@ -171,7 +171,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: false
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -194,7 +194,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: false
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -211,7 +211,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: false
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -234,7 +234,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: false
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -257,7 +257,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: false
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -274,7 +274,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: false
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -456,7 +456,7 @@ describe('MergeTilesTasker', () => {
       expect(tasks).toHaveLength(expectedTasks.length);
       expect(tasks).toEqual(expect.arrayContaining(expectedTasks));
     });
-    
+
     it('generates "New" job type for merging tiles with "isNew" parameter for new sources', () => {
       const layers: ILayerMergeData[] = [
         {
@@ -493,7 +493,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: true
+              isNew: true,
             },
             {
               type: filesSourceType,
@@ -516,7 +516,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: true
+              isNew: true,
             },
             {
               type: filesSourceType,
@@ -533,7 +533,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: true
+              isNew: true,
             },
             {
               type: filesSourceType,
@@ -556,7 +556,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: true
+              isNew: true,
             },
             {
               type: filesSourceType,
@@ -579,7 +579,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: true
+              isNew: true,
             },
             {
               type: filesSourceType,
@@ -596,7 +596,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
-              isNew: true
+              isNew: true,
             },
             {
               type: filesSourceType,
