@@ -171,6 +171,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false
             },
             {
               type: filesSourceType,
@@ -193,6 +194,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false
             },
             {
               type: filesSourceType,
@@ -209,6 +211,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false
             },
             {
               type: filesSourceType,
@@ -231,6 +234,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false
             },
             {
               type: filesSourceType,
@@ -253,6 +257,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false
             },
             {
               type: filesSourceType,
@@ -269,6 +274,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false
             },
             {
               type: filesSourceType,
@@ -285,6 +291,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -336,6 +343,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -358,6 +366,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -380,6 +389,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -402,6 +412,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -424,6 +435,7 @@ describe('MergeTilesTasker', () => {
             {
               type: destSourcePath,
               path: 'test/dest',
+              isNew: false,
             },
             {
               type: filesSourceType,
@@ -442,6 +454,178 @@ describe('MergeTilesTasker', () => {
         },
       ];
       expect(tasks).toHaveLength(expectedTasks.length);
+      expect(tasks).toEqual(expect.arrayContaining(expectedTasks));
+    });
+    
+    it('generates "New" job type for merging tiles with "isNew" parameter for new sources', () => {
+      const layers: ILayerMergeData[] = [
+        {
+          fileName: 'test1.gpkg',
+          tilesPath: 'test/tile1.gpkg',
+          footprint: bboxPolygon([-180, -90, 0, 90]),
+        },
+        {
+          fileName: 'test2.gpkg',
+          tilesPath: 'test/tile2.gpkg',
+          footprint: bboxPolygon([-180, -90, 90, 0]),
+        },
+      ];
+      const params: IMergeParameters = {
+        layers: layers,
+        destPath: 'test/dest',
+        maxZoom: 1,
+        extent: [0, 0, 1, 1],
+        grids: [Grid.TWO_ON_ONE, Grid.TWO_ON_ONE],
+      };
+
+      const taskGen = mergeTilesTasker.createBatchedTasks(params, true);
+      const tasks: IMergeTaskParams[] = [];
+      for (const task of taskGen) {
+        tasks.push(task);
+      }
+
+      const destSourcePath = 'FS';
+      const filesSourceType = 'GPKG';
+      const expectedTasks: IMergeTaskParams[] = [
+        {
+          targetFormat: TargetFormat.JPEG,
+          sources: [
+            {
+              type: destSourcePath,
+              path: 'test/dest',
+              isNew: true
+            },
+            {
+              type: filesSourceType,
+              path: layers[0].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+            {
+              type: filesSourceType,
+              path: layers[1].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+          ],
+          batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 0 }],
+        },
+        {
+          targetFormat: TargetFormat.JPEG,
+          sources: [
+            {
+              type: destSourcePath,
+              path: 'test/dest',
+              isNew: true
+            },
+            {
+              type: filesSourceType,
+              path: layers[1].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+          ],
+          batches: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 0 }],
+        },
+        {
+          targetFormat: TargetFormat.JPEG,
+          sources: [
+            {
+              type: destSourcePath,
+              path: 'test/dest',
+              isNew: true
+            },
+            {
+              type: filesSourceType,
+              path: layers[0].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+            {
+              type: filesSourceType,
+              path: layers[1].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+          ],
+          batches: [{ minX: 0, maxX: 1, minY: 0, maxY: 1, zoom: 1 }],
+        },
+        {
+          targetFormat: TargetFormat.JPEG,
+          sources: [
+            {
+              type: destSourcePath,
+              path: 'test/dest',
+              isNew: true
+            },
+            {
+              type: filesSourceType,
+              path: layers[0].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+            {
+              type: filesSourceType,
+              path: layers[1].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+          ],
+          batches: [{ minX: 1, maxX: 2, minY: 0, maxY: 1, zoom: 1 }],
+        },
+        {
+          targetFormat: TargetFormat.JPEG,
+          sources: [
+            {
+              type: destSourcePath,
+              path: 'test/dest',
+              isNew: true
+            },
+            {
+              type: filesSourceType,
+              path: layers[1].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+          ],
+          batches: [{ minX: 2, maxX: 3, minY: 0, maxY: 1, zoom: 1 }],
+        },
+        {
+          targetFormat: TargetFormat.JPEG,
+          sources: [
+            {
+              type: destSourcePath,
+              path: 'test/dest',
+              isNew: true
+            },
+            {
+              type: filesSourceType,
+              path: layers[0].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+          ],
+          batches: [{ minX: 0, maxX: 1, minY: 1, maxY: 2, zoom: 1 }],
+        },
+        {
+          targetFormat: TargetFormat.JPEG,
+          sources: [
+            {
+              type: destSourcePath,
+              path: 'test/dest',
+              isNew: true,
+            },
+            {
+              type: filesSourceType,
+              path: layers[0].tilesPath,
+              grid: Grid.TWO_ON_ONE,
+              extent: { minX: 0, minY: 0, maxX: 1, maxY: 1 },
+            },
+          ],
+          batches: [{ minX: 1, maxX: 2, minY: 1, maxY: 2, zoom: 1 }],
+        },
+      ];
+
       expect(tasks).toEqual(expect.arrayContaining(expectedTasks));
     });
   });

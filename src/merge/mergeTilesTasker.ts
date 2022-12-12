@@ -13,7 +13,16 @@ import { difference, union, bbox as toBbox, bboxPolygon, Feature, Polygon, BBox 
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../common/constants';
 import { OperationStatus, TargetFormat } from '../common/enums';
-import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams, ILogger, IMergeSources } from '../common/interfaces';
+import {
+  ILayerMergeData,
+  IMergeParameters,
+  IMergeOverlaps,
+  IConfig,
+  IMergeTaskParams,
+  ILogger,
+  IMergeSources,
+  ITargetMergeSource,
+} from '../common/interfaces';
 import { JobManagerClient } from '../serviceClients/jobManagerClient';
 import { Grid } from '../layers/interfaces';
 
@@ -68,7 +77,7 @@ export class MergeTilesTasker {
     }
   }
 
-  public *createBatchedTasks(params: IMergeParameters): Generator<IMergeTaskParams> {
+  public *createBatchedTasks(params: IMergeParameters, isNew = false): Generator<IMergeTaskParams> {
     const sourceType = this.config.get<string>('mapServerCacheType');
     const bboxedLayers = params.layers.map((layer) => {
       const bbox = toBbox(layer.footprint) as [number, number, number, number];
@@ -78,6 +87,11 @@ export class MergeTilesTasker {
         footprint: bbox,
       };
     });
+    const targetMergeSource: ITargetMergeSource = {
+      type: sourceType,
+      path: params.destPath,
+      isNew: isNew,
+    };
     for (let zoom = params.maxZoom; zoom >= 0; zoom--) {
       const snappedLayers = bboxedLayers.map((layer) => {
         const poly = bboxPolygon(snapBBoxToTileGrid(layer.footprint, zoom));
@@ -91,12 +105,7 @@ export class MergeTilesTasker {
           yield {
             targetFormat: TargetFormat.JPEG,
             batches: batch,
-            sources: [
-              {
-                type: sourceType,
-                path: params.destPath,
-              },
-            ].concat(
+            sources: [targetMergeSource].concat(
               overlap.layers.map<IMergeSources>((layer, index) => {
                 const filenameExtension = layer.fileName.split('.').pop() as string;
                 const sourceParams: IMergeSources = {
@@ -126,7 +135,8 @@ export class MergeTilesTasker {
     jobType: string,
     grids: Grid[],
     extent: BBox,
-    managerCallbackUrl: string
+    managerCallbackUrl: string,
+    isNew?: boolean
   ): Promise<void> {
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
       const fileRelativePath = join(data.originDirectory, fileName);
@@ -145,7 +155,7 @@ export class MergeTilesTasker {
       grids: grids,
       extent,
     };
-    const mergeTasksParams = this.createBatchedTasks(params);
+    const mergeTasksParams = this.createBatchedTasks(params, isNew);
     let mergeTaskBatch: IMergeTaskParams[] = [];
     let jobId: string | undefined = undefined;
     for (const mergeTask of mergeTasksParams) {
