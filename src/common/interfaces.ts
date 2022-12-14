@@ -63,12 +63,9 @@ export interface IMergeSources {
   extent?: IBBox;
 }
 
-export interface ITargetMergeSource extends IMergeSources {
-  isNew?: boolean;
-}
-
 export interface IMergeTaskParams {
   targetFormat: TargetFormat;
+  isNewTarget: boolean;
   sources: IMergeSources[];
   batches: ITileRange[];
 }

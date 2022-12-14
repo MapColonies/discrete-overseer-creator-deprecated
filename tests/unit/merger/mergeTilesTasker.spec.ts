@@ -167,11 +167,11 @@ describe('MergeTilesTasker', () => {
       const expectedTargetMergeSource = {
         type: destSourcePath,
         path: 'test/dest',
-        isNew: false,
       };
       const expectedTasks: IMergeTaskParams[] = [
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -191,6 +191,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -204,6 +205,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -223,6 +225,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -242,6 +245,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -255,6 +259,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -268,6 +273,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -316,11 +322,11 @@ describe('MergeTilesTasker', () => {
       const expectedTargetMergeSource = {
         type: destSourcePath,
         path: 'test/dest',
-        isNew: false,
       };
       const expectedTasks: IMergeTaskParams[] = [
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -340,6 +346,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -359,6 +366,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -378,6 +386,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -397,6 +406,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: false,
           sources: [
             expectedTargetMergeSource,
             {
@@ -451,11 +461,11 @@ describe('MergeTilesTasker', () => {
       const expectedTargetMergeSource = {
         type: destSourcePath,
         path: 'test/dest',
-        isNew: true,
       };
       const expectedTasks: IMergeTaskParams[] = [
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: true,
           sources: [
             expectedTargetMergeSource,
             {
@@ -475,6 +485,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: true,
           sources: [
             expectedTargetMergeSource,
             {
@@ -488,6 +499,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: true,
           sources: [
             expectedTargetMergeSource,
             {
@@ -507,6 +519,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: true,
           sources: [
             expectedTargetMergeSource,
             {
@@ -526,6 +539,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: true,
           sources: [
             expectedTargetMergeSource,
             {
@@ -539,6 +553,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: true,
           sources: [
             expectedTargetMergeSource,
             {
@@ -552,6 +567,7 @@ describe('MergeTilesTasker', () => {
         },
         {
           targetFormat: TargetFormat.JPEG,
+          isNewTarget: true,
           sources: [
             expectedTargetMergeSource,
             {

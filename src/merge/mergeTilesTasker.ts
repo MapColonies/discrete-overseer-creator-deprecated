@@ -13,16 +13,7 @@ import { difference, union, bbox as toBbox, bboxPolygon, Feature, Polygon, BBox 
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../common/constants';
 import { OperationStatus, TargetFormat } from '../common/enums';
-import {
-  ILayerMergeData,
-  IMergeParameters,
-  IMergeOverlaps,
-  IConfig,
-  IMergeTaskParams,
-  ILogger,
-  IMergeSources,
-  ITargetMergeSource,
-} from '../common/interfaces';
+import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams, ILogger, IMergeSources } from '../common/interfaces';
 import { JobManagerClient } from '../serviceClients/jobManagerClient';
 import { Grid } from '../layers/interfaces';
 
@@ -87,11 +78,7 @@ export class MergeTilesTasker {
         footprint: bbox,
       };
     });
-    const targetMergeSource: ITargetMergeSource = {
-      type: sourceType,
-      path: params.destPath,
-      isNew: isNew,
-    };
+
     for (let zoom = params.maxZoom; zoom >= 0; zoom--) {
       const snappedLayers = bboxedLayers.map((layer) => {
         const poly = bboxPolygon(snapBBoxToTileGrid(layer.footprint, zoom));
@@ -104,8 +91,14 @@ export class MergeTilesTasker {
         for (const batch of batches) {
           yield {
             targetFormat: TargetFormat.JPEG,
+            isNewTarget: isNew,
             batches: batch,
-            sources: [targetMergeSource].concat(
+            sources: [
+              {
+                type: sourceType,
+                path: params.destPath,
+              },
+            ].concat(
               overlap.layers.map<IMergeSources>((layer, index) => {
                 const filenameExtension = layer.fileName.split('.').pop() as string;
                 const sourceParams: IMergeSources = {
