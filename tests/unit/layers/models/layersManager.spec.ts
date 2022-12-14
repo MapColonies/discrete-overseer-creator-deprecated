@@ -1,7 +1,7 @@
 import { IngestionParams, LayerMetadata, ProductType, RecordType } from '@map-colonies/mc-model-types';
 import { LayersManager } from '../../../../src/layers/models/layersManager';
 import { createLayerJobMock, findJobsMock, jobManagerClientMock } from '../../../mocks/clients/jobManagerClient';
-import { catalogExistsMock, catalogClientMock, getHighestLayerVersionMock } from '../../../mocks/clients/catalogClient';
+import { catalogExistsMock, catalogClientMock, getHighestLayerVersionMock, findRecordMock } from '../../../mocks/clients/catalogClient';
 import { mapPublisherClientMock, mapExistsMock } from '../../../mocks/clients/mapPublisherClient';
 import { init as initMockConfig, configMock, setValue, clear as clearMockConfig } from '../../../mocks/config';
 import { logger } from '../../../mocks/logger';
@@ -14,7 +14,7 @@ import {
 } from '../../../mocks/fileValidator';
 import { ConflictError } from '../../../../src/common/exceptions/http/conflictError';
 import { BadRequestError } from '../../../../src/common/exceptions/http/badRequestError';
-import { OperationStatus } from '../../../../src/common/enums';
+import { JobAction, OperationStatus, TaskAction } from '../../../../src/common/enums';
 import { ZoomLevelCalculator } from '../../../../src/utils/zoomToResolution';
 import { createSplitTilesTasksMock, generateTasksParametersMock, splitTilesTaskerMock } from '../../../mocks/splitTilesTasker';
 import { createMergeTilesTasksMock, mergeTilesTasker } from '../../../mocks/mergeTilesTasker';
@@ -65,7 +65,7 @@ const testImageMetadata = {
 } as unknown as LayerMetadata;
 const layerRelativePath = 'test/OrthophotoHistory';
 
-const managerCallbackUrl = 'http:localhostTest';
+const managerCallbackUrl = 'http://localhostTest';
 
 describe('LayersManager', () => {
   beforeEach(function () {
@@ -157,6 +157,120 @@ describe('LayersManager', () => {
       expect(findJobsMock).toHaveBeenCalledTimes(1);
       expect(validateGpkgFilesMock).toHaveBeenCalledTimes(1);
       expect(createMergeTilesTasksMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('createMergeTilesTasksMock function should be called with "isNew" parameter for "New" job type', async function () {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      setValue({ 'tiling.zoomGroups': '1,2-3' });
+      setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+      const testData: IngestionParams = {
+        fileNames: ['test.gpkg'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
+      const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
+      getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
+      getHighestLayerVersionMock.mockResolvedValue(undefined);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
+      mapExistsMock.mockResolvedValue(false);
+      findJobsMock.mockResolvedValue([]);
+      validateGpkgFilesMock.mockReturnValue(true);
+      createLayerJobMock.mockResolvedValue('testJobId');
+      createMergeTilesTasksMock.mockResolvedValue(undefined);
+
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
+      layersManager = new LayersManager(
+        logger,
+        zoomLevelCalculator,
+        jobManagerClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock,
+        splitTilesTaskerMock,
+        mergeTilesTasker
+      );
+
+      await layersManager.createLayer(testData, managerCallbackUrl);
+
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
+      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(validateGpkgFilesMock).toHaveBeenCalledTimes(1);
+      expect(createMergeTilesTasksMock).toHaveBeenCalledTimes(1);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+      const mockId = createMergeTilesTasksMock.mock.calls[0][0].metadata.id;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+      const mockDisplayPath = createMergeTilesTasksMock.mock.calls[0][0].metadata.displayPath;
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      const relativePath = `${mockId}/${mockDisplayPath}`;
+      expect(createMergeTilesTasksMock).toHaveBeenCalledWith(
+        testData,
+        relativePath,
+        TaskAction.MERGE_TILES,
+        JobAction.NEW,
+        [Grid.TWO_ON_ONE],
+        [0, 0, 1, 1],
+        managerCallbackUrl,
+        true
+      );
+    });
+
+    it('createMergeTilesTasksMock function should not called with "isNew" parameter for "Update" job type', async function () {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      setValue({ 'tiling.zoomGroups': '1,2-3' });
+      setValue('ingestionTilesSplittingTiles.tasksBatchSize', 2);
+      const testData: IngestionParams = {
+        fileNames: ['test.gpkg'],
+        metadata: { ...testImageMetadata },
+        originDirectory: '/here',
+      };
+
+      const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
+      getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
+      getHighestLayerVersionMock.mockResolvedValue(2.0);
+      fileValidatorValidateExistsMock.mockResolvedValue(true);
+      validateSourceDirectoryMock.mockResolvedValue(true);
+      validateNotWatchDirMock.mockResolvedValue(true);
+      mapExistsMock.mockResolvedValue(true);
+      findJobsMock.mockResolvedValue([]);
+      validateGpkgFilesMock.mockReturnValue(true);
+      createLayerJobMock.mockResolvedValue('testJobId');
+      createMergeTilesTasksMock.mockResolvedValue(undefined);
+
+      const zoomLevelCalculator = new ZoomLevelCalculator(configMock);
+      layersManager = new LayersManager(
+        logger,
+        zoomLevelCalculator,
+        jobManagerClientMock,
+        catalogClientMock,
+        mapPublisherClientMock,
+        fileValidatorMock,
+        splitTilesTaskerMock,
+        mergeTilesTasker
+      );
+
+      await layersManager.createLayer(testData, managerCallbackUrl);
+
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
+      expect(fileValidatorValidateExistsMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(findRecordMock).toHaveBeenCalledTimes(1);
+      expect(validateGpkgFilesMock).toHaveBeenCalledTimes(1);
+      expect(createMergeTilesTasksMock).toHaveBeenCalledTimes(1);
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      const relativePath = `undefined/undefined`; // its undefined because 'findRecord' function is executes when job type is "Update" and return record as undefined while testing
+      expect(createMergeTilesTasksMock).toHaveBeenCalledWith(
+        testData,
+        relativePath,
+        TaskAction.MERGE_TILES,
+        JobAction.UPDATE,
+        [Grid.TWO_ON_ONE],
+        [0, 0, 1, 1],
+        managerCallbackUrl
+      );
     });
 
     it('should throw Bad Request Error for "Update" job type if layer is not exists in map proxy', async function () {

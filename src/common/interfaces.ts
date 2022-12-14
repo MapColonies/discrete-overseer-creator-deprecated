@@ -65,6 +65,7 @@ export interface IMergeSources {
 
 export interface IMergeTaskParams {
   targetFormat: TargetFormat;
+  isNewTarget: boolean;
   sources: IMergeSources[];
   batches: ITileRange[];
 }

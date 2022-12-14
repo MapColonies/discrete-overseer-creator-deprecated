@@ -124,7 +124,7 @@ export class JobManagerClient extends HttpClient {
 
   public async createTasks(jobId: string, taskParams: ITaskParameters[] | IMergeTaskParams[], taskType: string): Promise<void> {
     const createTasksUrl = `/jobs/${jobId}/tasks`;
-    const parmas = taskParams as unknown as (IMergeTaskParams | IMergeTaskParams)[];
+    const parmas = taskParams as (ITaskParameters | IMergeTaskParams)[];
     const req = parmas.map((params) => {
       return {
         type: taskType,

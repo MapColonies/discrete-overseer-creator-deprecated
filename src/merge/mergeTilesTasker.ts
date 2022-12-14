@@ -68,7 +68,7 @@ export class MergeTilesTasker {
     }
   }
 
-  public *createBatchedTasks(params: IMergeParameters): Generator<IMergeTaskParams> {
+  public *createBatchedTasks(params: IMergeParameters, isNew = false): Generator<IMergeTaskParams> {
     const sourceType = this.config.get<string>('mapServerCacheType');
     const bboxedLayers = params.layers.map((layer) => {
       const bbox = toBbox(layer.footprint) as [number, number, number, number];
@@ -78,6 +78,7 @@ export class MergeTilesTasker {
         footprint: bbox,
       };
     });
+
     for (let zoom = params.maxZoom; zoom >= 0; zoom--) {
       const snappedLayers = bboxedLayers.map((layer) => {
         const poly = bboxPolygon(snapBBoxToTileGrid(layer.footprint, zoom));
@@ -89,7 +90,9 @@ export class MergeTilesTasker {
         const batches = tileBatchGenerator(this.batchSize, rangeGen);
         for (const batch of batches) {
           yield {
+            // TODO needs to be replaced by request parameter
             targetFormat: TargetFormat.JPEG,
+            isNewTarget: isNew,
             batches: batch,
             sources: [
               {
@@ -126,7 +129,8 @@ export class MergeTilesTasker {
     jobType: string,
     grids: Grid[],
     extent: BBox,
-    managerCallbackUrl: string
+    managerCallbackUrl: string,
+    isNew?: boolean
   ): Promise<void> {
     const layers = data.fileNames.map<ILayerMergeData>((fileName) => {
       const fileRelativePath = join(data.originDirectory, fileName);
@@ -145,7 +149,7 @@ export class MergeTilesTasker {
       grids: grids,
       extent,
     };
-    const mergeTasksParams = this.createBatchedTasks(params);
+    const mergeTasksParams = this.createBatchedTasks(params, isNew);
     let mergeTaskBatch: IMergeTaskParams[] = [];
     let jobId: string | undefined = undefined;
     for (const mergeTask of mergeTasksParams) {

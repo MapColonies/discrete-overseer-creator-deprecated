@@ -82,7 +82,7 @@ export class LayersManager {
       const layerRelativePath = `${data.metadata.id}/${data.metadata.displayPath}`;
 
       if (taskType === TaskAction.MERGE_TILES) {
-        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent, overseerUrl);
+        await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent, overseerUrl, true);
       } else {
         const layerZoomRanges = this.zoomLevelCalculator.createLayerZoomRanges(data.metadata.maxResolutionDeg as number);
         await this.splitTilesTasker.createSplitTilesTasks(data, layerRelativePath, layerZoomRanges, jobType, taskType);
