@@ -90,7 +90,6 @@ export class MergeTilesTasker {
         const batches = tileBatchGenerator(this.batchSize, rangeGen);
         for (const batch of batches) {
           yield {
-            // TODO needs to be replaced by request parameter
             targetFormat: params.targetFormat,
             isNewTarget: isNew,
             batches: batch,
