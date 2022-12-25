@@ -1,9 +1,8 @@
-import { IRasterCatalogUpsertRequestBody } from '@map-colonies/mc-model-types';
+import { IRasterCatalogUpsertRequestBody, TileOutputFormat } from '@map-colonies/mc-model-types';
 import { ITileRange } from '@map-colonies/mc-utils';
 import { BBox } from '@turf/helpers';
 import { GeoJSON } from 'geojson';
 import { Grid, IBBox } from '../layers/interfaces';
-import { TargetFormat } from '../common/enums';
 
 export interface ILogger {
   log: (level: string, message: string) => void;
@@ -49,6 +48,7 @@ export interface IMergeParameters {
   maxZoom: number;
   grids: Grid[];
   extent: BBox;
+  targetFormat: TileOutputFormat;
 }
 
 export interface IMergeOverlaps {
@@ -64,7 +64,7 @@ export interface IMergeSources {
 }
 
 export interface IMergeTaskParams {
-  targetFormat: TargetFormat;
+  targetFormat: TileOutputFormat;
   isNewTarget: boolean;
   sources: IMergeSources[];
   batches: ITileRange[];

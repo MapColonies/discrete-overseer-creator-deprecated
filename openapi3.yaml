@@ -221,6 +221,7 @@ components:
           maxResolutionDeg: 0.072
           maxResolutionMeter: 8000
           minHorizontalAccuracyCE90: 4000
+          transparency: 'TRANSPARENT'
           sensors: ['string']
           region: ['string']
           rms: 0
