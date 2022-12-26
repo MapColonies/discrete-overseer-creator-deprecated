@@ -1,4 +1,4 @@
-import { ProductType } from '@map-colonies/mc-model-types';
+import { ProductType, TileOutputFormat } from '@map-colonies/mc-model-types';
 import { TasksManager } from '../../../../src/tasks/models/tasksManager';
 import { jobManagerClientMock, getJobStatusMock, getTaskMock, abortJobMock, updateJobStatusMock } from '../../../mocks/clients/jobManagerClient';
 import { mapPublisherClientMock, publishLayerMock } from '../../../mocks/clients/mapPublisherClient';
@@ -35,6 +35,7 @@ describe('TasksManager', () => {
       productVersion: '1',
       productId: 'test',
       maxResolutionDeg: 2.68220901489258e-6,
+      tileOutputFormat: TileOutputFormat.JPEG,
     };
 
     const mapPublishReq: IPublishMapLayerRequest = {
