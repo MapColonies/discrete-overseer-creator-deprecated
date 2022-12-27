@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.6.0...v4.0.0) (2022-12-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* adding transparency and tile output format params (MAPCO-2580) (#185)
+
+### Features
+
+* adding transparency and tile output format params (MAPCO-2580) ([#185](https://github.com/MapColonies/discrete-overseer-creator/issues/185)) ([9cf00a6](https://github.com/MapColonies/discrete-overseer-creator/commit/9cf00a6e4b4666210e18b96a80352ee3fd669100))
+
 ## [3.6.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.5.2...v3.6.0) (2022-12-11)
 
 
