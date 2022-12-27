@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { IngestionParams } from '@map-colonies/mc-model-types';
+import { IngestionParams, TileOutputFormat } from '@map-colonies/mc-model-types';
 import {
   subGroupsGen,
   multiIntersect,
@@ -12,7 +12,7 @@ import {
 import { difference, union, bbox as toBbox, bboxPolygon, Feature, Polygon, BBox } from '@turf/turf';
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../common/constants';
-import { OperationStatus, TargetFormat } from '../common/enums';
+import { OperationStatus } from '../common/enums';
 import { ILayerMergeData, IMergeParameters, IMergeOverlaps, IConfig, IMergeTaskParams, ILogger, IMergeSources } from '../common/interfaces';
 import { JobManagerClient } from '../serviceClients/jobManagerClient';
 import { Grid } from '../layers/interfaces';
@@ -90,8 +90,7 @@ export class MergeTilesTasker {
         const batches = tileBatchGenerator(this.batchSize, rangeGen);
         for (const batch of batches) {
           yield {
-            // TODO needs to be replaced by request parameter
-            targetFormat: TargetFormat.JPEG,
+            targetFormat: params.targetFormat,
             isNewTarget: isNew,
             batches: batch,
             sources: [
@@ -148,6 +147,7 @@ export class MergeTilesTasker {
       maxZoom: maxZoom,
       grids: grids,
       extent,
+      targetFormat: data.metadata.tileOutputFormat as TileOutputFormat,
     };
     const mergeTasksParams = this.createBatchedTasks(params, isNew);
     let mergeTaskBatch: IMergeTaskParams[] = [];

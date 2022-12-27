@@ -1,4 +1,4 @@
-import { LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
+import { LayerMetadata, ProductType, TileOutputFormat, Transparency } from '@map-colonies/mc-model-types';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import _ from 'lodash';
@@ -81,7 +81,6 @@ const validTestImageMetadata = {
   classification: 'test',
   type: RecordType.RECORD_RASTER,
   productType: ProductType.ORTHOPHOTO_HISTORY,
-  productSubType: undefined,
   srsId: '4326',
   srsName: 'wgs84',
   producerName: 'testProducer',
@@ -89,12 +88,10 @@ const validTestImageMetadata = {
   ingestionDate: new Date('11/16/2017'),
   sourceDateEnd: new Date('11/16/2017'),
   sourceDateStart: new Date('11/16/2017'),
-  layerPolygonParts: undefined,
   region: [],
-  includedInBests: undefined,
   maxResolutionMeter: 0.2,
-  productBoundingBox: undefined,
-  rawProductData: undefined,
+  productBoundingBox: '100,0,101,1',
+  transparency: Transparency.TRANSPARENT,
 } as unknown as LayerMetadata;
 const validTestData = {
   fileNames: [],
@@ -190,6 +187,43 @@ describe('layers', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
     });
 
+    it('should return 200 status code for sending request transparency opaque with png output format', async function () {
+      findJobsMock.mockResolvedValue([]);
+      const transparencyOpaqueMetadata = { ...validTestData.metadata, transparency: Transparency.OPAQUE };
+      const testData = { ...validTestData, metadata: transparencyOpaqueMetadata };
+      const response = await requestSender.createLayer(testData);
+      expect(response).toSatisfyApiSpec();
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+      expect(createLayerJobMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: {
+            ...validTestData.metadata,
+            transparency: Transparency.OPAQUE,
+            tileOutputFormat: TileOutputFormat.PNG,
+            id: expect.anything(),
+            displayPath: expect.anything(),
+            layerPolygonParts: expect.anything(),
+            sourceDateEnd: expect.anything(),
+            sourceDateStart: expect.anything(),
+            ingestionDate: expect.anything(),
+            creationDate: expect.anything(),
+          },
+        }),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+      expect(createTasksMock).toHaveBeenCalledTimes(3);
+      expect(response.status).toBe(httpStatusCodes.OK);
+    });
+
     it('should return 200 status code for update layer operation with higher version on exists', async function () {
       const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
       findJobsMock.mockResolvedValue([]);
@@ -247,6 +281,7 @@ describe('layers', function () {
         expect.objectContaining({
           metadata: {
             ...validTestData.metadata,
+            tileOutputFormat: TileOutputFormat.PNG,
             productBoundingBox: '100,0,101,1',
             id: expect.anything(),
             displayPath: expect.anything(),
@@ -263,6 +298,89 @@ describe('layers', function () {
         expect.anything()
       );
       expect(createTasksMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('should return 200 status code for sending request transparency opaque with jpeg output format', async function () {
+      const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
+      findJobsMock.mockResolvedValue([]);
+      getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
+      const transparencyOpaqueMetadata = { ...validTestData.metadata, transparency: Transparency.OPAQUE };
+      const testData = { ...validTestData, fileNames: ['indexed.gpkg'], originDirectory: 'files', metadata: transparencyOpaqueMetadata };
+
+      getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
+      const response = await requestSender.createLayer(testData);
+
+      expect(response).toSatisfyApiSpec();
+      expect(response.status).toBe(httpStatusCodes.OK);
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+      expect(createLayerJobMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: {
+            ...validTestData.metadata,
+            transparency: Transparency.OPAQUE,
+            tileOutputFormat: TileOutputFormat.JPEG,
+            id: expect.anything(),
+            displayPath: expect.anything(),
+            layerPolygonParts: expect.anything(),
+            sourceDateEnd: expect.anything(),
+            sourceDateStart: expect.anything(),
+            ingestionDate: expect.anything(),
+            creationDate: expect.anything(),
+          },
+        }),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should return 200 status code for sending request transparency transparent with png output format', async function () {
+      const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
+      findJobsMock.mockResolvedValue([]);
+      getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
+      const transparencyTransparentMetadata = { ...validTestData.metadata, transparency: Transparency.TRANSPARENT };
+      const testData = { ...validTestData, fileNames: ['indexed.gpkg'], originDirectory: 'files', metadata: transparencyTransparentMetadata };
+
+      getGridSpy.mockReturnValue(Grid.TWO_ON_ONE);
+      const response = await requestSender.createLayer(testData);
+
+      expect(response).toSatisfyApiSpec();
+      expect(response.status).toBe(httpStatusCodes.OK);
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+      expect(createLayerJobMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: {
+            ...validTestData.metadata,
+            transparency: Transparency.TRANSPARENT,
+            tileOutputFormat: TileOutputFormat.PNG,
+            id: expect.anything(),
+            displayPath: expect.anything(),
+            layerPolygonParts: expect.anything(),
+            sourceDateEnd: expect.anything(),
+            sourceDateStart: expect.anything(),
+            ingestionDate: expect.anything(),
+            creationDate: expect.anything(),
+          },
+        }),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
     });
 
     it('should return 200 status code for indexed gpkg', async function () {

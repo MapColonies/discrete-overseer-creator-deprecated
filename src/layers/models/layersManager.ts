@@ -3,7 +3,7 @@ import { GeoJSON } from 'geojson';
 import isValidGeoJson from '@turf/boolean-valid';
 import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection, Geometry, geojsonType, bbox } from '@turf/turf';
-import { IngestionParams, LayerMetadata, ProductType } from '@map-colonies/mc-model-types';
+import { IngestionParams, LayerMetadata, ProductType, Transparency, TileOutputFormat } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { JobAction, OperationStatus, TaskAction } from '../../common/enums';
@@ -48,6 +48,7 @@ export class LayersManager {
     const resourceId = data.metadata.productId as string;
     const version = data.metadata.productVersion as string;
     const productType = data.metadata.productType as ProductType;
+    const transparency = data.metadata.transparency as Transparency;
     const originDirectory = data.originDirectory;
     const files = data.fileNames;
     const polygon = data.metadata.footprint;
@@ -70,6 +71,7 @@ export class LayersManager {
     const recordIds = await this.generateRecordIds();
     data.metadata.displayPath = recordIds.displayPath;
     data.metadata.id = recordIds.id;
+    data.metadata.tileOutputFormat = this.getTileOutputFormat(taskType, transparency);
 
     if (jobType === JobAction.NEW) {
       await this.validateNotExistsInCatalog(resourceId, version, productType);
@@ -246,5 +248,19 @@ export class LayersManager {
       this.logger.log('error', `failed to generate record id: ${(err as Error).message}`);
       throw err;
     }
+  }
+
+  private getTileOutputFormat(taskType: string, transparency: Transparency): TileOutputFormat {
+    let tileOutputFormat: TileOutputFormat;
+    if (transparency === Transparency.OPAQUE) {
+      if (taskType === TaskAction.MERGE_TILES) {
+        tileOutputFormat = TileOutputFormat.JPEG;
+      } else {
+        tileOutputFormat = TileOutputFormat.PNG;
+      }
+    } else {
+      tileOutputFormat = TileOutputFormat.PNG;
+    }
+    return tileOutputFormat;
   }
 }

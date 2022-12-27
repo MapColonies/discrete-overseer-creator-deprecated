@@ -29,11 +29,6 @@ export enum SourceType {
   GPKG = 'GPKG',
 }
 
-export enum TargetFormat {
-  JPEG = 'jpeg',
-  PNG = 'png',
-}
-
 export enum TileFormat {
   JPEG = 'image/jpeg',
   PNG = 'image/png',
