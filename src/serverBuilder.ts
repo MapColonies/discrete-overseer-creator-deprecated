@@ -49,6 +49,7 @@ export class ServerBuilder {
     this.serverInstance.use(OpenApiMiddleware({ apiSpec: apiSpecPath, validateRequests: true, ignorePaths: ignorePathRegex }));
     const physicalDirPath = this.config.get<string>('layerSourceDir');
     const displayNameDir = this.config.get<string>('displayNameDir');
+    this.serverInstance.enable('trust proxy'); // to provide real protocol from controller
     const mountDirs = [
       {
         physical: physicalDirPath,
