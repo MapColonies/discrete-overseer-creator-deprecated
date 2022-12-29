@@ -18,4 +18,5 @@ spec:
     name: {{ $releaseName }}-{{ $chartName }}
   tls:
     termination: edge
+    insecureEdgeTerminationPolicy: Redirect
 {{- end -}}
