@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.1](https://github.com/MapColonies/discrete-overseer-creator/compare/v4.0.0...v4.0.1) (2022-12-29)
+
+
+### Bug Fixes
+
+* enable getting https protocol from proxy ([#186](https://github.com/MapColonies/discrete-overseer-creator/issues/186)) ([abd4dc4](https://github.com/MapColonies/discrete-overseer-creator/commit/abd4dc496281edb3871e0d53f528588742703a2f))
+
 ## [4.0.0](https://github.com/MapColonies/discrete-overseer-creator/compare/v3.6.0...v4.0.0) (2022-12-27)
 
 
