@@ -1,7 +1,7 @@
 import { IRasterCatalogUpsertRequestBody, LayerMetadata, ProductType, TileOutputFormat } from '@map-colonies/mc-model-types';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
-import { OperationStatus, MapServerCacheType, TileFormat } from '../../common/enums';
+import { OperationStatus, MapServerCacheType } from '../../common/enums';
 import { IConfig, ILogger } from '../../common/interfaces';
 import { IPublishMapLayerRequest, PublishedMapLayerCacheType } from '../../layers/interfaces';
 import { CatalogClient } from '../../serviceClients/catalogClient';
@@ -100,20 +100,12 @@ export class TasksManager {
         name: `${layerName}`,
         tilesPath: relativePath,
         cacheType: this.cacheType,
-        format: this.mapToTileFormat(metadata.tileOutputFormat as TileOutputFormat),
+        format: metadata.tileOutputFormat as TileOutputFormat,
       };
       await this.mapPublisher.publishLayer(publishReq);
     } catch (err) {
       await this.jobManager.updateJobStatus(jobId, OperationStatus.FAILED, undefined, 'Failed to publish layer to mapping server');
       throw err;
-    }
-  }
-
-  private mapToTileFormat(tileOutputFormat: TileOutputFormat): TileFormat {
-    if (tileOutputFormat === TileOutputFormat.JPEG) {
-      return TileFormat.JPEG;
-    } else {
-      return TileFormat.PNG;
     }
   }
 
