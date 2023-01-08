@@ -224,6 +224,44 @@ describe('layers', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
     });
 
+    it('should return 200 status code and  productVersion full number x will become x.0', async function () {
+      findJobsMock.mockResolvedValue([]);
+      const productVersionMetadata = { ...validTestData.metadata, productVersion: '3', transparency: Transparency.OPAQUE };
+      const testData = { ...validTestData, metadata: productVersionMetadata };
+      const response = await requestSender.createLayer(testData);
+      expect(response).toSatisfyApiSpec();
+      expect(getHighestLayerVersionMock).toHaveBeenCalledTimes(1);
+      expect(findJobsMock).toHaveBeenCalledTimes(1);
+      expect(mapExistsMock).toHaveBeenCalledTimes(1);
+      expect(catalogExistsMock).toHaveBeenCalledTimes(1);
+      expect(createLayerJobMock).toHaveBeenCalledTimes(1);
+
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+      expect(createLayerJobMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: {
+            ...validTestData.metadata,
+            productVersion: `${productVersionMetadata.productVersion}.0`,
+            transparency: Transparency.OPAQUE,
+            tileOutputFormat: TileOutputFormat.PNG,
+            id: expect.anything(),
+            displayPath: expect.anything(),
+            layerPolygonParts: expect.anything(),
+            sourceDateEnd: expect.anything(),
+            sourceDateStart: expect.anything(),
+            ingestionDate: expect.anything(),
+            creationDate: expect.anything(),
+          },
+        }),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+      expect(createTasksMock).toHaveBeenCalledTimes(3);
+      expect(response.status).toBe(httpStatusCodes.OK);
+    });
+
     it('should return 200 status code for update layer operation with higher version on exists', async function () {
       const getGridSpy = jest.spyOn(SQLiteClient.prototype, 'getGrid');
       findJobsMock.mockResolvedValue([]);

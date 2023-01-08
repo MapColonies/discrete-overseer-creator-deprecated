@@ -72,6 +72,7 @@ export class LayersManager {
     data.metadata.displayPath = recordIds.displayPath;
     data.metadata.id = recordIds.id;
     data.metadata.tileOutputFormat = this.getTileOutputFormat(taskType, transparency);
+    this.validateCorrectProductVersion(data);
 
     if (jobType === JobAction.NEW) {
       await this.validateNotExistsInCatalog(resourceId, version, productType);
@@ -194,6 +195,14 @@ export class LayersManager {
     data.metadata.productBoundingBox = createBBoxString(data.metadata.footprint as GeoJSON);
     if (!data.metadata.layerPolygonParts) {
       data.metadata.layerPolygonParts = layerMetadataToPolygonParts(data.metadata);
+    }
+  }
+
+  /// validate productVersion will have decmal value
+  private validateCorrectProductVersion(data: IngestionParams): void {
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    if (data.metadata.productVersion?.indexOf('.') === -1) {
+      data.metadata.productVersion = `${data.metadata.productVersion}.0`;
     }
   }
 
