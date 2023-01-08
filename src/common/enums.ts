@@ -28,4 +28,3 @@ export enum SourceType {
   FS = 'FS',
   GPKG = 'GPKG',
 }
-
