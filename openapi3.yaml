@@ -207,7 +207,7 @@ components:
           classification: 'string'
           productId: 'string'
           productName: 'string'
-          productVersion: '47'
+          productVersion: '47.1'
           productType: 'Orthophoto'
           productSubType: 'string'
           description: 'string'
