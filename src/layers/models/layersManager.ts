@@ -71,7 +71,6 @@ export class LayersManager {
     const recordIds = await this.generateRecordIds();
     data.metadata.displayPath = recordIds.displayPath;
     data.metadata.id = recordIds.id;
-    data.metadata.tileOutputFormat = this.getTileOutputFormat(taskType, transparency);
     this.validateCorrectProductVersion(data);
 
     if (jobType === JobAction.NEW) {
@@ -80,6 +79,7 @@ export class LayersManager {
         throw new ConflictError(`layer '${resourceId}-${productType}', is already exists on MapProxy`);
       }
 
+      data.metadata.tileOutputFormat = this.getTileOutputFormat(taskType, transparency);
       this.setDefaultValues(data);
 
       const layerRelativePath = `${data.metadata.id}/${data.metadata.displayPath}`;
@@ -97,6 +97,16 @@ export class LayersManager {
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
+      //todo - override data from record - on future should not be provided from new route for update
+      this.logger.log(
+        'warn',
+        `Update job - Transparency and TileOutputFormat will be override from catalog:
+         Transparency => from ${data.metadata.transparency as Transparency} to ${record?.metadata.transparency as Transparency},
+         TileOutputFormat => from ${data.metadata.tileOutputFormat as TileOutputFormat} to ${record?.metadata.tileOutputFormat as TileOutputFormat}`
+      );
+      data.metadata.transparency = record?.metadata.transparency;
+      data.metadata.tileOutputFormat = record?.metadata.tileOutputFormat;
+
       await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent, overseerUrl);
     } else {
       throw new BadRequestError('Unsupported job type');
