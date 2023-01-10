@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.3](https://github.com/MapColonies/discrete-overseer-creator/compare/v4.0.2...v4.0.3) (2023-01-10)
+
+
+### Bug Fixes
+
+* override transparency mode from exists records on update (MAPCO-2796) ([#190](https://github.com/MapColonies/discrete-overseer-creator/issues/190)) ([4dab213](https://github.com/MapColonies/discrete-overseer-creator/commit/4dab2130a89bfbcfe11d7dcc81305576bcd0230d)), closes [#2](https://github.com/MapColonies/discrete-overseer-creator/issues/2)
+
 ### [4.0.2](https://github.com/MapColonies/discrete-overseer-creator/compare/v4.0.1...v4.0.2) (2023-01-08)
 
 
