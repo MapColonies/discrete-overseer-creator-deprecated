@@ -97,6 +97,10 @@ export class LayersManager {
       if (!existsInMapProxy) {
         throw new BadRequestError(`layer '${resourceId}-${productType}', is not exists on MapProxy`);
       }
+      //todo - override data from record - on future should not be provided from new route for update
+      data.metadata.transparency = record?.metadata.transparency;
+      data.metadata.tileOutputFormat = record?.metadata.tileOutputFormat;
+
       await this.mergeTilesTasker.createMergeTilesTasks(data, layerRelativePath, taskType, jobType, this.grids, extent, overseerUrl);
     } else {
       throw new BadRequestError('Unsupported job type');
