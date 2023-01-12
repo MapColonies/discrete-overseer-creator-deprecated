@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.4](https://github.com/MapColonies/discrete-overseer-creator/compare/v4.0.3...v4.0.4) (2023-01-12)
+
+
+### Bug Fixes
+
+* prevent recieving ingestionDate field ([#191](https://github.com/MapColonies/discrete-overseer-creator/issues/191)) ([d5678e3](https://github.com/MapColonies/discrete-overseer-creator/commit/d5678e3f753c711ff595eea59b22e25febd3670f))
+
 ### [4.0.3](https://github.com/MapColonies/discrete-overseer-creator/compare/v4.0.2...v4.0.3) (2023-01-10)
 
 
