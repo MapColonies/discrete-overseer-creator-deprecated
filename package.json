@@ -44,7 +44,7 @@
   "dependencies": {
     "@map-colonies/error-express-handler": "^1.2.0",
     "@map-colonies/mc-logger": "^2.0.2",
-    "@map-colonies/mc-model-types": "^14.0.0",
+    "@map-colonies/mc-model-types": "^14.0.2",
     "@map-colonies/mc-probe": "^1.0.0",
     "@map-colonies/mc-utils": "^1.6.0",
     "@map-colonies/storage-explorer-middleware": "^1.2.7",
